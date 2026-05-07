@@ -556,6 +556,7 @@ const Icon = ({ name, size = 20, color = 'currentColor' }) => {
     pause: <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>,
     play: <path d="M8 5v14l11-7z"/>,
     personAdd: <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>,
+    personRemove: <path d="M14 8c0-2.21-1.79-4-4-4S6 5.79 6 8s1.79 4 4 4 4-1.79 4-4zm-2 0c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-6 10v-2c0-2.21 3.13-3 5-3 .35 0 .69.03 1.02.07C12.1 13.37 12 13.7 12 14.03V16H2v-2zm14-4h-6v2h6v-2z"/>,
     forward: <path d="M14 11V7l5 5-5 5v-4H6v-2h8z"/>,
     history: <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>,
     contacts: <path d="M20 0H4v2h16V0zM4 24h16v2H4v-2zM20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 2.75c1.24 0 2.25 1.01 2.25 2.25S13.24 11.25 12 11.25 9.75 10.24 9.75 9 10.76 6.75 12 6.75zM17 17H7v-1.5c0-1.67 3.33-2.5 5-2.5s5 .83 5 2.5V17z"/>,
@@ -571,6 +572,7 @@ const Icon = ({ name, size = 20, color = 'currentColor' }) => {
     drag: <><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"></circle></>,
     expand: <path d="M14 4h6v6h-2V7.41l-3.79 3.8-1.42-1.42L16.59 6H14V4zM4 14h2v2.59l3.79-3.8 1.42 1.42L7.41 18H10v2H4v-6z"/>,
     info: <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>,
+    group: <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>,
   };
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
@@ -624,9 +626,26 @@ const HISTORY = [
 ];
 
 const VOICEMAILS = [
-  { id: 1, name: 'Charlie Apegian', number: '(555) 123-4567', duration: '0:42', time: 'Today 2:15 PM', progress: 0 },
-  { id: 2, name: 'Pam Reynolds',    number: '(360) 296-1400', duration: '1:23', time: 'Today 9:04 AM', progress: 0 },
-  { id: 3, name: 'Unknown',         number: '(800) 555-0100', duration: '0:18', time: 'Yesterday',     progress: 0 },
+  { id: 1, name: 'Charlie Apegian', number: '(555) 123-4567', company: 'Creative Solutions LLC', duration: '0:42', time: 'Today 2:15 PM', progress: 0 },
+  { id: 2, name: 'Pam Reynolds',    number: '(360) 296-1400', company: 'Reynolds Co',            duration: '1:23', time: 'Today 9:04 AM', progress: 0 },
+  { id: 3, name: 'Unknown',         number: '(800) 555-0100', company: '',                       duration: '0:18', time: 'Yesterday',     progress: 0 },
+];
+
+const AGENTS = [
+  { id: 1, name: 'Charlie Stile',   title: 'Product Support Specialist I',  number: '(555) 123-4567', status: 'available' },
+  { id: 2, name: 'Eleanor Foster',  title: 'Product Support Specialist II', number: '(555) 123-4567', status: 'available' },
+  { id: 3, name: 'Joe Smith',       title: 'Product Support Specialist I',  number: '(555) 123-4567', status: 'busy' },
+  { id: 4, name: 'Pam Reynolds',    title: 'Product Support Manager',       number: '(555) 123-4567', status: 'available' },
+  { id: 5, name: 'Marcus Lee',      title: 'Product Support Team Lead',     number: '(555) 123-4567', status: 'offline' },
+];
+
+const ADD_SEARCH_LIST = [
+  { id: 1, name: 'Charlie Apegian', type: 'Customer', number: '(555) 123-4567', status: 'available' },
+  { id: 2, name: 'Eleanor Foster',  type: 'User',     number: '(555) 243-4838', status: 'available' },
+  { id: 3, name: 'Joe Smith',       type: 'User',     number: '(513) 365-4220', status: 'busy' },
+  { id: 4, name: 'Pam Reynolds',    type: 'Customer', number: '(360) 296-1400', status: 'available' },
+  { id: 5, name: 'Marcus Lee',      type: 'Customer', number: '(612) 444-9820', status: 'offline' },
+  { id: 6, name: 'Henry Rhodes',    type: 'Customer', number: '(555) 987-6543', status: 'available' },
 ];
 
 // ─────────────────────────────────────────────────────────────
@@ -682,10 +701,15 @@ function SoftphoneApp() {
   const [transferOpen, setTransferOpen] = useState(false);
   const [transferSearch, setTransferSearch] = useState('');
   const [transferTarget, setTransferTarget] = useState(null);
+  const [transferTab, setTransferTab] = useState('users');
   const [voicemails, setVoicemails] = useState(VOICEMAILS);
   const [playingVM, setPlayingVM] = useState(null);
   const [toast, setToast] = useState(null);
   const [minimized, setMinimized] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [addSearch, setAddSearch] = useState('');
+  const [participants, setParticipants] = useState([]);
+  const [participantsOpen, setParticipantsOpen] = useState(false);
 
   const timerRef = useRef(null);
   const vmRef = useRef(null);
@@ -781,6 +805,7 @@ function SoftphoneApp() {
 
   // ── Handlers ──
   const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+  const STATUS_COLOR = { available: '#94CC86', busy: '#FF7C19', offline: '#ED4B52' };
 
   const startCall = (contact) => {
     const c = contact || suggestion || { name: dialInput || 'Unknown', number: dialInput };
@@ -811,6 +836,8 @@ function SoftphoneApp() {
     setOnHold(false); setMuted(false); setShowKeypad(false);
     setMinimized(false);
     setCallDetailOpen(false);
+    setTransferOpen(false); setTransferTarget(null); setTransferSearch('');
+    setAddOpen(false); setAddSearch(''); setParticipants([]); setParticipantsOpen(false);
     setNavTab('dialpad');
     showToast('Call ended');
   };
@@ -823,6 +850,7 @@ function SoftphoneApp() {
   const confirmTransfer = () => {
     setTransferOpen(false);
     setTransferTarget(null);
+    setTransferSearch('');
     endCall();
     showToast('Call transferred successfully!');
   };
@@ -859,13 +887,13 @@ function SoftphoneApp() {
   const renderHistory = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'flex', gap: 2, padding: 2, background: 'rgba(0,0,0,0.18)', borderRadius: 6 }}>
-        {['recent', 'favorites'].map(t => (
-          <button key={t} onClick={() => setHistoryTab(t)}
+        {[{ id: 'recent', label: 'All' }, { id: 'favorites', label: 'Inbound' }].map(t => (
+          <button key={t.id} onClick={() => setHistoryTab(t.id)}
             style={{ flex: 1, height: 30, borderRadius: 4, border: 'none', cursor: 'pointer',
-              background: historyTab === t ? '#F4F6FB' : 'transparent',
-              color: historyTab === t ? '#363B4D' : '#fff',
-              fontFamily: 'Montserrat', fontSize: 12, fontWeight: 700, textTransform: 'capitalize' }}>
-            {t}
+              background: historyTab === t.id ? '#F4F6FB' : 'transparent',
+              color: historyTab === t.id ? '#363B4D' : '#fff',
+              fontFamily: 'Montserrat', fontSize: 12, fontWeight: 700 }}>
+            {t.label}
           </button>
         ))}
       </div>
@@ -996,7 +1024,7 @@ function SoftphoneApp() {
               <Avatar name={c.name} size={32}/>
               <div className="sp-contact-item-info">
                 <div className="sp-contact-item-name">{c.name}</div>
-                <div className="sp-contact-item-num">{c.number}</div>
+                <div className="sp-contact-item-num">{c.company || c.number}</div>
               </div>
               <button className="sp-history-call-btn" onClick={e => { e.stopPropagation(); startCall(c); }}>
                 <Icon name="call" size={14}/>
@@ -1017,7 +1045,7 @@ function SoftphoneApp() {
             <Avatar name={vm.name} size={32}/>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ color: '#fff', fontSize: 12, fontWeight: 600 }}>{vm.name}</div>
-              <div style={{ color: '#8D99AE', fontSize: 10 }}>{vm.time} · {vm.duration}</div>
+              <div style={{ color: '#8D99AE', fontSize: 10 }}>{vm.company || vm.time} · {vm.duration}</div>
             </div>
             <button className="sp-history-call-btn" onClick={() => callBack({ name: vm.name, number: vm.number })}>
               <Icon name="call" size={14}/>
@@ -1037,27 +1065,152 @@ function SoftphoneApp() {
     </div>
   );
 
+  // ── Render: Add Participant Search ──
+  const renderAddSearch = () => {
+    const filtered = ADD_SEARCH_LIST.filter(p =>
+      p.name.toLowerCase().includes(addSearch.toLowerCase()) || p.number.includes(addSearch)
+    );
+    const addedIds = new Set(participants.map(p => p.id));
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <button onClick={() => { setAddOpen(false); setAddSearch(''); }}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none',
+            cursor: 'pointer', color: '#87CFE7', fontFamily: 'Montserrat', fontSize: 13, fontWeight: 600,
+            padding: '2px 0', alignSelf: 'flex-start' }}>
+          <Icon name="arrowLeft" size={16}/> Back
+        </button>
+        <input className="sp-contact-search" placeholder="Search users or contacts..."
+          value={addSearch} onChange={e => setAddSearch(e.target.value)} autoFocus/>
+        <div className="sp-contacts-list">
+          {filtered.map(p => {
+            const alreadyAdded = addedIds.has(p.id);
+            return (
+              <div key={p.id} className="sp-contact-item"
+                style={{ opacity: alreadyAdded ? 0.45 : 1, cursor: alreadyAdded ? 'default' : 'pointer' }}
+                onClick={() => {
+                  if (alreadyAdded) return;
+                  setParticipants(prev => [...prev, { ...p, joinedAt: callTimer }]);
+                  setAddOpen(false); setAddSearch('');
+                }}>
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <Avatar name={p.name} size={32}/>
+                  <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
+                    borderRadius: '50%', background: STATUS_COLOR[p.status], border: '1.5px solid #363B4D' }}/>
+                </div>
+                <div className="sp-contact-item-info">
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span className="sp-contact-item-name">{p.name}</span>
+                    <span style={{ color: '#8D99AE', fontSize: 10, fontWeight: 500 }}>{p.type}</span>
+                  </div>
+                  <div className="sp-contact-item-num">{p.number}</div>
+                </div>
+                {alreadyAdded && <span style={{ color: '#8D99AE', fontSize: 10, fontWeight: 600, flexShrink: 0 }}>Added</span>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  // ── Render: Participants List (All Users in call) ──
+  const renderParticipantsList = () => {
+    const customers = participants.filter(p => p.type === 'Customer');
+    const users = participants.filter(p => p.type === 'User');
+    const renderRow = (p, isYou = false) => (
+      <div key={p.id || 'you'} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }}>
+        <div style={{ position: 'relative', flexShrink: 0 }}>
+          <Avatar name={p.name} size={32}/>
+          {!isYou && <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
+            borderRadius: '50%', background: STATUS_COLOR[p.status] || '#94CC86', border: '1.5px solid #363B4D' }}/>}
+        </div>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{p.name}{isYou && <span style={{ color: '#8D99AE', fontWeight: 400 }}> (You)</span>}</div>
+          <div style={{ color: '#94CC86', fontSize: 11, fontWeight: 500 }}>In call</div>
+        </div>
+        {!isYou && (
+          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8D99AE', padding: 4, borderRadius: 4 }}
+            onClick={() => setParticipants(prev => prev.filter(x => x.id !== p.id))}
+            title="Remove from call">
+            <Icon name="personRemove" size={18}/>
+          </button>
+        )}
+      </div>
+    );
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <button onClick={() => setParticipantsOpen(false)}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none',
+            cursor: 'pointer', color: '#87CFE7', fontFamily: 'Montserrat', fontSize: 13, fontWeight: 600,
+            padding: '2px 0', alignSelf: 'flex-start' }}>
+          <Icon name="arrowLeft" size={16}/> Back
+        </button>
+        {customers.length > 0 && (
+          <div>
+            <div style={{ color: '#8D99AE', fontSize: 11, fontWeight: 600, marginBottom: 4 }}>Customers ({customers.length})</div>
+            {customers.map(p => renderRow(p))}
+          </div>
+        )}
+        {(users.length > 0 || true) && (
+          <div>
+            <div style={{ color: '#8D99AE', fontSize: 11, fontWeight: 600, marginBottom: 4 }}>Users ({users.length + 1})</div>
+            {users.map(p => renderRow(p))}
+            {renderRow({ id: 'you', name: 'Emma Langhammer', status: 'available' }, true)}
+          </div>
+        )}
+        <div className="sp-divider" style={{ margin: '4px 0' }}/>
+        <div className="sp-actions">
+          {[
+            { icon: muted ? 'micOff' : 'mic', label: muted ? 'Unmute' : 'Mute', action: () => setMuted(m => !m), active: muted },
+            { icon: onHold ? 'play' : 'pause', label: onHold ? 'Resume' : 'Hold', action: () => setOnHold(h => !h), active: onHold },
+            { icon: 'dialpad', label: 'Keypad', action: () => { setParticipantsOpen(false); setShowKeypad(true); } },
+            { icon: 'personAdd', label: 'Add', action: () => { setParticipantsOpen(false); setAddOpen(true); } },
+            { icon: 'forward', label: 'Transfer', action: () => { setParticipantsOpen(false); setTransferOpen(true); setTransferTab('users'); } },
+            { icon: 'callEnd', label: 'End', action: endCall, red: true },
+          ].map((a, i) => (
+            <button key={i} className="sp-action-btn" onClick={a.action}>
+              <div className={`sp-action-icon ${a.red ? 'red' : ''} ${a.active ? 'active' : ''}`}>
+                <Icon name={a.icon} size={18}/>
+              </div>
+              <span className="sp-action-label">{a.label}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   // ── Render: Active Call Tab ──
   const renderCallTab = () => {
     if (callDetailOpen && activeContact) {
       const c = CONTACTS.find(x => x.name === activeContact.name) || activeContact;
       return renderContactDetail(c, () => setCallDetailOpen(false));
     }
+    if (addOpen) return renderAddSearch();
+    if (participantsOpen) return renderParticipantsList();
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center', position: 'relative' }}>
+        {participants.length > 0 && (
+          <button onClick={() => setParticipantsOpen(true)}
+            style={{ position: 'absolute', top: 0, right: 0, display: 'flex', alignItems: 'center', gap: 4,
+              background: 'rgba(0,127,173,0.2)', border: '1px solid rgba(0,127,173,0.4)', borderRadius: 12,
+              padding: '3px 8px', cursor: 'pointer', color: '#87CFE7',
+              fontFamily: 'Montserrat', fontSize: 10, fontWeight: 700 }}>
+            <Icon name="group" size={13}/> +{participants.length} in call
+          </button>
+        )}
         <Avatar name={activeContact.name} size={64} fontSize={20} color={tweaks.accentColor}/>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
           <span className="sp-contact-name">{activeContact.name}</span>
           <span style={{ color: '#8D99AE', fontSize: 12 }}>{activeContact.number}</span>
-          <span className="sp-timer-text">{onHold ? 'On Hold' : fmt(callTimer)}</span>
-          {activeContact.company && <span className="sp-contact-link">{activeContact.company}</span>}
+          {activeContact.company && <span style={{ color: '#8D99AE', fontSize: 12 }}>{activeContact.company}</span>}
           <button onClick={() => setCallDetailOpen(true)}
-            style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none',
-              cursor: 'pointer', color: '#87CFE7', fontFamily: 'Montserrat', fontSize: 11, fontWeight: 600,
-              padding: '2px 6px', marginTop: 2 }}>
-            <Icon name="info" size={11}/> View contact details
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#87CFE7',
+              fontFamily: 'Montserrat', fontSize: 12, fontWeight: 600, padding: '2px 0', marginTop: 1 }}>
+            Contact Details ›
           </button>
         </div>
+        <span className="sp-timer-text" style={{ marginTop: 2 }}>{onHold ? 'On Hold' : fmt(callTimer)}</span>
         {showKeypad ? (
           <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
             <button onClick={() => setShowKeypad(false)}
@@ -1072,10 +1225,10 @@ function SoftphoneApp() {
           <div className="sp-actions">
             {[
               { icon: muted ? 'micOff' : 'mic', label: muted ? 'Unmute' : 'Mute', action: () => setMuted(m => !m), active: muted },
-              { icon: 'dialpad', label: 'Keypad', action: () => setShowKeypad(s => !s) },
-              { icon: 'personAdd', label: 'Add', action: () => showToast('Add participant') },
               { icon: onHold ? 'play' : 'pause', label: onHold ? 'Resume' : 'Hold', action: () => setOnHold(h => !h), active: onHold },
-              { icon: 'forward', label: 'Transfer', action: () => setTransferOpen(true) },
+              { icon: 'dialpad', label: 'Keypad', action: () => setShowKeypad(s => !s) },
+              { icon: 'personAdd', label: 'Add', action: () => setAddOpen(true), active: participants.length > 0 },
+              { icon: 'forward', label: 'Transfer', action: () => { setTransferOpen(true); setTransferTab('users'); } },
               { icon: 'callEnd', label: 'End', action: endCall, red: true },
             ].map((a, i) => (
               <button key={i} className="sp-action-btn" onClick={a.action}>
@@ -1093,25 +1246,29 @@ function SoftphoneApp() {
 
   // ── Render: Transfer (inline in widget) ──
   const renderTransferInline = () => {
-    const filtered = CONTACTS.filter(c =>
-      c.id !== activeContact.id &&
-      (c.name.toLowerCase().includes(transferSearch.toLowerCase()) || c.number.includes(transferSearch))
+    const pool = transferTab === 'users' ? AGENTS : [];
+    const filtered = pool.filter(a =>
+      a.name.toLowerCase().includes(transferSearch.toLowerCase()) || a.title.toLowerCase().includes(transferSearch.toLowerCase())
     );
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <button onClick={() => { setTransferOpen(false); setTransferTarget(null); }}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none',
+        <button onClick={() => { setTransferOpen(false); setTransferTarget(null); setTransferSearch(''); }}
+          style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none',
             cursor: 'pointer', color: '#87CFE7', fontFamily: 'Montserrat', fontSize: 13, fontWeight: 600,
-            padding: '4px 0', alignSelf: 'flex-start' }}>
-          <Icon name="arrowLeft" size={16}/> Back to call
+            padding: '2px 0', alignSelf: 'flex-start' }}>
+          <Icon name="arrowLeft" size={16}/> Back
         </button>
         {transferTarget ? (
           <>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 10, borderRadius: 6, background: 'rgba(255,255,255,0.06)' }}>
-              <Avatar name={transferTarget.name} size={36}/>
+              <div style={{ position: 'relative' }}>
+                <Avatar name={transferTarget.name} size={36}/>
+                <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
+                  borderRadius: '50%', background: STATUS_COLOR[transferTarget.status] || '#94CC86', border: '1.5px solid #363B4D' }}/>
+              </div>
               <div style={{ flex: 1 }}>
                 <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{transferTarget.name}</div>
-                <div style={{ color: '#CED0D4', fontSize: 11 }}>{transferTarget.number}</div>
+                <div style={{ color: '#8D99AE', fontSize: 11 }}>{transferTarget.title}</div>
               </div>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
@@ -1123,19 +1280,33 @@ function SoftphoneApp() {
           </>
         ) : (
           <>
-            <input className="sp-contact-search" placeholder="Search agents or contacts..."
+            <div style={{ display: 'flex', gap: 2, padding: 2, background: 'rgba(0,0,0,0.18)', borderRadius: 6 }}>
+              {['users', 'queues'].map(t => (
+                <button key={t} onClick={() => setTransferTab(t)}
+                  style={{ flex: 1, height: 30, borderRadius: 4, border: 'none', cursor: 'pointer',
+                    background: transferTab === t ? '#F4F6FB' : 'transparent',
+                    color: transferTab === t ? '#363B4D' : '#fff',
+                    fontFamily: 'Montserrat', fontSize: 12, fontWeight: 700, textTransform: 'capitalize' }}>
+                  {t.charAt(0).toUpperCase() + t.slice(1)}
+                </button>
+              ))}
+            </div>
+            <input className="sp-contact-search" placeholder="Search users..."
               value={transferSearch} onChange={e => setTransferSearch(e.target.value)} autoFocus/>
             <div className="sp-contacts-list">
-              {filtered.map(c => (
-                <div key={c.id} className="sp-contact-item" onClick={() => setTransferTarget(c)}>
-                  <div style={{ position: 'relative' }}>
-                    <Avatar name={c.name} size={32}/>
-                    <div style={{ position: 'absolute', bottom: 0, right: 0, width: 9, height: 9,
-                      borderRadius: '50%', background: '#94CC86', border: '1.5px solid #363B4D' }}/>
+              {filtered.length === 0 && transferTab === 'queues' && (
+                <div style={{ color: '#5F6475', fontSize: 12, textAlign: 'center', padding: '16px 0' }}>No queues available</div>
+              )}
+              {filtered.map(a => (
+                <div key={a.id} className="sp-contact-item" onClick={() => setTransferTarget(a)}>
+                  <div style={{ position: 'relative', flexShrink: 0 }}>
+                    <Avatar name={a.name} size={32}/>
+                    <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
+                      borderRadius: '50%', background: STATUS_COLOR[a.status], border: '1.5px solid #363B4D' }}/>
                   </div>
                   <div className="sp-contact-item-info">
-                    <div className="sp-contact-item-name">{c.name}</div>
-                    <div className="sp-contact-item-num">{c.number}</div>
+                    <div className="sp-contact-item-name">{a.name}</div>
+                    <div className="sp-contact-item-num">{a.title}</div>
                   </div>
                 </div>
               ))}
