@@ -1,0 +1,1592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>qManage Softphone</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Montserrat', sans-serif;
+    background: #f0f2f5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+  .qm-bg {
+    position: fixed; inset: 0;
+    background: #fff;
+    overflow: hidden;
+  }
+  .qm-header {
+    height: 64px;
+    background: #fff;
+    border-bottom: 1px solid #CED0D4;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    gap: 16px;
+    position: relative;
+    z-index: 1;
+  }
+  .qm-logo {
+    display: flex; align-items: center; gap: 6px;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: 700; font-size: 22px;
+    color: #363B4D;
+    text-decoration: none;
+  }
+  .qm-search {
+    flex: 1; max-width: 500px; margin: 0 auto;
+    height: 40px; border-radius: 4px;
+    border: 1px solid #CED0D4;
+    background: #F4F6FB;
+    display: flex; align-items: center; padding: 0 12px; gap: 8px;
+    color: #8D99AE; font-size: 14px; font-family: 'Montserrat', sans-serif;
+  }
+  .qm-header-right {
+    display: flex; align-items: center; gap: 16px; margin-left: auto;
+  }
+  .qm-icon-btn {
+    width: 36px; height: 36px; border-radius: 4px;
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #5F6475; transition: background 0.15s;
+  }
+  .qm-icon-btn:hover { background: #F4F6FB; }
+  .qm-phone-btn {
+    width: 36px; height: 36px; border-radius: 4px;
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #5F6475; transition: all 0.15s; position: relative;
+  }
+  .qm-phone-btn:hover { background: #F4F6FB; }
+  .qm-add-ticket {
+    height: 36px; padding: 0 16px; border-radius: 4px;
+    background: #007FAD; border: none; cursor: pointer;
+    color: #fff; font-family: 'Montserrat', sans-serif;
+    font-size: 14px; font-weight: 600;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .qm-avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #A4495D; display: flex; align-items: center;
+    justify-content: center; color: #fff; font-size: 12px; font-weight: 700;
+  }
+  .qm-content {
+    padding: 32px;
+    background: #F4F6FB;
+    min-height: calc(100vh - 64px);
+  }
+
+  /* ── SOFTPHONE WIDGET (full) ── */
+  .sp-widget {
+    width: 450px;
+    height: 450px;
+    border-radius: 10px;
+    background: #363B4D;
+    box-shadow: 0px 8px 32px 0px rgba(0,0,0,0.28), 0px 0px 2px 0px rgba(0,0,0,0.16);
+    overflow: hidden;
+    font-family: 'Montserrat', sans-serif;
+    position: fixed;
+    z-index: 1000;
+    user-select: none;
+    display: flex;
+    flex-direction: column;
+  }
+  .sp-widget-content {
+    flex: 1;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+  .sp-widget-scroll {
+    flex: 1;
+    overflow-y: auto;
+    min-height: 0;
+  }
+
+  /* ── MINIMIZED PILL ── */
+  .sp-mini {
+    position: fixed;
+    z-index: 1000;
+    background: #363B4D;
+    border-radius: 12px;
+    box-shadow: 0px 8px 24px rgba(0,0,0,0.32);
+    padding: 8px 12px 8px 8px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-family: 'Montserrat', sans-serif;
+    user-select: none;
+    min-width: 360px;
+  }
+  .sp-mini-handle {
+    width: 22px; height: 32px;
+    display: flex; align-items: center; justify-content: center;
+    color: #5F6475;
+    cursor: grab;
+    flex-shrink: 0;
+  }
+  .sp-mini-handle:active { cursor: grabbing; }
+  .sp-mini-name {
+    color: #fff; font-size: 15px; font-weight: 700;
+    white-space: nowrap;
+  }
+  .sp-mini-timer {
+    color: #fff; font-size: 14px; font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    margin-left: auto;
+    white-space: nowrap;
+  }
+  .sp-mini-end {
+    height: 36px; padding: 0 14px; border-radius: 6px;
+    border: none; cursor: pointer;
+    background: #ED4B52; color: #fff;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px; font-weight: 700;
+    display: flex; align-items: center; gap: 6px;
+    flex-shrink: 0;
+  }
+  .sp-mini-end:hover { background: #d43f46; }
+  .sp-mini-expand {
+    width: 32px; height: 32px;
+    background: none; border: none; cursor: pointer;
+    color: #8D99AE;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .sp-mini-expand:hover { color: #fff; background: rgba(255,255,255,0.06); }
+
+  /* ── DRAG HANDLE (in widget header) ── */
+  .sp-drag-handle {
+    cursor: grab; color: #5F6475;
+    display: flex; align-items: center;
+    padding: 4px 6px;
+    margin-left: -4px;
+  }
+  .sp-drag-handle:active { cursor: grabbing; }
+
+  /* ── HEADER BAR ── */
+  .sp-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 12px 0 6px;
+    height: 44px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+  }
+  .sp-header-title {
+    color: #fff; font-size: 14px; font-weight: 600;
+  }
+  .sp-header-actions { display: flex; gap: 2px; align-items: center; }
+  .sp-hbtn {
+    width: 28px; height: 28px; border-radius: 4px;
+    background: none; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #8D99AE; transition: all 0.15s;
+  }
+  .sp-hbtn:hover { background: rgba(255,255,255,0.08); color: #fff; }
+
+  /* ── BODY ── */
+  .sp-body {
+    padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 12px;
+  }
+
+  /* ── AVATAR ── */
+  .sp-avatar {
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700; flex-shrink: 0;
+    color: #fff;
+  }
+
+  /* ── CONTACT BLOCK ── */
+  .sp-contact-name { color: #fff; font-size: 16px; font-weight: 700; text-align: center; }
+  .sp-contact-number { color: #fff; font-size: 14px; font-weight: 500; text-align: center; }
+  .sp-contact-link { color: #87CFE7; font-size: 12px; font-weight: 500; cursor: pointer; }
+  .sp-contact-link:hover { text-decoration: underline; }
+  .sp-status-text { color: #8D99AE; font-size: 12px; text-align: center; }
+  .sp-timer-text { color: #fff; font-size: 22px; font-weight: 700; text-align: center; letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+
+  /* ── ACTIONS ── */
+  .sp-actions {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 6px 0;
+    justify-items: center;
+    padding: 4px 0;
+  }
+  .sp-action-btn {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 4px; width: 64px; padding: 4px 0;
+    background: none; border: none; cursor: pointer;
+  }
+  .sp-action-icon {
+    width: 42px; height: 42px; border-radius: 50%;
+    background: #5F6475;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+    color: #fff;
+  }
+  .sp-action-icon:hover { background: #4a5066; }
+  .sp-action-icon.active { background: #007FAD; }
+  .sp-action-icon.red { background: #ED4B52; }
+  .sp-action-icon.red:hover { background: #d43f46; }
+  .sp-action-label {
+    color: #CED0D4; font-size: 11px; font-weight: 500;
+    text-align: center; line-height: 1.2;
+  }
+
+  /* ── DIAL PAD ── */
+  .sp-dialpad-input-wrap { position: relative; display: flex; align-items: center; }
+  .sp-dialpad-input {
+    width: 100%; height: 40px; border-radius: 20px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #fff; font-size: 15px; font-weight: 700;
+    font-family: 'Montserrat', sans-serif;
+    text-align: center; padding: 0 36px;
+    outline: none; letter-spacing: 1px;
+  }
+  .sp-dialpad-input::placeholder { color: #5F6475; font-weight: 400; }
+  .sp-dialpad-suggestion {
+    font-size: 11px; color: #8D99AE; font-weight: 500;
+    text-align: center; margin-top: -4px;
+  }
+  .sp-backspace {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer;
+    color: #8D99AE; padding: 4px;
+  }
+  .sp-backspace:hover { color: #fff; }
+  .sp-keypad {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 8px; padding: 0 12px;
+  }
+  .sp-key {
+    height: 40px; border-radius: 50%;
+    background: rgba(255,255,255,0.07);
+    border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px; font-weight: 700;
+    color: #fff;
+  }
+  .sp-key:hover { background: rgba(255,255,255,0.14); }
+  .sp-key:active { background: rgba(255,255,255,0.22); }
+  .sp-key-sub { font-size: 8px; font-weight: 500; color: #8D99AE; letter-spacing: 1px; }
+  .sp-call-btn {
+    width: 44px; height: 44px; border-radius: 50%;
+    background: #94CC86; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto; color: #253322;
+  }
+  .sp-call-btn:hover { background: #7fb872; }
+
+  /* ── BOTTOM NAV ── */
+  .sp-nav {
+    display: flex; align-items: center; justify-content: space-around;
+    padding: 6px 8px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    flex-shrink: 0;
+    background: rgba(0,0,0,0.12);
+  }
+  .sp-nav-btn {
+    flex: 1; height: 44px; border-radius: 6px;
+    background: none; border: none; cursor: pointer;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2px;
+    color: #8D99AE; transition: all 0.15s;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 9px; font-weight: 600;
+    position: relative;
+  }
+  .sp-nav-btn:hover { color: #fff; }
+  .sp-nav-btn.active { color: #87CFE7; }
+  .sp-nav-btn.call-tab.active {
+    color: #94CC86;
+  }
+  .sp-nav-btn.call-tab {
+    color: #94CC86;
+  }
+  .sp-nav-dot {
+    position: absolute; top: 6px; right: 14px;
+    width: 7px; height: 7px; border-radius: 50%;
+    background: #94CC86;
+    box-shadow: 0 0 0 0 rgba(148,204,134,0.7);
+    animation: pulse-dot 1.6s ease-out infinite;
+  }
+  @keyframes pulse-dot {
+    0% { box-shadow: 0 0 0 0 rgba(148,204,134,0.5); }
+    100% { box-shadow: 0 0 0 6px rgba(148,204,134,0); }
+  }
+
+  /* ── HISTORY ── */
+  .sp-history-list {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .sp-history-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 4px; border-radius: 4px;
+    cursor: pointer;
+  }
+  .sp-history-item:hover { background: rgba(255,255,255,0.06); }
+  .sp-history-info { flex: 1; min-width: 0; }
+  .sp-history-name { color: #fff; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sp-history-meta { color: #8D99AE; font-size: 11px; font-weight: 500; }
+  .sp-history-call-btn {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: rgba(148,204,134,0.15);
+    border: none; cursor: pointer; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: #94CC86;
+  }
+  .sp-history-call-btn:hover { background: #94CC86; color: #253322; }
+
+  /* ── VOICEMAIL ── */
+  .sp-voicemail-item {
+    padding: 10px 4px; border-radius: 4px;
+    cursor: pointer;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .sp-voicemail-item:hover { background: rgba(255,255,255,0.06); }
+  .sp-voicemail-row { display: flex; align-items: center; gap: 8px; }
+  .sp-voicemail-play {
+    width: 28px; height: 28px; border-radius: 50%;
+    background: #007FAD; border: none; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; flex-shrink: 0;
+  }
+  .sp-voicemail-bar {
+    flex: 1; height: 3px; border-radius: 2px;
+    background: rgba(255,255,255,0.15); overflow: hidden;
+  }
+  .sp-voicemail-progress { height: 100%; background: #007FAD; }
+
+  /* ── CONTACTS ── */
+  .sp-contact-search {
+    width: 100%; height: 36px; border-radius: 4px;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    color: #fff; font-size: 13px;
+    font-family: 'Montserrat', sans-serif;
+    padding: 0 12px; outline: none;
+  }
+  .sp-contact-search::placeholder { color: #5F6475; }
+  .sp-contacts-list {
+    display: flex; flex-direction: column; gap: 2px;
+  }
+  .sp-contact-item {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 4px; border-radius: 4px;
+    cursor: pointer;
+  }
+  .sp-contact-item:hover { background: rgba(255,255,255,0.06); }
+  .sp-contact-item-info { flex: 1; min-width: 0; }
+  .sp-contact-item-name { color: #fff; font-size: 13px; font-weight: 600; }
+  .sp-contact-item-num { color: #8D99AE; font-size: 11px; font-weight: 500; }
+
+  /* ── BUTTONS ── */
+  .sp-btn-secondary {
+    flex: 1; height: 36px; border-radius: 4px;
+    border: 1px solid rgba(255,255,255,0.2);
+    background: rgba(255,255,255,0.06);
+    color: #fff; cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px; font-weight: 600;
+  }
+  .sp-btn-secondary:hover { background: rgba(255,255,255,0.12); }
+  .sp-btn-primary {
+    flex: 1; height: 36px; border-radius: 4px;
+    border: none; background: #007FAD;
+    color: #fff; cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px; font-weight: 600;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .sp-btn-primary:hover { background: #005f82; }
+  .sp-btn-danger {
+    flex: 1; height: 40px; border-radius: 6px;
+    border: none; background: #ED4B52;
+    color: #fff; cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .sp-btn-danger:hover { background: #d43f46; }
+  .sp-btn-accept {
+    flex: 1; height: 40px; border-radius: 6px;
+    border: none; background: #94CC86;
+    color: #253322; cursor: pointer;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .sp-btn-accept:hover { background: #7fb872; }
+
+  /* ── CALL INFO BANNER (when on a tab while in call) ── */
+  .sp-callinfo-banner {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px;
+    background: rgba(148,204,134,0.1);
+    border-bottom: 1px solid rgba(148,204,134,0.2);
+    cursor: pointer;
+  }
+  .sp-callinfo-banner:hover { background: rgba(148,204,134,0.16); }
+  .sp-callinfo-pulse {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #94CC86;
+    box-shadow: 0 0 0 0 rgba(148,204,134,0.7);
+    animation: pulse-dot 1.6s ease-out infinite;
+    flex-shrink: 0;
+  }
+  .sp-callinfo-name { color: #fff; font-size: 12px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .sp-callinfo-timer { color: #94CC86; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* ── DIVIDER ── */
+  .sp-divider { height: 1px; background: rgba(255,255,255,0.08); }
+
+  /* ── BADGE ── */
+  .sp-badge {
+    display: inline-flex; align-items: center;
+    padding: 2px 8px; border-radius: 3px;
+    font-size: 11px; font-weight: 600;
+    background: rgba(135,207,231,0.15);
+    color: #87CFE7; border: 1px solid rgba(135,207,231,0.3);
+  }
+
+  /* ── TOAST NOTIFICATION ── */
+  .sp-toast-notif {
+    position: fixed; top: 72px; left: 50%; transform: translateX(-50%);
+    background: #363B4D;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 6px; padding: 12px 20px;
+    color: #fff; font-size: 13px; font-weight: 500;
+    z-index: 3000; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    animation: toastIn 0.3s ease;
+  }
+  @keyframes toastIn {
+    from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+  }
+
+  /* ── INCOMING PULSE ── */
+  @keyframes pulse-ring {
+    0% { transform: scale(1); opacity: 0.6; }
+    100% { transform: scale(1.6); opacity: 0; }
+  }
+  .sp-avatar-pulse { position: relative; display: inline-flex; align-items: center; justify-content: center; }
+  .sp-avatar-pulse::before, .sp-avatar-pulse::after {
+    content: ''; position: absolute;
+    width: 100%; height: 100%; border-radius: 50%;
+    background: rgba(0,127,173,0.35);
+    animation: pulse-ring 1.4s ease-out infinite;
+  }
+  .sp-avatar-pulse::after { animation-delay: 0.6s; }
+
+  /* ── MAXIMIZED OVERLAY ── */
+  .sp-max-backdrop {
+    position: fixed; inset: 0;
+    background: rgba(20,22,32,0.55);
+    backdrop-filter: blur(4px);
+    z-index: 1500;
+    animation: fadeIn 0.2s ease;
+  }
+  @keyframes fadeIn { from { opacity: 0 } to { opacity: 1 } }
+  .sp-max-window {
+    position: fixed;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 720px; max-width: 90vw;
+    height: 540px; max-height: 90vh;
+    background: #363B4D;
+    border-radius: 14px;
+    box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+    z-index: 1600;
+    overflow: hidden;
+    display: flex;
+    font-family: 'Montserrat', sans-serif;
+    animation: maxIn 0.22s ease;
+  }
+  @keyframes maxIn {
+    from { opacity: 0; transform: translate(-50%, -50%) scale(0.96) }
+    to { opacity: 1; transform: translate(-50%, -50%) scale(1) }
+  }
+  .sp-max-left {
+    flex: 1.2;
+    background: linear-gradient(180deg, #2A2F3E 0%, #363B4D 100%);
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 32px;
+    gap: 16px;
+    position: relative;
+  }
+  .sp-max-right {
+    flex: 1;
+    background: #2A2F3E;
+    display: flex; flex-direction: column;
+    overflow: hidden;
+  }
+  .sp-max-close {
+    position: absolute; top: 14px; right: 14px;
+    width: 32px; height: 32px; border-radius: 6px;
+    background: rgba(255,255,255,0.06); border: none; cursor: pointer;
+    color: #CED0D4;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .sp-max-close:hover { background: rgba(255,255,255,0.12); color: #fff; }
+  .sp-max-avatar {
+    width: 96px; height: 96px; font-size: 32px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700;
+  }
+  .sp-max-name { color: #fff; font-size: 22px; font-weight: 700; }
+  .sp-max-number { color: #CED0D4; font-size: 14px; font-weight: 500; }
+  .sp-max-timer { color: #94CC86; font-size: 32px; font-weight: 700; letter-spacing: 1px; font-variant-numeric: tabular-nums; }
+  .sp-max-status { color: #8D99AE; font-size: 13px; }
+  .sp-max-actions {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 12px; width: 100%;
+    margin-top: 8px;
+  }
+  .sp-max-action {
+    display: flex; flex-direction: column; align-items: center;
+    gap: 6px; background: none; border: none; cursor: pointer;
+    padding: 8px 0;
+  }
+  .sp-max-action-icon {
+    width: 52px; height: 52px; border-radius: 50%;
+    background: #5F6475;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; transition: all 0.15s;
+  }
+  .sp-max-action-icon:hover { background: #4a5066; }
+  .sp-max-action-icon.active { background: #007FAD; }
+  .sp-max-action-icon.red { background: #ED4B52; }
+  .sp-max-action-icon.red:hover { background: #d43f46; }
+  .sp-max-action-label { color: #CED0D4; font-size: 11px; font-weight: 600; }
+  .sp-max-detail-header {
+    padding: 18px 20px 12px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .sp-max-detail-title { color: #fff; font-size: 15px; font-weight: 700; margin-bottom: 4px; }
+  .sp-max-detail-sub { color: #8D99AE; font-size: 12px; }
+  .sp-max-detail-body {
+    flex: 1; overflow-y: auto;
+    padding: 16px 20px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .sp-max-detail-row { display: flex; flex-direction: column; gap: 4px; }
+  .sp-max-detail-label { color: #8D99AE; font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; }
+  .sp-max-detail-val { color: #fff; font-size: 13px; font-weight: 500; }
+  .sp-max-detail-link { color: #87CFE7; font-size: 13px; font-weight: 500; }
+  .sp-max-tabs {
+    display: flex; padding: 0 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    gap: 4px;
+  }
+  .sp-max-tab {
+    padding: 12px 14px;
+    background: none; border: none; cursor: pointer;
+    color: #8D99AE; font-size: 12px; font-weight: 600;
+    font-family: 'Montserrat', sans-serif;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+  .sp-max-tab.active { color: #fff; border-bottom-color: #87CFE7; }
+  .sp-max-tab:hover { color: #fff; }
+  .sp-max-end-bar {
+    padding: 14px 20px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+    display: flex; gap: 10px;
+  }
+
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+</style>
+</head>
+<body>
+
+<!-- Simulated qManage background -->
+<div class="qm-bg">
+  <div class="qm-header" id="qmHeader">
+    <button class="qm-icon-btn" style="color:#363B4D">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
+    </button>
+    <div class="qm-logo">
+      <span style="color:#00A6E0;font-size:26px;font-weight:900">q</span>Manage
+    </div>
+    <div class="qm-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
+      Search qManage
+    </div>
+    <div class="qm-header-right">
+      <button class="qm-phone-btn" id="phoneToggleBtn" title="Softphone">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
+      </button>
+      <button class="qm-icon-btn">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
+      </button>
+      <button class="qm-add-ticket">+ Add Ticket</button>
+      <div class="qm-avatar">JD</div>
+    </div>
+  </div>
+
+  <div class="qm-content">
+    <h1 style="font-size:24px;font-weight:700;color:#363B4D;margin-bottom:4px">Hi, John!</h1>
+    <p style="color:#8D99AE;font-size:14px">Here's what's going on today.</p>
+  </div>
+</div>
+
+<div id="app"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef, useCallback } = React;
+
+const AVATAR_COLORS = ['#007FAD','#A4495D','#2B376B','#6F9965','#7B3746','#8D99AE'];
+function avatarColor(name) {
+  let h = 0; for (let c of name) h = (h * 31 + c.charCodeAt(0)) % AVATAR_COLORS.length;
+  return AVATAR_COLORS[h];
+}
+function initials(name) {
+  return name.split(' ').map(p=>p[0]).join('').slice(0,2).toUpperCase();
+}
+
+const Icon = ({ name, size=20, color='currentColor' }) => {
+  const paths = {
+    dialpad: <><circle cx="12" cy="19" r="1.5"/><path d="M7 3.5H9.5V6H7zM10.75 3.5H13.25V6H10.75zM14.5 3.5H17V6H14.5zM7 7.25H9.5V9.75H7zM10.75 7.25H13.25V9.75H10.75zM14.5 7.25H17V9.75H14.5zM7 11H9.5V13.5H7zM10.75 11H13.25V13.5H10.75zM14.5 11H17V13.5H14.5z"/></>,
+    call: <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>,
+    callEnd: <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>,
+    mic: <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>,
+    micOff: <path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z"/>,
+    pause: <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>,
+    personAdd: <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>,
+    forward: <path d="M14 11V7l5 5-5 5v-4H6v-2h8z"/>,
+    history: <path d="M13 3c-4.97 0-9 4.03-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42C8.27 19.99 10.51 21 13 21c4.97 0 9-4.03 9-9s-4.03-9-9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/>,
+    contacts: <path d="M20 0H4v2h16V0zM4 24h16v2H4v-2zM20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-8 2.75c1.24 0 2.25 1.01 2.25 2.25S13.24 11.25 12 11.25 9.75 10.24 9.75 9 10.76 6.75 12 6.75zM17 17H7v-1.5c0-1.67 3.33-2.5 5-2.5s5 .83 5 2.5V17z"/>,
+    voicemail: <path d="M18.5 6C15.46 6 13 8.46 13 11.5c0 1.33.47 2.55 1.26 3.5H9.74c.79-.95 1.26-2.17 1.26-3.5C11 8.46 8.54 6 5.5 6 2.46 6 0 8.46 0 11.5S2.46 17 5.5 17h13c3.04 0 5.5-2.46 5.5-5.5S21.54 6 18.5 6zM5.5 15C3.57 15 2 13.43 2 11.5S3.57 8 5.5 8 9 9.57 9 11.5 7.43 15 5.5 15zm13 0c-1.93 0-3.5-1.57-3.5-3.5S16.57 8 18.5 8 22 9.57 22 11.5 20.43 15 18.5 15z"/>,
+    callMade: <path d="M9 5v2h6.59L4 18.59 5.41 20 17 8.41V15h2V5z"/>,
+    callReceived: <path d="M20 5.41L18.59 4 7 15.59V9H5v10h10v-2H8.41z"/>,
+    callMissed: <path d="M3 8.41l9 9 7-7V15h2V7h-8v2h4.59L12 14.59l-9-9L1.59 7 3 8.41z"/>,
+    backspace: <path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z"/>,
+    play: <path d="M8 5v14l11-7z"/>,
+    arrowLeft: <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>,
+    close: <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>,
+    mail: <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>,
+    minimize: <path d="M6 19h12v2H6z"/>,
+    maximize: <path d="M3 3h7v2H5v5H3V3zm11 0h7v7h-2V5h-5V3zM5 14v5h5v2H3v-7h2zm14 0h2v7h-7v-2h5v-5z"/>,
+    drag: <><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"/></>,
+    expand: <path d="M14 4h6v6h-2V7.41l-3.79 3.8-1.42-1.42L16.59 6H14V4zM4 14h2v2.59l3.79-3.8 1.42 1.42L7.41 18H10v2H4v-6z"/>,
+  };
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
+      {paths[name] || <circle cx="12" cy="12" r="5"/>}
+    </svg>
+  );
+};
+
+const Avatar = ({ name, size=32, color, fontSize }) => {
+  const fs = fontSize || (size >= 80 ? 30 : size >= 48 ? 16 : size >= 40 ? 14 : 12);
+  const bg = color || avatarColor(name);
+  return (
+    <div className="sp-avatar" style={{ width:size, height:size, fontSize:fs, background:bg }}>
+      {initials(name)}
+    </div>
+  );
+};
+
+const CONTACTS = [
+  { id:1, name:'Charlie Apegian', number:'(555) 123-4567', email:'c.apegian@csllc.com', company:'Creative Solutions LLC', companyType:'Regular Company', billing:'Per Unit', companyCode:'CSLLC', type:'Superuser',
+    tickets:[
+      {id:'345234', title:"Can't Connect to Server"},
+      {id:'544364', title:'Error in distribution calculation'},
+      {id:'544365', title:'Missing data in input file'},
+      {id:'544366', title:'Invalid format for date entry'},
+      {id:'654347', title:'User unable to access document after creation'},
+    ] },
+  { id:2, name:'Eleanor Foster', number:'(555) 243-4838', email:'e.foster@techcorp.com', company:'TechCorp', companyType:'Enterprise', billing:'Site License', companyCode:'TECH', type:'User',
+    tickets:[{id:'412009', title:'Reset MFA token'}, {id:'412044', title:'Slow report generation'}] },
+  { id:3, name:'Joe Smith', number:'(513) 365-4220', email:'j.smith@example.com', company:'Acme Inc', companyType:'Regular Company', billing:'Per Unit', companyCode:'ACME', type:'Admin', tickets:[] },
+  { id:4, name:'Pam Reynolds', number:'(360) 296-1400', email:'p.reynolds@example.com', company:'Reynolds Co', companyType:'Regular Company', billing:'Per Unit', companyCode:'REYN', type:'User',
+    tickets:[{id:'502117', title:'Export to CSV failing'}] },
+  { id:5, name:'Marcus Lee', number:'(612) 444-9820', email:'m.lee@example.com', company:'LeeGroup', companyType:'Regular Company', billing:'Per Unit', companyCode:'LEE', type:'User', tickets:[] },
+];
+
+const HISTORY = [
+  { id:1, type:'received', name:'Charlie Apegian', number:'(555) 123-4567', time:'6:38 PM', duration:'', date:'Today' },
+  { id:2, type:'missed', name:'Charlie Apegian', number:'(555) 123-4567', time:'12:55 PM', duration:'', date:'Today' },
+  { id:3, type:'received', name:'(589) 216-4863', number:'(589) 216-4863', time:'11:38 AM', duration:'35:08', date:'Today' },
+  { id:4, type:'received', name:'Joe Smith', number:'(513) 365-4220', time:'9:15 AM', duration:'23:54', date:'Today' },
+  { id:5, type:'made', name:'Pam Reynolds', number:'(360) 296-1400', time:'5:28 PM', duration:'16:32', date:'Yesterday' },
+  { id:6, type:'missed', name:'Pam Reynolds', number:'(360) 296-1400', time:'5:08 PM', duration:'', date:'Yesterday' },
+];
+
+const VOICEMAILS = [
+  { id:1, name:'Charlie Apegian', number:'(555) 123-4567', duration:'0:42', time:'Today 2:15 PM', progress:0 },
+  { id:2, name:'Pam Reynolds', number:'(360) 296-1400', duration:'1:23', time:'Today 9:04 AM', progress:0 },
+  { id:3, name:'Unknown', number:'(800) 555-0100', duration:'0:18', time:'Yesterday', progress:0 },
+];
+
+// ── Custom hook: drag a fixed-positioned element by a handle ──
+function useDrag(initial = { x: window.innerWidth - 360, y: 80 }) {
+  const [pos, setPos] = useState(initial);
+  const dragRef = useRef(null);
+  const startHandler = useCallback((e) => {
+    e.preventDefault();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startPosX = pos.x;
+    const startPosY = pos.y;
+    const onMove = (ev) => {
+      const nx = Math.max(8, Math.min(window.innerWidth - 200, startPosX + ev.clientX - startX));
+      const ny = Math.max(8, Math.min(window.innerHeight - 60, startPosY + ev.clientY - startY));
+      setPos({ x: nx, y: ny });
+    };
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  }, [pos]);
+  return [pos, setPos, startHandler];
+}
+
+function SoftphoneApp() {
+  const [open, setOpen] = useState(false);
+  const [screen, setScreen] = useState('idle'); // idle|incoming|outgoing|active
+  const [navTab, setNavTab] = useState('dialpad'); // dialpad|contacts|history|voicemail|call
+  const [dialInput, setDialInput] = useState('');
+  const [suggestion, setSuggestion] = useState(null);
+  const [activeContact, setActiveContact] = useState(CONTACTS[0]);
+  const [callTimer, setCallTimer] = useState(0);
+  const [muted, setMuted] = useState(false);
+  const [onHold, setOnHold] = useState(false);
+  const [showKeypad, setShowKeypad] = useState(false);
+  const [historyTab, setHistoryTab] = useState('recent');
+  const [contactSearch, setContactSearch] = useState('');
+  const [selectedContact, setSelectedContact] = useState(null);
+  const [transferOpen, setTransferOpen] = useState(false);
+  const [callDetailOpen, setCallDetailOpen] = useState(false);
+  const [transferSearch, setTransferSearch] = useState('');
+  const [transferTarget, setTransferTarget] = useState(null);
+  const [voicemails, setVoicemails] = useState(VOICEMAILS);
+  const [playingVM, setPlayingVM] = useState(null);
+  const [toast, setToast] = useState(null);
+  const [minimized, setMinimized] = useState(false);
+  const [maximized, setMaximized] = useState(false);
+  const [maxTab, setMaxTab] = useState('details'); // details|history|notes
+  const timerRef = useRef(null);
+  const vmRef = useRef(null);
+
+  const tweakDefaults = /*EDITMODE-BEGIN*/{
+    "accentColor": "#bed2da",
+    "autoIncoming": true,
+    "showAvatarPulse": true
+  }/*EDITMODE-END*/;
+  const tweaksResult = window.useTweaks ? window.useTweaks(tweakDefaults) : [tweakDefaults, ()=>{}];
+  const tweaks = tweaksResult[0] || tweakDefaults;
+  const setTweak = tweaksResult[1] || (()=>{});
+
+  const showToast = useCallback((msg) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 2400);
+  }, []);
+
+  const isInCall = screen === 'active';
+  const isCalling = screen === 'incoming' || screen === 'outgoing' || screen === 'active';
+
+  // Position state for full widget vs minimized pill
+  const [widgetPos, setWidgetPos, widgetDragStart] = useDrag({ x: window.innerWidth - 344, y: 80 });
+  const [miniPos, setMiniPos, miniDragStart] = useDrag({ x: window.innerWidth - 480, y: 80 });
+
+  // Timer
+  useEffect(() => {
+    if (isInCall && !onHold) {
+      timerRef.current = setInterval(() => setCallTimer(t => t+1), 1000);
+    }
+    return () => clearInterval(timerRef.current);
+  }, [isInCall, onHold]);
+
+  // VM playback
+  useEffect(() => {
+    if (playingVM !== null) {
+      vmRef.current = setInterval(() => {
+        setVoicemails(prev => prev.map(v =>
+          v.id === playingVM ? { ...v, progress: Math.min(v.progress + 2, 100) } : v
+        ));
+      }, 100);
+    }
+    return () => clearInterval(vmRef.current);
+  }, [playingVM]);
+
+  // Suggestion lookup
+  useEffect(() => {
+    if (dialInput.length >= 4) {
+      const m = CONTACTS.find(c => c.number.replace(/\D/g,'').includes(dialInput.replace(/\D/g,'')));
+      setSuggestion(m || null);
+    } else setSuggestion(null);
+  }, [dialInput]);
+
+  const fmt = (s) => {
+    const m = Math.floor(s/60), sec = s%60;
+    return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+  };
+
+  const handleKey = (k) => setDialInput(p => p + k);
+  const handleBackspace = () => setDialInput(p => p.slice(0,-1));
+
+  const startCall = (contact) => {
+    const c = contact || suggestion || { name: dialInput || 'Unknown', number: dialInput };
+    setActiveContact(c);
+    setCallTimer(0);
+    setMuted(false); setOnHold(false); setShowKeypad(false);
+    setScreen('outgoing');
+    setNavTab('call');
+    setTimeout(() => setScreen('active'), 1800);
+  };
+
+  const triggerIncoming = () => {
+    setActiveContact(CONTACTS[0]);
+    setScreen('incoming');
+    setOpen(true);
+    setMinimized(false);
+  };
+
+  const acceptCall = () => {
+    setCallTimer(0); setMuted(false); setOnHold(false); setShowKeypad(false);
+    setScreen('active');
+    setNavTab('call');
+  };
+
+  const endCall = () => {
+    setScreen('idle');
+    setDialInput('');
+    setOnHold(false); setMuted(false); setShowKeypad(false);
+    setMinimized(false); setMaximized(false);
+    setCallDetailOpen(false);
+    setNavTab('dialpad');
+    showToast('Call ended');
+  };
+
+  const callBack = (item) => {
+    const c = CONTACTS.find(c=>c.name===item.name) || { name:item.name, number:item.number };
+    startCall(c);
+  };
+
+  const confirmTransfer = () => {
+    setTransferOpen(false);
+    setTransferTarget(null);
+    setMaximized(false);
+    endCall();
+    showToast('Call transferred successfully!');
+  };
+
+  // Phone button toggles
+  useEffect(() => {
+    const btn = document.getElementById('phoneToggleBtn');
+    if (!btn) return;
+    const handler = () => {
+      if (minimized) { setMinimized(false); setOpen(true); return; }
+      setOpen(o => !o);
+    };
+    btn.addEventListener('click', handler);
+    return () => btn.removeEventListener('click', handler);
+  }, [minimized]);
+
+  useEffect(() => {
+    const btn = document.getElementById('phoneToggleBtn');
+    if (!btn) return;
+    const showActive = open || minimized;
+    btn.style.color = showActive ? tweaks.accentColor : '#5F6475';
+    btn.style.background = showActive ? `${tweaks.accentColor}18` : 'none';
+  }, [open, minimized, tweaks.accentColor]);
+
+  // Auto-trigger incoming
+  useEffect(() => {
+    if (!tweaks.autoIncoming) return;
+    const t = setTimeout(() => triggerIncoming(), 1500);
+    return () => clearTimeout(t);
+  }, []);
+
+  // ── Dial pad ──
+  const KEYS = [
+    ['1',''],['2','ABC'],['3','DEF'],
+    ['4','GHI'],['5','JKL'],['6','MNO'],
+    ['7','PQRS'],['8','TUV'],['9','WXYZ'],
+    ['*',''],['0','+'],['#','']
+  ];
+
+  const renderDialpad = (compact=false) => (
+    <div style={{display:'flex',flexDirection:'column',gap:10}}>
+      <div className="sp-dialpad-input-wrap">
+        <input
+          className="sp-dialpad-input"
+          value={dialInput}
+          onChange={e=>setDialInput(e.target.value)}
+          placeholder="Type a name or number"
+        />
+        {dialInput && (
+          <button className="sp-backspace" onClick={handleBackspace}>
+            <Icon name="backspace" size={18}/>
+          </button>
+        )}
+      </div>
+      {suggestion && <div className="sp-dialpad-suggestion">{suggestion.name}</div>}
+      <div className="sp-keypad">
+        {KEYS.map(([k,sub],i) => (
+          <button key={i} className="sp-key" onClick={()=>handleKey(k)}>
+            <div style={{display:'flex',flexDirection:'column',alignItems:'center',gap:1}}>
+              <span>{k}</span>
+              {sub && <span className="sp-key-sub">{sub}</span>}
+            </div>
+          </button>
+        ))}
+      </div>
+      {!compact && (
+        <button className="sp-call-btn" onClick={()=>startCall()} disabled={!dialInput} style={{opacity:dialInput?1:0.4}}>
+          <Icon name="call" size={20}/>
+        </button>
+      )}
+    </div>
+  );
+
+  // ── History ──
+  const renderHistory = () => (
+    <div style={{display:'flex',flexDirection:'column',gap:10}}>
+      <div style={{display:'flex',gap:2,padding:2,background:'rgba(0,0,0,0.18)',borderRadius:6}}>
+        {['recent','favorites'].map(t => (
+          <button key={t} onClick={()=>setHistoryTab(t)}
+            style={{flex:1,height:30,borderRadius:4,border:'none',cursor:'pointer',
+              background: historyTab===t?'#F4F6FB':'transparent',
+              color: historyTab===t?'#363B4D':'#fff',
+              fontFamily:'Montserrat',fontSize:12,fontWeight:700,textTransform:'capitalize'}}>
+            {t}
+          </button>
+        ))}
+      </div>
+      <div className="sp-history-list">
+        {HISTORY.map(item => {
+          const iconName = item.type==='missed' ? 'callMissed' : item.type==='made' ? 'callMade' : 'callReceived';
+          const iconColor = item.type==='missed' ? '#ED4B52' : item.type==='made' ? '#87CFE7' : '#94CC86';
+          return (
+            <div key={item.id} className="sp-history-item">
+              <Icon name={iconName} size={16} color={iconColor}/>
+              <div className="sp-history-info">
+                <div className="sp-history-name">{item.name}</div>
+                <div className="sp-history-meta">{item.time} {item.duration && `· ${item.duration}`}</div>
+              </div>
+              <button className="sp-history-call-btn" onClick={()=>callBack(item)}>
+                <Icon name="call" size={14}/>
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+
+  // ── Rich contact detail panel ──
+  const renderContactDetail = (c, onBack) => (
+    <div style={{display:'flex',flexDirection:'column',gap:14}}>
+      <button onClick={onBack}
+        style={{display:'flex',alignItems:'center',gap:6,background:'none',border:'none',cursor:'pointer',color:'#87CFE7',fontFamily:'Montserrat',fontSize:13,fontWeight:600,padding:0,alignSelf:'flex-start'}}>
+        <Icon name="arrowLeft" size={16}/> Back
+      </button>
+      <div style={{display:'flex',alignItems:'flex-start',gap:12}}>
+        <Avatar name={c.name} size={44} fontSize={14}/>
+        <div style={{display:'flex',flexDirection:'column',gap:6,flex:1,minWidth:0}}>
+          <div style={{display:'flex',alignItems:'center',gap:6}}>
+            <span style={{color:'#87CFE7',fontSize:15,fontWeight:700}}>{c.name}</span>
+            <Icon name="info" size={14} color="#8D99AE"/>
+          </div>
+          {c.type && <span className="sp-badge" style={{alignSelf:'flex-start'}}>{c.type}</span>}
+          {c.email && (
+            <div style={{display:'flex',alignItems:'center',gap:6,marginTop:2}}>
+              <Icon name="mail" size={12} color="#87CFE7"/>
+              <span style={{color:'#87CFE7',fontSize:11,fontWeight:500,wordBreak:'break-all'}}>{c.email}</span>
+            </div>
+          )}
+          <div style={{display:'flex',alignItems:'center',gap:6}}>
+            <Icon name="call" size={12} color="#87CFE7"/>
+            <span style={{color:'#87CFE7',fontSize:12,fontWeight:500}}>{c.number}</span>
+          </div>
+        </div>
+      </div>
+      <div className="sp-divider"/>
+      <div style={{display:'flex',flexDirection:'column',gap:6}}>
+        <span style={{color:'#8D99AE',fontSize:11,fontWeight:600}}>Company</span>
+        <span style={{color:'#87CFE7',fontSize:14,fontWeight:700}}>{c.company}</span>
+        <div style={{display:'flex',alignItems:'center',gap:10,flexWrap:'wrap',marginTop:2}}>
+          {c.companyType && (
+            <span style={{display:'inline-flex',alignItems:'center',padding:'2px 8px',borderRadius:3,fontSize:11,fontWeight:600,background:'rgba(155,127,219,0.18)',color:'#C5B3F0',border:'1px solid rgba(155,127,219,0.3)'}}>
+              {c.companyType}
+            </span>
+          )}
+          {c.billing && (
+            <span style={{display:'inline-flex',alignItems:'center',gap:4,color:'#CED0D4',fontSize:11}}>
+              <span style={{display:'inline-block',width:10,height:10,borderRadius:2,background:'#FFA630'}}/>{c.billing}
+            </span>
+          )}
+          {c.companyCode && (
+            <span style={{color:'#8D99AE',fontSize:11}}>
+              Company Code <span style={{color:'#fff',fontWeight:600,marginLeft:4}}>{c.companyCode}</span>
+            </span>
+          )}
+        </div>
+      </div>
+      <div className="sp-divider"/>
+      <div style={{display:'flex',flexDirection:'column',gap:6}}>
+        <div style={{display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+          <span style={{color:'#8D99AE',fontSize:11,fontWeight:600}}>Recent Tickets</span>
+          {c.tickets && c.tickets.length > 0 && (
+            <span style={{color:'#87CFE7',fontSize:12,fontWeight:600,cursor:'pointer'}}>See {c.tickets.length} tickets ▾</span>
+          )}
+        </div>
+        {c.tickets && c.tickets.length > 0 ? (
+          <div style={{display:'flex',flexDirection:'column',gap:4,marginTop:4}}>
+            {c.tickets.map(t => (
+              <div key={t.id} style={{display:'flex',gap:10,padding:'4px 0',cursor:'pointer'}}>
+                <span style={{color:'#87CFE7',fontSize:12,fontWeight:600,minWidth:54}}>{t.id}</span>
+                <span style={{color:'#CED0D4',fontSize:12}}>{t.title}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <span style={{color:'#5F6475',fontSize:12,fontStyle:'italic'}}>No recent tickets</span>
+        )}
+      </div>
+      <div style={{display:'flex',gap:8}}>
+        <button className="sp-btn-secondary" onClick={()=>showToast('Ticket created for '+c.name)}>
+          + Add Ticket
+        </button>
+        {!isInCall && (
+          <button className="sp-btn-primary" onClick={()=>{onBack();startCall(c);}}>
+            <Icon name="call" size={14}/> Call
+          </button>
+        )}
+      </div>
+    </div>
+  );
+
+  // ── Contacts ──
+  const renderContacts = () => {
+    if (selectedContact) {
+      return renderContactDetail(selectedContact, ()=>setSelectedContact(null));
+    }
+    const filtered = CONTACTS.filter(c =>
+      c.name.toLowerCase().includes(contactSearch.toLowerCase()) || c.number.includes(contactSearch)
+    );
+    return (
+      <div style={{display:'flex',flexDirection:'column',gap:10}}>
+        <input className="sp-contact-search" placeholder="Search contacts..."
+          value={contactSearch} onChange={e=>setContactSearch(e.target.value)}/>
+        <div className="sp-contacts-list">
+          {filtered.map(c => (
+            <div key={c.id} className="sp-contact-item" onClick={()=>setSelectedContact(c)}>
+              <Avatar name={c.name} size={32}/>
+              <div className="sp-contact-item-info">
+                <div className="sp-contact-item-name">{c.name}</div>
+                <div className="sp-contact-item-num">{c.number}</div>
+              </div>
+              <button className="sp-history-call-btn" onClick={e=>{e.stopPropagation();startCall(c);}}>
+                <Icon name="call" size={14}/>
+              </button>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  // ── Voicemail ──
+  const renderVoicemail = () => (
+    <div style={{display:'flex',flexDirection:'column',gap:4}}>
+      {voicemails.map(vm => (
+        <div key={vm.id} className="sp-voicemail-item">
+          <div className="sp-voicemail-row">
+            <Avatar name={vm.name} size={32}/>
+            <div style={{flex:1,minWidth:0}}>
+              <div style={{color:'#fff',fontSize:12,fontWeight:600}}>{vm.name}</div>
+              <div style={{color:'#8D99AE',fontSize:10}}>{vm.time} · {vm.duration}</div>
+            </div>
+            <button className="sp-history-call-btn" onClick={()=>callBack({name:vm.name,number:vm.number})}>
+              <Icon name="call" size={14}/>
+            </button>
+          </div>
+          <div className="sp-voicemail-row" style={{gap:8}}>
+            <button className="sp-voicemail-play" onClick={()=>setPlayingVM(playingVM===vm.id?null:vm.id)}>
+              <Icon name={playingVM===vm.id?'pause':'play'} size={14}/>
+            </button>
+            <div className="sp-voicemail-bar">
+              <div className="sp-voicemail-progress" style={{width:`${vm.progress}%`}}/>
+            </div>
+            <span style={{color:'#8D99AE',fontSize:10}}>{vm.duration}</span>
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+
+  // ── Active call body (in nav tab) ──
+  const renderCallTab = () => {
+    if (callDetailOpen && activeContact) {
+      const c = CONTACTS.find(x=>x.name===activeContact.name) || activeContact;
+      return renderContactDetail(c, ()=>setCallDetailOpen(false));
+    }
+    return (
+    <div style={{display:'flex',flexDirection:'column',gap:12,alignItems:'center'}}>
+      <Avatar name={activeContact.name} size={64} fontSize={20} color={tweaks.accentColor}/>
+      <div style={{display:'flex',flexDirection:'column',gap:4,alignItems:'center'}}>
+        <span className="sp-contact-name">{activeContact.name}</span>
+        <span style={{color:'#8D99AE',fontSize:12}}>{activeContact.number}</span>
+        <span className="sp-timer-text">{onHold ? 'On Hold' : fmt(callTimer)}</span>
+        {activeContact.company && <span className="sp-contact-link">{activeContact.company}</span>}
+        <button onClick={()=>setCallDetailOpen(true)}
+          style={{display:'flex',alignItems:'center',gap:4,background:'none',border:'none',cursor:'pointer',color:'#87CFE7',fontFamily:'Montserrat',fontSize:11,fontWeight:600,padding:'2px 6px',marginTop:2}}>
+          <Icon name="info" size={11}/> View contact details
+        </button>
+      </div>
+      {showKeypad ? (
+        <div style={{width:'100%',display:'flex',flexDirection:'column',gap:8}}>
+          <button onClick={()=>setShowKeypad(false)}
+            style={{display:'flex',alignItems:'center',gap:6,background:'none',border:'none',cursor:'pointer',color:'#87CFE7',fontFamily:'Montserrat',fontSize:13,fontWeight:600,padding:'4px 0',alignSelf:'flex-start'}}>
+            <Icon name="arrowLeft" size={16}/> Back to call
+          </button>
+          {renderDialpad(true)}
+        </div>
+      ) : (
+        <div className="sp-actions">
+          {[
+            { icon: muted?'micOff':'mic', label: muted?'Unmute':'Mute', action:()=>setMuted(m=>!m), active:muted },
+            { icon: 'dialpad', label:'Keypad', action:()=>setShowKeypad(s=>!s), active:showKeypad },
+            { icon: 'personAdd', label:'Add', action:()=>showToast('Add participant') },
+            { icon: onHold?'play':'pause', label: onHold?'Resume':'Hold', action:()=>setOnHold(h=>!h), active:onHold },
+            { icon: 'forward', label:'Transfer', action:()=>setTransferOpen(true) },
+            { icon: 'callEnd', label:'End', action:endCall, red:true },
+          ].map((a,i) => (
+            <button key={i} className="sp-action-btn" onClick={a.action}>
+              <div className={`sp-action-icon ${a.red?'red':''} ${a.active?'active':''}`}>
+                <Icon name={a.icon} size={18}/>
+              </div>
+              <span className="sp-action-label">{a.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+    );
+  };
+
+  // ── Bottom nav ──
+  const renderNav = () => {
+    const items = [
+      {id:'dialpad',icon:'dialpad',label:'Dial'},
+      {id:'contacts',icon:'contacts',label:'Contacts'},
+      {id:'history',icon:'history',label:'History'},
+      {id:'voicemail',icon:'voicemail',label:'Voicemail'},
+    ];
+    if (isInCall) items.push({id:'call',icon:'call',label:'Call',isCall:true});
+    return (
+      <div className="sp-nav">
+        {items.map(n => (
+          <button key={n.id} className={`sp-nav-btn ${navTab===n.id?'active':''} ${n.isCall?'call-tab':''}`}
+            onClick={()=>setNavTab(n.id)} title={n.label}>
+            <Icon name={n.icon} size={20}/>
+            <span>{n.label}</span>
+            {n.isCall && navTab !== 'call' && <span className="sp-nav-dot"/>}
+          </button>
+        ))}
+      </div>
+    );
+  };
+
+  // ── Incoming overlay (full screen of widget) ──
+  const renderIncoming = () => (
+    <div className="sp-body" style={{gap:14,alignItems:'center',padding:'24px 20px'}}>
+      <div className={tweaks.showAvatarPulse ? 'sp-avatar-pulse' : ''}>
+        <Avatar name={activeContact.name} size={72} fontSize={22} color={tweaks.accentColor}/>
+      </div>
+      <div style={{display:'flex',flexDirection:'column',gap:4,alignItems:'center'}}>
+        <span className="sp-contact-name">{activeContact.name}</span>
+        <span className="sp-contact-number" style={{fontSize:13,color:'#CED0D4'}}>{activeContact.number}</span>
+        <span style={{color:'#8D99AE',fontSize:12,marginTop:4}}>Incoming call...</span>
+      </div>
+      <div style={{display:'flex',flexDirection:'column',gap:8,width:'100%',marginTop:6}}>
+        <div style={{display:'flex',gap:10,width:'100%'}}>
+          <button className="sp-btn-danger" onClick={endCall}>
+            <Icon name="callEnd" size={16}/> Decline
+          </button>
+          <button className="sp-btn-accept" onClick={acceptCall}>
+            <Icon name="call" size={16}/> Accept
+          </button>
+        </div>
+        <button onClick={()=>showToast('New ticket started for '+activeContact.name)}
+          style={{height:36,borderRadius:6,border:'1px solid rgba(135,207,231,0.4)',background:'rgba(135,207,231,0.1)',color:'#87CFE7',fontFamily:'Montserrat',fontSize:13,fontWeight:600,cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:6}}>
+          + Add Ticket
+        </button>
+      </div>
+    </div>
+  );
+
+  const renderOutgoing = () => (
+    <div className="sp-body" style={{gap:14,alignItems:'center',padding:'24px 20px'}}>
+      <Avatar name={activeContact.name} size={72} fontSize={22} color={tweaks.accentColor}/>
+      <div style={{display:'flex',flexDirection:'column',gap:4,alignItems:'center'}}>
+        <span className="sp-contact-name">{activeContact.name}</span>
+        <span className="sp-contact-number" style={{fontSize:13,color:'#CED0D4'}}>{activeContact.number || activeContact.name}</span>
+        <span style={{color:'#8D99AE',fontSize:12,marginTop:4}}>Ringing...</span>
+      </div>
+      <button className="sp-btn-danger" onClick={endCall} style={{width:'100%',marginTop:6}}>
+        <Icon name="callEnd" size={16}/> Cancel
+      </button>
+    </div>
+  );
+
+  // Header titles
+  const headerTitles = {
+    idle: navTab==='dialpad' ? 'Softphone' : navTab==='contacts' ? 'Contacts' : navTab==='history' ? 'Call History' : navTab==='voicemail' ? 'Voicemail' : 'Softphone',
+    incoming: 'Incoming Call',
+    outgoing: 'Calling...',
+    active: navTab==='call' ? 'Active Call' : navTab==='dialpad' ? 'Dial Pad' : navTab==='contacts' ? 'Contacts' : navTab==='history' ? 'Call History' : navTab==='voicemail' ? 'Voicemail' : 'Active Call',
+  };
+
+  // ── Main widget content (when not in incoming/outgoing pre-state) ──
+  const renderTransferInline = () => {
+    const filtered = CONTACTS.filter(c =>
+      c.id !== activeContact.id && (c.name.toLowerCase().includes(transferSearch.toLowerCase()) || c.number.includes(transferSearch))
+    );
+    return (
+      <div style={{display:'flex',flexDirection:'column',gap:10}}>
+        <button onClick={()=>{setTransferOpen(false);setTransferTarget(null);}}
+          style={{display:'flex',alignItems:'center',gap:6,background:'none',border:'none',cursor:'pointer',color:'#87CFE7',fontFamily:'Montserrat',fontSize:13,fontWeight:600,padding:'4px 0',alignSelf:'flex-start'}}>
+          <Icon name="arrowLeft" size={16}/> Back to call
+        </button>
+        {transferTarget ? (
+          <>
+            <div style={{display:'flex',alignItems:'center',gap:10,padding:10,borderRadius:6,background:'rgba(255,255,255,0.06)'}}>
+              <Avatar name={transferTarget.name} size={36}/>
+              <div style={{flex:1}}>
+                <div style={{color:'#fff',fontSize:13,fontWeight:600}}>{transferTarget.name}</div>
+                <div style={{color:'#CED0D4',fontSize:11}}>{transferTarget.number}</div>
+              </div>
+            </div>
+            <div style={{display:'flex',gap:8}}>
+              <button className="sp-btn-secondary" onClick={()=>setTransferTarget(null)}>Back</button>
+              <button className="sp-btn-primary" onClick={confirmTransfer}>
+                <Icon name="forward" size={14}/> Transfer Now
+              </button>
+            </div>
+          </>
+        ) : (
+          <>
+            <input className="sp-contact-search" placeholder="Search agents or contacts..."
+              value={transferSearch} onChange={e=>setTransferSearch(e.target.value)} autoFocus/>
+            <div className="sp-contacts-list">
+              {filtered.map(c => (
+                <div key={c.id} className="sp-contact-item" onClick={()=>setTransferTarget(c)}>
+                  <div style={{position:'relative'}}>
+                    <Avatar name={c.name} size={32}/>
+                    <div style={{position:'absolute',bottom:0,right:0,width:9,height:9,borderRadius:'50%',background:'#94CC86',border:'1.5px solid #363B4D'}}/>
+                  </div>
+                  <div className="sp-contact-item-info">
+                    <div className="sp-contact-item-name">{c.name}</div>
+                    <div className="sp-contact-item-num">{c.number}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+
+  const renderMainContent = () => {
+    if (screen === 'incoming') return <div className="sp-widget-content">{renderIncoming()}</div>;
+    if (screen === 'outgoing') return <div className="sp-widget-content">{renderOutgoing()}</div>;
+    return (
+      <div className="sp-widget-content">
+        {isInCall && navTab !== 'call' && !transferOpen && (
+          <div className="sp-callinfo-banner" onClick={()=>setNavTab('call')}>
+            <span className="sp-callinfo-pulse"/>
+            <span className="sp-callinfo-name">{activeContact.name}</span>
+            <span className="sp-callinfo-timer">{fmt(callTimer)}</span>
+            <Icon name="expand" size={14} color="#8D99AE"/>
+          </div>
+        )}
+        <div className="sp-widget-scroll">
+          <div className="sp-body">
+            {transferOpen && isInCall ? renderTransferInline() : (
+              <>
+                {navTab === 'dialpad' && renderDialpad()}
+                {navTab === 'contacts' && renderContacts()}
+                {navTab === 'history' && renderHistory()}
+                {navTab === 'voicemail' && renderVoicemail()}
+                {navTab === 'call' && isInCall && renderCallTab()}
+              </>
+            )}
+          </div>
+        </div>
+        {renderNav()}
+      </div>
+    );
+  };
+
+  // ── Maximized overlay ──
+  const renderMaximized = () => {
+    const filtered = CONTACTS.filter(c =>
+      c.id !== activeContact.id && (c.name.toLowerCase().includes(transferSearch.toLowerCase()) || c.number.includes(transferSearch))
+    );
+    return (
+      <>
+        <div className="sp-max-backdrop" onClick={()=>{setMaximized(false);setTransferOpen(false);setTransferTarget(null);}}/>
+        <div className="sp-max-window">
+          <div className="sp-max-left">
+            <button className="sp-max-close" onClick={()=>{setMaximized(false);setTransferOpen(false);setTransferTarget(null);}}>
+              <Icon name="minimize" size={16}/>
+            </button>
+            <Avatar className="sp-max-avatar" name={activeContact.name} size={96} fontSize={32} color={tweaks.accentColor}/>
+            <div style={{display:'flex',flexDirection:'column',gap:6,alignItems:'center'}}>
+              <span className="sp-max-name">{activeContact.name}</span>
+              <span className="sp-max-number">{activeContact.number}</span>
+              <span className="sp-max-timer">{onHold ? 'On Hold' : fmt(callTimer)}</span>
+              {muted && <span style={{color:'#FFA630',fontSize:12,fontWeight:600}}>🔇 Muted</span>}
+            </div>
+            <div className="sp-max-actions">
+              {[
+                { icon: muted?'micOff':'mic', label: muted?'Unmute':'Mute', action:()=>setMuted(m=>!m), active:muted },
+                { icon: 'dialpad', label:'Keypad', action:()=>setShowKeypad(s=>!s), active:showKeypad },
+                { icon: 'personAdd', label:'Add', action:()=>showToast('Add participant') },
+                { icon: onHold?'play':'pause', label: onHold?'Resume':'Hold', action:()=>setOnHold(h=>!h), active:onHold },
+                { icon: 'forward', label:'Transfer', action:()=>setTransferOpen(true) },
+                { icon: 'callEnd', label:'End', action:endCall, red:true },
+              ].map((a,i) => (
+                <button key={i} className="sp-max-action" onClick={a.action}>
+                  <div className={`sp-max-action-icon ${a.red?'red':''} ${a.active?'active':''}`}>
+                    <Icon name={a.icon} size={22}/>
+                  </div>
+                  <span className="sp-max-action-label">{a.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+          <div className="sp-max-right">
+            {transferOpen ? (
+              <>
+                <div className="sp-max-detail-header" style={{display:'flex',alignItems:'center',gap:10}}>
+                  <button onClick={()=>{setTransferOpen(false);setTransferTarget(null);}}
+                    style={{background:'none',border:'none',cursor:'pointer',color:'#fff',display:'flex',alignItems:'center'}}>
+                    <Icon name="arrowLeft" size={16}/>
+                  </button>
+                  <div style={{flex:1}}>
+                    <div className="sp-max-detail-title">Transfer Call</div>
+                    <div className="sp-max-detail-sub">Select an agent or contact</div>
+                  </div>
+                </div>
+                <div className="sp-max-detail-body">
+                  {transferTarget ? (
+                    <>
+                      <div style={{display:'flex',alignItems:'center',gap:10,padding:10,borderRadius:6,background:'rgba(255,255,255,0.06)'}}>
+                        <Avatar name={transferTarget.name} size={36}/>
+                        <div style={{flex:1}}>
+                          <div style={{color:'#fff',fontSize:13,fontWeight:600}}>{transferTarget.name}</div>
+                          <div style={{color:'#CED0D4',fontSize:11}}>{transferTarget.number}</div>
+                        </div>
+                      </div>
+                      <div style={{display:'flex',gap:10}}>
+                        <button className="sp-btn-secondary" onClick={()=>setTransferTarget(null)}>Back</button>
+                        <button className="sp-btn-primary" onClick={confirmTransfer}>
+                          <Icon name="forward" size={14}/> Transfer Now
+                        </button>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <input className="sp-contact-search" placeholder="Search agents or contacts..."
+                        value={transferSearch} onChange={e=>setTransferSearch(e.target.value)} autoFocus/>
+                      <div style={{display:'flex',flexDirection:'column',gap:2}}>
+                        {filtered.map(c => (
+                          <div key={c.id} className="sp-contact-item" onClick={()=>setTransferTarget(c)}>
+                            <div style={{position:'relative'}}>
+                              <Avatar name={c.name} size={32}/>
+                              <div style={{position:'absolute',bottom:0,right:0,width:9,height:9,borderRadius:'50%',background:'#94CC86',border:'1.5px solid #2A2F3E'}}/>
+                            </div>
+                            <div className="sp-contact-item-info">
+                              <div className="sp-contact-item-name">{c.name}</div>
+                              <div className="sp-contact-item-num">{c.number}</div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="sp-max-tabs">
+                  {['details','history','notes'].map(t => (
+                    <button key={t} className={`sp-max-tab ${maxTab===t?'active':''}`} onClick={()=>setMaxTab(t)}>
+                      {t.charAt(0).toUpperCase()+t.slice(1)}
+                    </button>
+                  ))}
+                </div>
+                <div className="sp-max-detail-body">
+                  {maxTab==='details' && (
+                    <>
+                      <div className="sp-max-detail-row">
+                        <span className="sp-max-detail-label">Phone</span>
+                        <span className="sp-max-detail-link">{activeContact.number}</span>
+                      </div>
+                      <div className="sp-max-detail-row">
+                        <span className="sp-max-detail-label">Email</span>
+                        <span className="sp-max-detail-link" style={{wordBreak:'break-all'}}>{activeContact.email || 'c.apegian@csllc.com'}</span>
+                      </div>
+                      <div className="sp-max-detail-row">
+                        <span className="sp-max-detail-label">Company</span>
+                        <span className="sp-max-detail-val">{activeContact.company || 'Creative Solutions LLC'}</span>
+                      </div>
+                      <div className="sp-max-detail-row">
+                        <span className="sp-max-detail-label">Role</span>
+                        <span className="sp-max-detail-val">
+                          <span className="sp-badge">{activeContact.type || 'Superuser'}</span>
+                        </span>
+                      </div>
+                      <div className="sp-max-detail-row">
+                        <span className="sp-max-detail-label">Open Tickets</span>
+                        <span className="sp-max-detail-val">3 open · 1 high priority</span>
+                      </div>
+                      <div className="sp-max-detail-row">
+                        <span className="sp-max-detail-label">Last Contact</span>
+                        <span className="sp-max-detail-val">Yesterday at 4:12 PM (12 min)</span>
+                      </div>
+                    </>
+                  )}
+                  {maxTab==='history' && (
+                    <div style={{display:'flex',flexDirection:'column',gap:2}}>
+                      {HISTORY.filter(h=>h.name===activeContact.name).map(h => (
+                        <div key={h.id} className="sp-history-item">
+                          <Icon name={h.type==='missed'?'callMissed':h.type==='made'?'callMade':'callReceived'} size={16}
+                            color={h.type==='missed'?'#ED4B52':h.type==='made'?'#87CFE7':'#94CC86'}/>
+                          <div className="sp-history-info">
+                            <div className="sp-history-name">{h.date} · {h.time}</div>
+                            <div className="sp-history-meta">{h.type==='missed'?'Missed':h.type==='made'?'Outgoing':'Incoming'} {h.duration && `· ${h.duration}`}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                  {maxTab==='notes' && (
+                    <textarea placeholder="Add call notes..."
+                      style={{width:'100%',minHeight:200,background:'rgba(255,255,255,0.06)',
+                        border:'1px solid rgba(255,255,255,0.1)',borderRadius:6,padding:12,
+                        color:'#fff',fontFamily:'Montserrat',fontSize:13,resize:'vertical',outline:'none'}}/>
+                  )}
+                </div>
+                <div className="sp-max-end-bar">
+                  <button className="sp-btn-secondary" onClick={()=>setMaximized(false)}>Minimize</button>
+                  <button className="sp-btn-danger" onClick={endCall}>
+                    <Icon name="callEnd" size={14}/> End Call
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      </>
+    );
+  };
+
+  // ── Minimized pill ──
+  const renderMini = () => (
+    <div className="sp-mini" style={{ left: miniPos.x, top: miniPos.y }}>
+      <div className="sp-mini-handle" onMouseDown={miniDragStart}>
+        <Icon name="drag" size={20}/>
+      </div>
+      <Avatar name={activeContact.name} size={36} fontSize={13} color={tweaks.accentColor}/>
+      <span className="sp-mini-name">{activeContact.name}</span>
+      <span className="sp-mini-timer">{onHold ? 'On Hold' : fmt(callTimer)}</span>
+      <button className="sp-mini-end" onClick={endCall}>
+        <Icon name="callEnd" size={14}/> End
+      </button>
+      <button className="sp-mini-expand" onClick={()=>{setMinimized(false);setOpen(true);setNavTab('call');}} title="Expand">
+        <Icon name="expand" size={16}/>
+      </button>
+    </div>
+  );
+
+  return (
+    <>
+      {/* Minimized pill (only when in call & minimized) */}
+      {minimized && isInCall && renderMini()}
+
+      {/* Full widget */}
+      {open && !minimized && (
+        <div className="sp-widget" style={{ left: widgetPos.x, top: widgetPos.y }}>
+          <div className="sp-header">
+            <div style={{display:'flex',alignItems:'center',gap:6}}>
+              <div className="sp-drag-handle" onMouseDown={widgetDragStart}>
+                <Icon name="drag" size={18}/>
+              </div>
+              <span className="sp-header-title">{headerTitles[screen] || 'Softphone'}</span>
+            </div>
+            <div className="sp-header-actions">
+              {isInCall && (
+                <button className="sp-hbtn" title="Minimize" onClick={()=>{setMinimized(true);setOpen(false);}}>
+                  <Icon name="minimize" size={14}/>
+                </button>
+              )}
+              {false && isInCall && (
+                <button className="sp-hbtn" title="Minimize" onClick={()=>{setMinimized(true);setOpen(false);}}>
+                  <Icon name="minimize" size={14}/>
+                </button>
+              )}
+              {screen==='idle' && (
+                <button className="sp-hbtn" title="Simulate incoming call" onClick={triggerIncoming}>
+                  <Icon name="call" size={14}/>
+                </button>
+              )}
+              <button className="sp-hbtn" onClick={()=>setOpen(false)} title="Close">
+                <Icon name="close" size={14}/>
+              </button>
+            </div>
+          </div>
+          {renderMainContent()}
+        </div>
+      )}
+
+      {/* Toast */}
+      {toast && <div className="sp-toast-notif">{toast}</div>}
+
+      {/* Tweaks */}
+      {window.TweaksPanel && (
+        <window.TweaksPanel>
+          <window.TweakColor label="Accent color" value={tweaks.accentColor} onChange={v=>setTweak('accentColor',v)}/>
+          <window.TweakToggle label="Avatar pulse on incoming" value={tweaks.showAvatarPulse} onChange={v=>setTweak('showAvatarPulse',v)}/>
+          <window.TweakToggle label="Auto-trigger incoming call" value={tweaks.autoIncoming} onChange={v=>setTweak('autoIncoming',v)}/>
+          <window.TweakButton label="Simulate incoming call" onClick={triggerIncoming}/>
+          {isInCall && <window.TweakButton label={minimized?"Maximize":"Minimize to pill"} onClick={()=>{setMinimized(m=>!m);setOpen(o=>minimized?true:false);}}/>}
+        </window.TweaksPanel>
+      )}
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('app')).render(<SoftphoneApp />);
+</script>
+</body>
+</html>
