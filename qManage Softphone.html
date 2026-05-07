@@ -190,17 +190,16 @@
     background: none; border: none; cursor: pointer; color: #8D99AE; padding: 4px;
   }
   .sp-backspace:hover { color: #fff; }
-  .sp-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding: 0 12px; }
+  .sp-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; padding: 0 24px; }
   .sp-key {
-    height: 40px; border-radius: 50%; background: rgba(255,255,255,0.07); border: none; cursor: pointer;
+    height: 60px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Montserrat', sans-serif; font-size: 16px; font-weight: 700; color: #fff;
+    font-family: 'Montserrat', sans-serif; font-size: 20px; font-weight: 600; color: #fff;
   }
-  .sp-key:hover { background: rgba(255,255,255,0.14); }
-  .sp-key:active { background: rgba(255,255,255,0.22); }
-  .sp-key-sub { font-size: 8px; font-weight: 500; color: #8D99AE; letter-spacing: 1px; }
+  .sp-key:hover { background: rgba(255,255,255,0.17); }
+  .sp-key:active { background: rgba(255,255,255,0.25); }
   .sp-call-btn {
-    width: 44px; height: 44px; border-radius: 50%;
+    width: 56px; height: 56px; border-radius: 50%;
     background: #94CC86; border: none; cursor: pointer;
     display: flex; align-items: center; justify-content: center;
     margin: 0 auto; color: #253322;
@@ -652,12 +651,7 @@ function useDrag(initial) {
 // ─────────────────────────────────────────────────────────────
 // Main App
 // ─────────────────────────────────────────────────────────────
-const KEYS = [
-  ['1',''],['2','ABC'],['3','DEF'],
-  ['4','GHI'],['5','JKL'],['6','MNO'],
-  ['7','PQRS'],['8','TUV'],['9','WXYZ'],
-  ['*',''],['0','+'],['#',''],
-];
+const KEYS = ['1','2','3','4','5','6','7','8','9','*','0','#'];
 
 function SoftphoneApp() {
   const [open, setOpen] = useState(false);
@@ -822,12 +816,9 @@ function SoftphoneApp() {
       </div>
       {suggestion && <div className="sp-dialpad-suggestion">{suggestion.name}</div>}
       <div className="sp-keypad">
-        {KEYS.map(([k, sub], i) => (
+        {KEYS.map((k, i) => (
           <button key={i} className="sp-key" onClick={() => setDialInput(p => p + k)}>
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 1 }}>
-              <span>{k}</span>
-              {sub && <span className="sp-key-sub">{sub}</span>}
-            </div>
+            {k}
           </button>
         ))}
       </div>
@@ -1133,7 +1124,7 @@ function SoftphoneApp() {
   // ── Render: Bottom Nav ──
   const renderNav = () => {
     const items = [
-      { id: 'dialpad',   icon: 'dialpad',   label: 'Dial' },
+      { id: 'dialpad',   icon: 'dialpad',   label: 'Keypad' },
       { id: 'contacts',  icon: 'contacts',  label: 'Contacts' },
       { id: 'history',   icon: 'history',   label: 'History' },
       { id: 'voicemail', icon: 'voicemail', label: 'Voicemail' },
@@ -1203,7 +1194,7 @@ function SoftphoneApp() {
   const headerTitle = () => {
     if (screen === 'incoming') return 'Incoming Call';
     if (screen === 'outgoing') return 'Calling...';
-    const tabNames = { dialpad: 'Softphone', contacts: 'Contacts', history: 'Call History', voicemail: 'Voicemail', call: 'Active Call' };
+    const tabNames = { dialpad: 'Keypad', contacts: 'Contacts', history: 'Call History', voicemail: 'Voicemail', call: 'Active Call' };
     return tabNames[navTab] || 'Softphone';
   };
 
