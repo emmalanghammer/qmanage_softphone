@@ -72,7 +72,7 @@
 
   /* ── Softphone Widget ── */
   .sp-widget {
-    width: 450px; height: 450px; border-radius: 10px;
+    width: 450px; height: 550px; border-radius: 10px;
     background: #363B4D;
     box-shadow: 0px 8px 32px 0px rgba(0,0,0,0.28), 0px 0px 2px 0px rgba(0,0,0,0.16);
     overflow: hidden; font-family: 'Montserrat', sans-serif;
@@ -123,7 +123,7 @@
   /* ── Widget Header ── */
   .sp-header {
     display: flex; align-items: center; justify-content: space-between;
-    padding: 0 12px 0 6px; height: 44px;
+    padding: 0 12px 0 6px; height: 48px;
     border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
   }
   .sp-header-title { color: #fff; font-size: 14px; font-weight: 600; }
@@ -322,6 +322,16 @@
     background: rgba(135,207,231,0.15); color: #87CFE7; border: 1px solid rgba(135,207,231,0.3);
   }
 
+  /* ── Header Call Status Chip ── */
+  .qm-call-chip {
+    display: none; align-items: center; gap: 6px; padding: 0 12px; height: 32px;
+    border-radius: 16px; font-family: 'Montserrat', sans-serif;
+    font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .qm-call-chip.incoming { display: flex; background: #94CC86; color: #253322; }
+  .qm-call-chip.active-call { display: flex; background: #007FAD; color: #fff; }
+
   /* ── Toast ── */
   .sp-toast-notif {
     position: fixed; top: 72px; left: 50%; transform: translateX(-50%);
@@ -367,6 +377,7 @@
       Search qManage
     </div>
     <div class="qm-header-right">
+      <div id="qmCallChip" class="qm-call-chip"></div>
       <button class="qm-phone-btn" id="phoneToggleBtn" title="Softphone">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
       </button>
@@ -726,6 +737,20 @@ function SoftphoneApp() {
       setSuggestion(null);
     }
   }, [dialInput]);
+
+  // qManage header call status chip
+  useEffect(() => {
+    const chip = document.getElementById('qmCallChip');
+    if (!chip) return;
+    chip.className = 'qm-call-chip';
+    if (screen === 'incoming') {
+      chip.classList.add('incoming');
+      chip.innerHTML = '&#9679; Incoming Call';
+    } else if (screen === 'active' || screen === 'outgoing') {
+      chip.classList.add('active-call');
+      chip.innerHTML = '&#9679; Active Call';
+    }
+  }, [screen]);
 
   // Phone button in header
   useEffect(() => {
@@ -1129,7 +1154,7 @@ function SoftphoneApp() {
       { id: 'history',   icon: 'history',   label: 'History' },
       { id: 'voicemail', icon: 'voicemail', label: 'Voicemail' },
     ];
-    if (isInCall) items.push({ id: 'call', icon: 'call', label: 'Call', isCall: true });
+    if (isInCall) items.unshift({ id: 'call', icon: 'call', label: 'Call', isCall: true });
     return (
       <div className="sp-nav">
         {items.map(n => (
@@ -1153,6 +1178,7 @@ function SoftphoneApp() {
       <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
         <span className="sp-contact-name">{activeContact.name}</span>
         <span className="sp-contact-number" style={{ fontSize: 13, color: '#CED0D4' }}>{activeContact.number}</span>
+        {activeContact.company && <span style={{ color: '#8D99AE', fontSize: 12 }}>{activeContact.company}</span>}
         <span style={{ color: '#8D99AE', fontSize: 12, marginTop: 4 }}>Incoming call...</span>
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', marginTop: 6 }}>
@@ -1199,13 +1225,23 @@ function SoftphoneApp() {
   };
 
   const renderMainContent = () => {
-    if (screen === 'incoming') return <div className="sp-widget-content">{renderIncoming()}</div>;
-    if (screen === 'outgoing') return <div className="sp-widget-content">{renderOutgoing()}</div>;
+    if (screen === 'incoming') return (
+      <div className="sp-widget-content">
+        <div className="sp-widget-scroll">{renderIncoming()}</div>
+        {renderNav()}
+      </div>
+    );
+    if (screen === 'outgoing') return (
+      <div className="sp-widget-content">
+        <div className="sp-widget-scroll">{renderOutgoing()}</div>
+        {renderNav()}
+      </div>
+    );
     return (
       <div className="sp-widget-content">
         {isInCall && navTab !== 'call' && !transferOpen && (
           <div className="sp-callinfo-banner" onClick={() => setNavTab('call')}>
-            <span className="sp-callinfo-pulse"/>
+            <Avatar name={activeContact.name} size={28} fontSize={11} color={tweaks.accentColor}/>
             <span className="sp-callinfo-name">{activeContact.name}</span>
             <span className="sp-callinfo-timer">{fmt(callTimer)}</span>
             <Icon name="expand" size={14} color="#8D99AE"/>
@@ -1229,27 +1265,33 @@ function SoftphoneApp() {
     );
   };
 
-  // ── Render: Minimized Pill ──
-  const renderMini = () => (
-    <div className="sp-mini" style={{ left: miniPos.x, top: miniPos.y }}>
-      <div className="sp-mini-handle" onMouseDown={miniDragStart}>
-        <Icon name="drag" size={20}/>
+  // ── Render: Minimized Pill (handles active, outgoing, and incoming) ──
+  const renderMiniSmall = () => {
+    const isRinging = screen === 'incoming' || screen === 'outgoing';
+    return (
+      <div className="sp-mini" style={{ left: miniPos.x, top: miniPos.y }}>
+        <div className="sp-mini-handle" onMouseDown={miniDragStart}>
+          <Icon name="drag" size={20}/>
+        </div>
+        <Avatar name={activeContact.name} size={36} fontSize={13} color={tweaks.accentColor}/>
+        <span className="sp-mini-name">{activeContact.name}</span>
+        {isRinging
+          ? <span className="sp-mini-timer" style={{ color: '#8D99AE' }}>Ringing...</span>
+          : <span className="sp-mini-timer">{onHold ? 'On Hold' : fmt(callTimer)}</span>
+        }
+        <button className="sp-mini-end" onClick={endCall}>
+          <Icon name="callEnd" size={14}/> {isRinging ? 'Cancel' : 'End'}
+        </button>
+        <button className="sp-mini-expand" onClick={() => { setMinimized(false); setOpen(true); if (isInCall) setNavTab('call'); }} title="Expand">
+          <Icon name="expand" size={16}/>
+        </button>
       </div>
-      <Avatar name={activeContact.name} size={36} fontSize={13} color={tweaks.accentColor}/>
-      <span className="sp-mini-name">{activeContact.name}</span>
-      <span className="sp-mini-timer">{onHold ? 'On Hold' : fmt(callTimer)}</span>
-      <button className="sp-mini-end" onClick={endCall}>
-        <Icon name="callEnd" size={14}/> End
-      </button>
-      <button className="sp-mini-expand" onClick={() => { setMinimized(false); setOpen(true); setNavTab('call'); }} title="Expand">
-        <Icon name="expand" size={16}/>
-      </button>
-    </div>
-  );
+    );
+  };
 
   return (
     <>
-      {minimized && isInCall && renderMini()}
+      {minimized && isCalling && renderMiniSmall()}
 
       {open && !minimized && (
         <div className="sp-widget" style={{ left: widgetPos.x, top: widgetPos.y }}>
@@ -1261,7 +1303,7 @@ function SoftphoneApp() {
               <span className="sp-header-title">{headerTitle()}</span>
             </div>
             <div className="sp-header-actions">
-              {isInCall && (
+              {isCalling && (
                 <button className="sp-hbtn" title="Minimize to pill" onClick={() => { setMinimized(true); setOpen(false); }}>
                   <Icon name="minimize" size={14}/>
                 </button>
@@ -1287,7 +1329,7 @@ function SoftphoneApp() {
         <TweakToggle label="Avatar pulse on incoming" value={tweaks.showAvatarPulse} onChange={v => setTweak('showAvatarPulse', v)}/>
         <TweakToggle label="Auto-trigger incoming call" value={tweaks.autoIncoming} onChange={v => setTweak('autoIncoming', v)}/>
         <TweakButton label="Simulate incoming call" onClick={triggerIncoming}/>
-        {isInCall && (
+        {isCalling && (
           <TweakButton label={minimized ? 'Expand to widget' : 'Minimize to pill'} onClick={() => {
             if (minimized) { setMinimized(false); setOpen(true); }
             else { setMinimized(true); setOpen(false); }
