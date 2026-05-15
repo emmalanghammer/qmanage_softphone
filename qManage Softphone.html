@@ -819,8 +819,8 @@ function SoftphoneApp() {
   const isInCall = screen === 'active';
   const isCalling = screen === 'incoming' || screen === 'outgoing' || screen === 'active';
 
-  const [widgetPos, , widgetDragStart] = useDrag({ x: window.innerWidth - 458, y: 80 });
-  const [miniPos, , miniDragStart] = useDrag({ x: window.innerWidth - 380, y: 80 });
+  const [widgetPos, , widgetDragStart] = useDrag({ x: window.innerWidth - 466, y: window.innerHeight - 570 });
+  const [miniPos, , miniDragStart] = useDrag({ x: window.innerWidth - 380, y: window.innerHeight - 80 });
 
   const showToast = useCallback((msg) => {
     setToast(msg);
