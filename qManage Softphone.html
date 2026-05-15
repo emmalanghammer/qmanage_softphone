@@ -774,6 +774,7 @@ function SoftphoneApp() {
   const [showKeypad, setShowKeypad] = useState(false);
   const [historyTab, setHistoryTab] = useState('all');
   const [contactSearch, setContactSearch] = useState('');
+  const [userSearch, setUserSearch] = useState('');
   const [selectedContact, setSelectedContact] = useState(null);
   const [callDetailOpen, setCallDetailOpen] = useState(false);
   const [transferOpen, setTransferOpen] = useState(false);
@@ -1128,9 +1129,16 @@ function SoftphoneApp() {
   };
 
   // ── Render: Users ──
-  const renderUsers = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {AGENTS.map(a => {
+  const renderUsers = () => {
+    const filtered = AGENTS.filter(a =>
+      a.name.toLowerCase().includes(userSearch.toLowerCase()) || a.title.toLowerCase().includes(userSearch.toLowerCase())
+    );
+    return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <input className="sp-contact-search" placeholder="Search users..."
+        value={userSearch} onChange={e => setUserSearch(e.target.value)}/>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {filtered.map(a => {
         const dotColor = agentStatusColor(a.status);
         return (
           <div key={a.id} className="sp-contact-item">
@@ -1153,8 +1161,10 @@ function SoftphoneApp() {
           </div>
         );
       })}
+      </div>
     </div>
-  );
+    );
+  };
 
   // ── Render: Add Participant Search ──
   const renderAddSearch = () => {
