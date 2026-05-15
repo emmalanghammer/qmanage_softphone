@@ -1689,11 +1689,9 @@ function SoftphoneApp() {
               <span className="sp-header-title">{headerTitle()}</span>
             </div>
             <div className="sp-header-actions">
-              {isCalling && (
-                <button className="sp-hbtn" title="Minimize to pill" onClick={() => { setMinimized(true); setOpen(false); }}>
-                  <Icon name="minimize" size={14}/>
-                </button>
-              )}
+              <button className="sp-hbtn" title="Minimize" onClick={() => { setMinimized(true); setOpen(false); }}>
+                <Icon name="minimize" size={14}/>
+              </button>
               <button className="sp-hbtn" title="Pop out" onClick={() => showToast('Popped out')}>
                 <Icon name="popout" size={14}/>
               </button>
