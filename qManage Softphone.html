@@ -710,11 +710,11 @@ const HISTORY = [
 ];
 
 const AGENTS = [
-  { id: 1, name: 'Charlie Stile',   title: 'Product Support Specialist I',  number: '(555) 123-4567', status: 'available' },
-  { id: 2, name: 'Eleanor Foster',  title: 'Product Support Specialist II', number: '(555) 123-4567', status: 'available' },
-  { id: 3, name: 'Joe Smith',       title: 'Product Support Specialist I',  number: '(555) 123-4567', status: 'busy' },
-  { id: 4, name: 'Pam Reynolds',    title: 'Product Support Manager',       number: '(555) 123-4567', status: 'available' },
-  { id: 5, name: 'Marcus Lee',      title: 'Product Support Team Lead',     number: '(555) 123-4567', status: 'offline' },
+  { id: 1, name: 'Charlie Stile',   title: 'Product Support Specialist I',  number: '(555) 123-4567', ext: '201', status: 'available' },
+  { id: 2, name: 'Eleanor Foster',  title: 'Product Support Specialist II', number: '(555) 243-4838', ext: '202', status: 'available' },
+  { id: 3, name: 'Joe Smith',       title: 'Product Support Specialist I',  number: '(513) 365-4220', ext: '203', status: 'busy' },
+  { id: 4, name: 'Pam Reynolds',    title: 'Product Support Manager',       number: '(360) 296-1400', ext: '204', status: 'available' },
+  { id: 5, name: 'Marcus Lee',      title: 'Product Support Team Lead',     number: '(612) 444-9820', ext: '205', status: 'offline' },
 ];
 
 const QUEUES = [
@@ -797,6 +797,7 @@ function SoftphoneApp() {
   const [addSearch, setAddSearch] = useState('');
   const [participants, setParticipants] = useState([]);
   const [participantsOpen, setParticipantsOpen] = useState(false);
+  const [askFirstTarget, setAskFirstTarget] = useState(null);
 
   const timerRef = useRef(null);
 
@@ -913,6 +914,7 @@ function SoftphoneApp() {
     setTransferOpen(false); setTransferTarget(null); setTransferSearch('');
     setAddOpen(false); setAddSearch(''); setParticipants([]); setParticipantsOpen(false);
     setTicketModalOpen(false); setTicketTitle(''); setTicketTitleError(false);
+    setAskFirstTarget(null);
     setNavTab('dialpad');
     showToast('Call ended');
   };
@@ -932,11 +934,19 @@ function SoftphoneApp() {
   };
 
   const confirmTransferWarm = () => {
-    const name = transferTarget?.name;
+    const target = transferTarget;
     setTransferOpen(false);
     setTransferTarget(null);
     setTransferSearch('');
-    showToast(`Caller on hold — connecting you with ${name}...`);
+    setCallTimer(0);
+    setAskFirstTarget(target);
+  };
+
+  const completeWarmTransfer = () => {
+    const target = askFirstTarget;
+    setAskFirstTarget(null);
+    endCall();
+    showToast(`Call transferred to ${target?.name}`);
   };
 
   // ── Render: Dial Pad ──
@@ -1301,6 +1311,42 @@ function SoftphoneApp() {
 
   // ── Render: Active Call Tab ──
   const renderCallTab = () => {
+    if (askFirstTarget) {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
+          <Avatar name={askFirstTarget.name} size={64} fontSize={20}/>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
+            <span className="sp-contact-name">{askFirstTarget.name}</span>
+            <span style={{ color: '#8D99AE', fontSize: 12 }}>{askFirstTarget.number}</span>
+          </div>
+          <span className="sp-timer-text">{fmt(callTimer)}</span>
+          <div className="sp-actions">
+            {[
+              { icon: muted ? 'micOff' : 'mic', label: muted ? 'Unmute' : 'Mute', action: () => setMuted(m => !m), active: muted },
+              { icon: onHold ? 'play' : 'pause', label: onHold ? 'Resume' : 'Hold', action: () => setOnHold(h => !h), active: onHold },
+              { icon: 'dialpad', label: 'Keypad', action: () => setShowKeypad(s => !s) },
+              { icon: 'personAdd', label: 'Add', action: null, disabled: true },
+              { icon: 'forward', label: 'Transfer', action: null, disabled: true },
+              { icon: 'callEnd', label: 'End', action: endCall, red: true },
+            ].map((a, i) => (
+              <button key={i} className="sp-action-btn" onClick={a.action || undefined}
+                style={a.disabled ? { opacity: 0.3, pointerEvents: 'none' } : {}}>
+                <div className={`sp-action-icon ${a.red ? 'red' : ''} ${a.active ? 'active' : ''}`}>
+                  <Icon name={a.icon} size={18}/>
+                </div>
+                <span className="sp-action-label">{a.label}</span>
+              </button>
+            ))}
+          </div>
+          <button onClick={completeWarmTransfer}
+            style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#007FAD', border: 'none',
+              borderRadius: 20, padding: '10px 20px', cursor: 'pointer', color: '#fff',
+              fontFamily: 'Montserrat', fontSize: 13, fontWeight: 700, width: '100%', justifyContent: 'center' }}>
+            <Icon name="call" size={16} color="#fff"/> Transfer {activeContact.name}
+          </button>
+        </div>
+      );
+    }
     if (callDetailOpen && activeContact) {
       const c = CONTACTS.find(x => x.name === activeContact.name) || activeContact;
       return renderContactDetail(c, () => setCallDetailOpen(false));
@@ -1381,50 +1427,41 @@ function SoftphoneApp() {
         </button>
         {transferTarget ? (
           <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: 10, borderRadius: 6, background: 'rgba(255,255,255,0.06)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0' }}>
               {transferTarget.agents != null ? (
-                <div style={{ width: 36, height: 36, borderRadius: '50%', background: 'rgba(135,207,231,0.15)',
+                <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(135,207,231,0.15)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Icon name="group" size={18} color="#87CFE7"/>
+                  <Icon name="group" size={22} color="#87CFE7"/>
                 </div>
               ) : (
                 <div style={{ position: 'relative', flexShrink: 0 }}>
-                  <Avatar name={transferTarget.name} size={36}/>
+                  <Avatar name={transferTarget.name} size={44}/>
                   {agentStatusColor(transferTarget.status) && (
-                    <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
-                      borderRadius: '50%', background: agentStatusColor(transferTarget.status), border: '1.5px solid #363B4D' }}/>
+                    <div style={{ position: 'absolute', bottom: 0, right: 0, width: 11, height: 11,
+                      borderRadius: '50%', background: agentStatusColor(transferTarget.status), border: '2px solid #363B4D' }}/>
                   )}
                 </div>
               )}
-              <div style={{ flex: 1 }}>
-                <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{transferTarget.name}</div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>{transferTarget.name}</div>
+                {transferTarget.ext && <div style={{ color: '#8D99AE', fontSize: 11 }}>Ext. {transferTarget.ext}</div>}
                 <div style={{ color: '#8D99AE', fontSize: 11 }}>
                   {transferTarget.agents != null
                     ? `${transferTarget.agents} agents · wait ${transferTarget.wait}`
                     : transferTarget.title}
                 </div>
+                {transferTarget.number && <div style={{ color: '#8D99AE', fontSize: 11 }}>{transferTarget.number}</div>}
               </div>
             </div>
-            <div style={{ background: 'rgba(0,0,0,0.15)', borderRadius: 6, padding: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
-              <div style={{ color: '#8D99AE', fontSize: 11, fontWeight: 600, marginBottom: 2 }}>Transfer type</div>
+            <div style={{ display: 'flex', gap: 8 }}>
               {!isQueue && (
-                <button className="sp-btn-secondary" style={{ justifyContent: 'flex-start', gap: 8 }} onClick={confirmTransferWarm}>
-                  <Icon name="call" size={14}/>
-                  <div style={{ textAlign: 'left' }}>
-                    <div style={{ fontSize: 13 }}>Ask First</div>
-                    <div style={{ fontSize: 10, fontWeight: 400, color: '#8D99AE' }}>Speak with recipient before connecting</div>
-                  </div>
-                </button>
+                <button className="sp-btn-secondary" style={{ flex: 1 }} onClick={confirmTransferWarm}>Ask First</button>
               )}
-              <button className="sp-btn-primary" style={{ justifyContent: 'flex-start', gap: 8 }} onClick={confirmTransfer}>
-                <Icon name="forward" size={14}/>
-                <div style={{ textAlign: 'left' }}>
-                  <div style={{ fontSize: 13 }}>Transfer Now</div>
-                  <div style={{ fontSize: 10, fontWeight: 400, color: 'rgba(255,255,255,0.6)' }}>Connect caller immediately</div>
-                </div>
-              </button>
+              <button className="sp-btn-primary" style={{ flex: 1 }} onClick={confirmTransfer}>Transfer Now</button>
             </div>
-            <button className="sp-btn-secondary" onClick={() => setTransferTarget(null)} style={{ marginTop: 2 }}>Cancel</button>
+            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8D99AE',
+              fontFamily: 'Montserrat', fontSize: 12, fontWeight: 600, padding: '4px 0', alignSelf: 'center' }}
+              onClick={() => setTransferTarget(null)}>Cancel</button>
           </>
         ) : (
           <>
