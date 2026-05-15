@@ -359,6 +359,84 @@
   ::-webkit-scrollbar { width: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
   ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+  /* ── New Ticket Modal ── */
+  .nt-overlay {
+    position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 2000;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nt-modal {
+    background: #fff; border-radius: 6px; width: 560px; max-width: 96vw;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.22); font-family: 'Montserrat', sans-serif;
+    display: flex; flex-direction: column; max-height: 90vh; overflow: hidden;
+  }
+  .nt-header {
+    display: flex; align-items: center; padding: 16px 20px; border-bottom: 1px solid #CED0D4;
+    gap: 8px;
+  }
+  .nt-title { flex: 1; font-size: 16px; font-weight: 700; color: #363B4D; }
+  .nt-hbtn {
+    width: 28px; height: 28px; border-radius: 4px; border: none; cursor: pointer;
+    background: none; color: #8D99AE; display: flex; align-items: center; justify-content: center;
+    font-size: 18px; transition: background 0.15s;
+  }
+  .nt-hbtn:hover { background: #F4F6FB; color: #363B4D; }
+  .nt-body { padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; }
+  .nt-section-label { font-size: 13px; font-weight: 700; color: #363B4D; margin-bottom: 10px; }
+  .nt-field { display: flex; flex-direction: column; gap: 4px; }
+  .nt-label { font-size: 12px; font-weight: 600; color: #5F6475; }
+  .nt-label span { color: #ED4B52; }
+  .nt-select, .nt-input {
+    height: 36px; border-radius: 4px; border: 1px solid #CED0D4;
+    padding: 0 10px; font-family: 'Montserrat', sans-serif; font-size: 13px;
+    color: #363B4D; background: #fff; outline: none; width: 100%;
+  }
+  .nt-select:focus, .nt-input:focus { border-color: #007FAD; }
+  .nt-input.error { border-color: #ED4B52; }
+  .nt-error { font-size: 11px; color: #ED4B52; font-weight: 500; }
+  .nt-add-contacts {
+    height: 36px; border-radius: 4px; border: 1px solid #007FAD;
+    background: #fff; color: #007FAD; font-family: 'Montserrat', sans-serif;
+    font-size: 13px; font-weight: 600; cursor: pointer; width: 100%;
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+  }
+  .nt-add-contacts:hover { background: #F4F6FB; }
+  .nt-desc-toolbar {
+    display: flex; gap: 2px; padding: 6px 8px; border: 1px solid #CED0D4;
+    border-bottom: none; border-radius: 4px 4px 0 0; background: #F4F6FB; flex-wrap: wrap;
+  }
+  .nt-tool {
+    width: 26px; height: 24px; border-radius: 3px; border: none; background: none;
+    cursor: pointer; color: #5F6475; font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .nt-tool:hover { background: #CED0D4; color: #363B4D; }
+  .nt-desc-area {
+    width: 100%; min-height: 100px; border: 1px solid #CED0D4; border-radius: 0 0 4px 4px;
+    padding: 10px; font-family: 'Montserrat', sans-serif; font-size: 13px; color: #363B4D;
+    resize: vertical; outline: none;
+  }
+  .nt-desc-area:focus { border-color: #007FAD; }
+  .nt-footer {
+    display: flex; align-items: center; padding: 12px 20px; border-top: 1px solid #CED0D4; gap: 8px;
+  }
+  .nt-priority-dot {
+    width: 24px; height: 24px; border-radius: 50%; background: #ED4B52;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-size: 11px; font-weight: 700; flex-shrink: 0;
+  }
+  .nt-btn-save {
+    height: 34px; padding: 0 14px; border-radius: 4px; border: 1px solid #CED0D4;
+    background: #fff; color: #363B4D; font-family: 'Montserrat', sans-serif;
+    font-size: 12px; font-weight: 600; cursor: pointer; margin-left: auto;
+  }
+  .nt-btn-save:hover { background: #F4F6FB; }
+  .nt-btn-create {
+    height: 34px; padding: 0 18px; border-radius: 4px; border: none;
+    background: #007FAD; color: #fff; font-family: 'Montserrat', sans-serif;
+    font-size: 12px; font-weight: 700; cursor: pointer;
+  }
+  .nt-btn-create:hover { background: #005f82; }
 </style>
 </head>
 <body>
@@ -625,12 +703,6 @@ const HISTORY = [
   { id: 6, type: 'missed',   name: 'Pam Reynolds',    number: '(360) 296-1400', time: '5:08 PM',  duration: '',      date: 'Yesterday' },
 ];
 
-const VOICEMAILS = [
-  { id: 1, name: 'Charlie Apegian', number: '(555) 123-4567', company: 'Creative Solutions LLC', duration: '0:42', time: 'Today 2:15 PM', progress: 0 },
-  { id: 2, name: 'Pam Reynolds',    number: '(360) 296-1400', company: 'Reynolds Co',            duration: '1:23', time: 'Today 9:04 AM', progress: 0 },
-  { id: 3, name: 'Unknown',         number: '(800) 555-0100', company: '',                       duration: '0:18', time: 'Yesterday',     progress: 0 },
-];
-
 const AGENTS = [
   { id: 1, name: 'Charlie Stile',   title: 'Product Support Specialist I',  number: '(555) 123-4567', status: 'available' },
   { id: 2, name: 'Eleanor Foster',  title: 'Product Support Specialist II', number: '(555) 123-4567', status: 'available' },
@@ -686,7 +758,7 @@ const KEYS = ['1','2','3','4','5','6','7','8','9','*','0','#'];
 function SoftphoneApp() {
   const [open, setOpen] = useState(false);
   const [screen, setScreen] = useState('idle');         // idle | incoming | outgoing | active
-  const [navTab, setNavTab] = useState('dialpad');      // dialpad | contacts | history | voicemail | call
+  const [navTab, setNavTab] = useState('dialpad');      // dialpad | contacts | users | history | call
   const [dialInput, setDialInput] = useState('');
   const [suggestion, setSuggestion] = useState(null);
   const [activeContact, setActiveContact] = useState(CONTACTS[0]);
@@ -702,8 +774,10 @@ function SoftphoneApp() {
   const [transferSearch, setTransferSearch] = useState('');
   const [transferTarget, setTransferTarget] = useState(null);
   const [transferTab, setTransferTab] = useState('users');
-  const [voicemails, setVoicemails] = useState(VOICEMAILS);
-  const [playingVM, setPlayingVM] = useState(null);
+  const [ticketModalOpen, setTicketModalOpen] = useState(false);
+  const [ticketTitle, setTicketTitle] = useState('');
+  const [ticketType, setTicketType] = useState('Default');
+  const [ticketTitleError, setTicketTitleError] = useState(false);
   const [toast, setToast] = useState(null);
   const [minimized, setMinimized] = useState(false);
   const [addOpen, setAddOpen] = useState(false);
@@ -712,7 +786,6 @@ function SoftphoneApp() {
   const [participantsOpen, setParticipantsOpen] = useState(false);
 
   const timerRef = useRef(null);
-  const vmRef = useRef(null);
 
   const tweakDefaults = /*EDITMODE-BEGIN*/{
     "accentColor": "#007FAD",
@@ -739,18 +812,6 @@ function SoftphoneApp() {
     }
     return () => clearInterval(timerRef.current);
   }, [isInCall, onHold]);
-
-  // Voicemail playback progress
-  useEffect(() => {
-    if (playingVM !== null) {
-      vmRef.current = setInterval(() => {
-        setVoicemails(prev => prev.map(v =>
-          v.id === playingVM ? { ...v, progress: Math.min(v.progress + 2, 100) } : v
-        ));
-      }, 100);
-    }
-    return () => clearInterval(vmRef.current);
-  }, [playingVM]);
 
   // Contact suggestion while dialing
   useEffect(() => {
@@ -838,6 +899,7 @@ function SoftphoneApp() {
     setCallDetailOpen(false);
     setTransferOpen(false); setTransferTarget(null); setTransferSearch('');
     setAddOpen(false); setAddSearch(''); setParticipants([]); setParticipantsOpen(false);
+    setTicketModalOpen(false); setTicketTitle(''); setTicketTitleError(false);
     setNavTab('dialpad');
     showToast('Call ended');
   };
@@ -1036,30 +1098,23 @@ function SoftphoneApp() {
     );
   };
 
-  // ── Render: Voicemail ──
-  const renderVoicemail = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-      {voicemails.map(vm => (
-        <div key={vm.id} className="sp-voicemail-item">
-          <div className="sp-voicemail-row">
-            <Avatar name={vm.name} size={32}/>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ color: '#fff', fontSize: 12, fontWeight: 600 }}>{vm.name}</div>
-              <div style={{ color: '#8D99AE', fontSize: 10 }}>{vm.company || vm.time} · {vm.duration}</div>
-            </div>
-            <button className="sp-history-call-btn" onClick={() => callBack({ name: vm.name, number: vm.number })}>
-              <Icon name="call" size={14}/>
-            </button>
+  // ── Render: Users ──
+  const renderUsers = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+      {AGENTS.map(a => (
+        <div key={a.id} className="sp-contact-item">
+          <div style={{ position: 'relative', flexShrink: 0 }}>
+            <Avatar name={a.name} size={32}/>
+            <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
+              borderRadius: '50%', background: STATUS_COLOR[a.status], border: '1.5px solid #363B4D' }}/>
           </div>
-          <div className="sp-voicemail-row" style={{ gap: 8 }}>
-            <button className="sp-voicemail-play" onClick={() => setPlayingVM(playingVM === vm.id ? null : vm.id)}>
-              <Icon name={playingVM === vm.id ? 'pause' : 'play'} size={14}/>
-            </button>
-            <div className="sp-voicemail-bar">
-              <div className="sp-voicemail-progress" style={{ width: `${vm.progress}%` }}/>
-            </div>
-            <span style={{ color: '#8D99AE', fontSize: 10 }}>{vm.duration}</span>
+          <div className="sp-contact-item-info">
+            <div className="sp-contact-item-name">{a.name}</div>
+            <div className="sp-contact-item-num">{a.title}</div>
           </div>
+          <button className="sp-history-call-btn" onClick={() => startCall({ name: a.name, number: a.number })}>
+            <Icon name="call" size={14}/>
+          </button>
         </div>
       ))}
     </div>
@@ -1320,10 +1375,10 @@ function SoftphoneApp() {
   // ── Render: Bottom Nav ──
   const renderNav = () => {
     const items = [
-      { id: 'dialpad',   icon: 'dialpad',   label: 'Keypad' },
-      { id: 'contacts',  icon: 'contacts',  label: 'Contacts' },
-      { id: 'history',   icon: 'history',   label: 'History' },
-      { id: 'voicemail', icon: 'voicemail', label: 'Voicemail' },
+      { id: 'dialpad',  icon: 'dialpad',   label: 'Keypad' },
+      { id: 'contacts', icon: 'contacts',  label: 'Contacts' },
+      { id: 'users',    icon: 'group',     label: 'Users' },
+      { id: 'history',  icon: 'history',   label: 'History' },
     ];
     if (isInCall) items.unshift({ id: 'call', icon: 'call', label: 'Call', isCall: true });
     return (
@@ -1361,7 +1416,7 @@ function SoftphoneApp() {
             <Icon name="call" size={16}/> Accept
           </button>
         </div>
-        <button onClick={() => showToast('New ticket started for ' + activeContact.name)}
+        <button onClick={() => { setTicketTitle(''); setTicketTitleError(false); setTicketModalOpen(true); }}
           style={{ height: 36, borderRadius: 6, border: '1px solid rgba(135,207,231,0.4)',
             background: 'rgba(135,207,231,0.1)', color: '#87CFE7', fontFamily: 'Montserrat',
             fontSize: 13, fontWeight: 600, cursor: 'pointer',
@@ -1391,7 +1446,7 @@ function SoftphoneApp() {
   const headerTitle = () => {
     if (screen === 'incoming') return 'Incoming Call';
     if (screen === 'outgoing') return 'Calling...';
-    const tabNames = { dialpad: 'Keypad', contacts: 'Contacts', history: 'Call History', voicemail: 'Voicemail', call: 'Active Call' };
+    const tabNames = { dialpad: 'Keypad', contacts: 'Contacts', users: 'Users', history: 'Call History', call: 'Active Call' };
     return tabNames[navTab] || 'Softphone';
   };
 
@@ -1422,10 +1477,10 @@ function SoftphoneApp() {
           <div className="sp-body">
             {transferOpen && isInCall ? renderTransferInline() : (
               <>
-                {navTab === 'dialpad'   && renderDialpad()}
-                {navTab === 'contacts'  && renderContacts()}
-                {navTab === 'history'   && renderHistory()}
-                {navTab === 'voicemail' && renderVoicemail()}
+                {navTab === 'dialpad'  && renderDialpad()}
+                {navTab === 'contacts' && renderContacts()}
+                {navTab === 'users'    && renderUsers()}
+                {navTab === 'history'  && renderHistory()}
                 {navTab === 'call' && isInCall && renderCallTab()}
               </>
             )}
@@ -1494,6 +1549,64 @@ function SoftphoneApp() {
       )}
 
       {toast && <div className="sp-toast-notif">{toast}</div>}
+
+      {ticketModalOpen && (
+        <div className="nt-overlay" onClick={e => { if (e.target === e.currentTarget) setTicketModalOpen(false); }}>
+          <div className="nt-modal">
+            <div className="nt-header">
+              <span className="nt-title">New Ticket</span>
+              <button className="nt-hbtn" title="Help">?</button>
+              <button className="nt-hbtn" onClick={() => setTicketModalOpen(false)} title="Close">✕</button>
+            </div>
+            <div className="nt-body">
+              <div>
+                <div className="nt-section-label">Details</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div className="nt-field">
+                    <label className="nt-label">Type <span>*</span></label>
+                    <select className="nt-select" value={ticketType} onChange={e => setTicketType(e.target.value)}>
+                      <option>Default</option>
+                      <option>Bug</option>
+                      <option>Feature Request</option>
+                      <option>Support</option>
+                    </select>
+                  </div>
+                  <div className="nt-field">
+                    <label className="nt-label">Title <span>*</span></label>
+                    <input className={`nt-input${ticketTitleError ? ' error' : ''}`} placeholder=""
+                      value={ticketTitle} onChange={e => { setTicketTitle(e.target.value); setTicketTitleError(false); }}/>
+                    {ticketTitleError && <span className="nt-error">Please provide a title</span>}
+                  </div>
+                </div>
+              </div>
+              <div>
+                <div className="nt-section-label">Contacts</div>
+                <button className="nt-add-contacts">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
+                  Add Contacts
+                </button>
+              </div>
+              <div>
+                <div className="nt-section-label">Description</div>
+                <div className="nt-desc-toolbar">
+                  {['B','I','U','≡','≡','≡','⋮≡','⋮≡'].map((t,i) => <button key={i} className="nt-tool">{t}</button>)}
+                </div>
+                <textarea className="nt-desc-area" placeholder=""/>
+              </div>
+            </div>
+            <div className="nt-footer">
+              <div className="nt-priority-dot">1</div>
+              <button className="nt-btn-save">Save and Create Another</button>
+              <button className="nt-btn-create" onClick={() => {
+                if (!ticketTitle.trim()) { setTicketTitleError(true); return; }
+                setTicketModalOpen(false);
+                showToast('Ticket created: ' + ticketTitle);
+                setTicketTitle('');
+              }}>Create</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <TweaksPanel>
         <TweakColor label="Accent color" value={tweaks.accentColor} onChange={v => setTweak('accentColor', v)}/>
