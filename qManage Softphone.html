@@ -1161,7 +1161,7 @@ function SoftphoneApp() {
     const filtered = ADD_SEARCH_LIST.filter(p =>
       p.name.toLowerCase().includes(addSearch.toLowerCase()) || p.number.includes(addSearch)
     );
-    const addedIds = new Set(participants.map(p => p.id));
+    const addedIds = new Set([...participants.map(p => p.id), activeContact.id]);
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
         <button onClick={() => { setAddOpen(false); setAddSearch(''); }}
@@ -1197,7 +1197,7 @@ function SoftphoneApp() {
                   </div>
                   <div className="sp-contact-item-num">{p.number}</div>
                 </div>
-                {alreadyAdded && <span style={{ color: '#8D99AE', fontSize: 10, fontWeight: 600, flexShrink: 0 }}>Added</span>}
+                {alreadyAdded && <span style={{ color: '#8D99AE', fontSize: 10, fontWeight: 600, flexShrink: 0 }}>{p.id === activeContact.id ? 'In Call' : 'Added'}</span>}
               </div>
             );
           })}
@@ -1210,7 +1210,7 @@ function SoftphoneApp() {
   const renderParticipantsList = () => {
     const customers = participants.filter(p => p.type === 'Customer');
     const users = participants.filter(p => p.type === 'User');
-    const renderRow = (p, isYou = false) => (
+    const renderRow = (p, isYou = false, isFixed = false) => (
       <div key={p.id || 'you'} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }}>
         <div style={{ position: 'relative', flexShrink: 0 }}>
           <Avatar name={p.name} size={32}/>
@@ -1223,7 +1223,7 @@ function SoftphoneApp() {
           <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{p.name}{isYou && <span style={{ color: '#8D99AE', fontWeight: 400 }}> (You)</span>}</div>
           <div style={{ color: '#94CC86', fontSize: 11, fontWeight: 500 }}>In call</div>
         </div>
-        {!isYou && (
+        {!isYou && !isFixed && (
           <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8D99AE', padding: 4, borderRadius: 4 }}
             onClick={() => setParticipants(prev => prev.filter(x => x.id !== p.id))}
             title="Remove from call">
@@ -1240,12 +1240,11 @@ function SoftphoneApp() {
             padding: '2px 0', alignSelf: 'flex-start' }}>
           <Icon name="arrowLeft" size={16}/> Back
         </button>
-        {customers.length > 0 && (
-          <div>
-            <div style={{ color: '#8D99AE', fontSize: 11, fontWeight: 600, marginBottom: 4 }}>Customers ({customers.length})</div>
-            {customers.map(p => renderRow(p))}
-          </div>
-        )}
+        <div>
+          <div style={{ color: '#8D99AE', fontSize: 11, fontWeight: 600, marginBottom: 4 }}>Customers ({customers.length + 1})</div>
+          {renderRow(activeContact, false, true)}
+          {customers.map(p => renderRow(p))}
+        </div>
         {(users.length > 0 || true) && (
           <div>
             <div style={{ color: '#8D99AE', fontSize: 11, fontWeight: 600, marginBottom: 4 }}>Users ({users.length + 1})</div>
