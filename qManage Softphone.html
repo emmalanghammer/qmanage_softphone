@@ -329,8 +329,15 @@
     font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer;
     transition: all 0.2s;
   }
-  .qm-call-chip.incoming { display: flex; background: #94CC86; color: #253322; }
-  .qm-call-chip.active-call { display: flex; background: #007FAD; color: #fff; }
+  .qm-call-chip.incoming  { display: flex; background: #94CC86; color: #253322; }
+  .qm-call-chip.outgoing  { display: flex; background: #94CC86; color: #253322; }
+  .qm-call-chip.active-call { display: flex; background: #94CC86; color: #253322; }
+  .qm-simulate-btn {
+    height: 32px; padding: 0 14px; border-radius: 6px;
+    border: 1px solid #CED0D4; background: none; cursor: pointer;
+    font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; color: #5F6475;
+  }
+  .qm-simulate-btn:hover { background: #F4F6FB; }
 
   /* ── Toast ── */
   .sp-toast-notif {
@@ -454,6 +461,7 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
       Search qManage
     </div>
+    <button class="qm-simulate-btn" id="simulateCallBtn">Simulate Call</button>
     <div class="qm-header-right">
       <div id="qmCallChip" class="qm-call-chip"></div>
       <button class="qm-phone-btn" id="phoneToggleBtn" title="Softphone">
@@ -837,21 +845,30 @@ function SoftphoneApp() {
     }
   }, [dialInput]);
 
-  // qManage header call status chip
+  // qManage header call status chip + simulate btn + phone btn visibility
   useEffect(() => {
     const chip = document.getElementById('qmCallChip');
-    if (!chip) return;
-    chip.className = 'qm-call-chip';
-    if (screen === 'incoming') {
-      chip.classList.add('incoming');
-      chip.innerHTML = '&#9679; Incoming Call';
-    } else if (screen === 'active' || screen === 'outgoing') {
-      chip.classList.add('active-call');
-      chip.innerHTML = '&#9679; Active Call';
+    const phoneBtn = document.getElementById('phoneToggleBtn');
+    const simBtn = document.getElementById('simulateCallBtn');
+    if (chip) {
+      chip.className = 'qm-call-chip';
+      chip.onclick = () => { setMinimized(false); setOpen(true); };
+      if (screen === 'incoming') {
+        chip.classList.add('incoming');
+        chip.innerHTML = '&#9679;&nbsp; Incoming';
+      } else if (screen === 'outgoing') {
+        chip.classList.add('outgoing');
+        chip.innerHTML = '&#9679;&nbsp; Ringing...';
+      } else if (screen === 'active') {
+        chip.classList.add('active-call');
+        chip.innerHTML = fmt(callTimer);
+      }
     }
-  }, [screen]);
+    if (phoneBtn) phoneBtn.style.display = isCalling ? 'none' : '';
+    if (simBtn) simBtn.style.display = screen === 'idle' ? '' : 'none';
+  }, [screen, callTimer]);
 
-  // Phone button in header
+  // Phone button + simulate button in header
   useEffect(() => {
     const btn = document.getElementById('phoneToggleBtn');
     if (!btn) return;
@@ -862,6 +879,13 @@ function SoftphoneApp() {
     btn.addEventListener('click', handler);
     return () => btn.removeEventListener('click', handler);
   }, [minimized]);
+
+  useEffect(() => {
+    const btn = document.getElementById('simulateCallBtn');
+    if (!btn) return;
+    btn.addEventListener('click', triggerIncoming);
+    return () => btn.removeEventListener('click', triggerIncoming);
+  }, []);
 
   useEffect(() => {
     const btn = document.getElementById('phoneToggleBtn');
@@ -1668,11 +1692,6 @@ function SoftphoneApp() {
               {isCalling && (
                 <button className="sp-hbtn" title="Minimize to pill" onClick={() => { setMinimized(true); setOpen(false); }}>
                   <Icon name="minimize" size={14}/>
-                </button>
-              )}
-              {screen === 'idle' && (
-                <button className="sp-hbtn" title="Simulate incoming call" onClick={triggerIncoming}>
-                  <Icon name="call" size={14}/>
                 </button>
               )}
               <button className="sp-hbtn" title="Pop out" onClick={() => showToast('Popped out')}>
