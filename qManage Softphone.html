@@ -767,7 +767,7 @@ function SoftphoneApp() {
   const [muted, setMuted] = useState(false);
   const [onHold, setOnHold] = useState(false);
   const [showKeypad, setShowKeypad] = useState(false);
-  const [historyTab, setHistoryTab] = useState('recent');
+  const [historyTab, setHistoryTab] = useState('all');
   const [contactSearch, setContactSearch] = useState('');
   const [selectedContact, setSelectedContact] = useState(null);
   const [callDetailOpen, setCallDetailOpen] = useState(false);
@@ -867,7 +867,7 @@ function SoftphoneApp() {
 
   // ── Handlers ──
   const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-  const STATUS_COLOR = { available: '#94CC86', busy: '#FF7C19', offline: '#ED4B52' };
+  const agentStatusColor = (s) => s === 'available' ? '#94CC86' : s === 'busy' ? '#ED4B52' : null;
 
   const startCall = (contact) => {
     const c = contact || suggestion || { name: dialInput || 'Unknown', number: dialInput };
@@ -938,7 +938,23 @@ function SoftphoneApp() {
           </button>
         ))}
       </div>
-      {!compact && (
+      {compact ? (
+        <button onClick={() => {
+          if (!dialInput) return;
+          const newP = { id: Date.now(), name: dialInput, number: dialInput, type: 'Customer', status: 'busy' };
+          setParticipants(prev => [...prev, { ...newP, joinedAt: callTimer }]);
+          setDialInput('');
+          setShowKeypad(false);
+          showToast(`Added ${dialInput} to call`);
+        }} disabled={!dialInput}
+          style={{ height: 40, borderRadius: 6, border: 'none', cursor: 'pointer',
+            background: dialInput ? '#007FAD' : 'rgba(255,255,255,0.08)',
+            color: '#fff', fontFamily: 'Montserrat', fontSize: 14, fontWeight: 700,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            opacity: dialInput ? 1 : 0.4 }}>
+          <Icon name="personAdd" size={18}/> Add to Call
+        </button>
+      ) : (
         <button className="sp-call-btn" onClick={() => startCall()} disabled={!dialInput} style={{ opacity: dialInput ? 1 : 0.4 }}>
           <Icon name="call" size={20}/>
         </button>
@@ -947,39 +963,44 @@ function SoftphoneApp() {
   );
 
   // ── Render: History ──
-  const renderHistory = () => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ display: 'flex', gap: 2, padding: 2, background: 'rgba(0,0,0,0.18)', borderRadius: 6 }}>
-        {[{ id: 'recent', label: 'All' }, { id: 'favorites', label: 'Inbound' }].map(t => (
-          <button key={t.id} onClick={() => setHistoryTab(t.id)}
-            style={{ flex: 1, height: 30, borderRadius: 4, border: 'none', cursor: 'pointer',
-              background: historyTab === t.id ? '#F4F6FB' : 'transparent',
-              color: historyTab === t.id ? '#363B4D' : '#fff',
-              fontFamily: 'Montserrat', fontSize: 12, fontWeight: 700 }}>
-            {t.label}
-          </button>
-        ))}
-      </div>
-      <div className="sp-history-list">
-        {HISTORY.map(item => {
-          const iconName = item.type === 'missed' ? 'callMissed' : item.type === 'made' ? 'callMade' : 'callReceived';
-          const iconColor = item.type === 'missed' ? '#ED4B52' : item.type === 'made' ? '#87CFE7' : '#94CC86';
-          return (
-            <div key={item.id} className="sp-history-item">
-              <Icon name={iconName} size={16} color={iconColor}/>
-              <div className="sp-history-info">
-                <div className="sp-history-name">{item.name}</div>
-                <div className="sp-history-meta">{item.time}{item.duration && ` · ${item.duration}`}</div>
+  const renderHistory = () => {
+    const items = historyTab === 'missed' ? HISTORY.filter(h => h.type === 'missed') : HISTORY;
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+        <div style={{ display: 'flex', gap: 2, padding: 2, background: 'rgba(0,0,0,0.18)', borderRadius: 6 }}>
+          {[{ id: 'all', label: 'All' }, { id: 'missed', label: 'Missed' }].map(t => (
+            <button key={t.id} onClick={() => setHistoryTab(t.id)}
+              style={{ flex: 1, height: 30, borderRadius: 4, border: 'none', cursor: 'pointer',
+                background: historyTab === t.id ? '#F4F6FB' : 'transparent',
+                color: historyTab === t.id ? '#363B4D' : '#fff',
+                fontFamily: 'Montserrat', fontSize: 12, fontWeight: 700 }}>
+              {t.label}
+            </button>
+          ))}
+        </div>
+        <div className="sp-history-list">
+          {items.map(item => {
+            const iconName = item.type === 'missed' ? 'callMissed' : item.type === 'made' ? 'callMade' : 'callReceived';
+            const iconColor = item.type === 'missed' ? '#ED4B52' : item.type === 'made' ? '#87CFE7' : '#94CC86';
+            return (
+              <div key={item.id} className="sp-history-item">
+                <Icon name={iconName} size={16} color={iconColor}/>
+                <div className="sp-history-info">
+                  <div className="sp-history-name">{item.name}</div>
+                  <div className="sp-history-meta">{item.time}{item.duration && ` · ${item.duration}`}</div>
+                </div>
+                {!isInCall && (
+                  <button className="sp-history-call-btn" onClick={() => callBack(item)}>
+                    <Icon name="call" size={14}/>
+                  </button>
+                )}
               </div>
-              <button className="sp-history-call-btn" onClick={() => callBack(item)}>
-                <Icon name="call" size={14}/>
-              </button>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
-    </div>
-  );
+    );
+  };
 
   // ── Render: Rich Contact Detail Panel ──
   const renderContactDetail = (c, onBack) => (
@@ -1089,9 +1110,11 @@ function SoftphoneApp() {
                 <div className="sp-contact-item-name">{c.name}</div>
                 <div className="sp-contact-item-num">{c.company || c.number}</div>
               </div>
-              <button className="sp-history-call-btn" onClick={e => { e.stopPropagation(); startCall(c); }}>
-                <Icon name="call" size={14}/>
-              </button>
+              {!isInCall && (
+                <button className="sp-history-call-btn" onClick={e => { e.stopPropagation(); startCall(c); }}>
+                  <Icon name="call" size={14}/>
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -1102,22 +1125,29 @@ function SoftphoneApp() {
   // ── Render: Users ──
   const renderUsers = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {AGENTS.map(a => (
-        <div key={a.id} className="sp-contact-item">
-          <div style={{ position: 'relative', flexShrink: 0 }}>
-            <Avatar name={a.name} size={32}/>
-            <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
-              borderRadius: '50%', background: STATUS_COLOR[a.status], border: '1.5px solid #363B4D' }}/>
+      {AGENTS.map(a => {
+        const dotColor = agentStatusColor(a.status);
+        return (
+          <div key={a.id} className="sp-contact-item">
+            <div style={{ position: 'relative', flexShrink: 0 }}>
+              <Avatar name={a.name} size={32}/>
+              {dotColor && (
+                <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
+                  borderRadius: '50%', background: dotColor, border: '1.5px solid #363B4D' }}/>
+              )}
+            </div>
+            <div className="sp-contact-item-info">
+              <div className="sp-contact-item-name">{a.name}</div>
+              <div className="sp-contact-item-num">{a.title}</div>
+            </div>
+            {!isInCall && (
+              <button className="sp-history-call-btn" onClick={() => startCall({ name: a.name, number: a.number })}>
+                <Icon name="call" size={14}/>
+              </button>
+            )}
           </div>
-          <div className="sp-contact-item-info">
-            <div className="sp-contact-item-name">{a.name}</div>
-            <div className="sp-contact-item-num">{a.title}</div>
-          </div>
-          <button className="sp-history-call-btn" onClick={() => startCall({ name: a.name, number: a.number })}>
-            <Icon name="call" size={14}/>
-          </button>
-        </div>
-      ))}
+        );
+      })}
     </div>
   );
 
@@ -1150,8 +1180,10 @@ function SoftphoneApp() {
                 }}>
                 <div style={{ position: 'relative', flexShrink: 0 }}>
                   <Avatar name={p.name} size={32}/>
-                  <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
-                    borderRadius: '50%', background: STATUS_COLOR[p.status], border: '1.5px solid #363B4D' }}/>
+                  {p.type === 'User' && agentStatusColor(p.status) && (
+                    <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
+                      borderRadius: '50%', background: agentStatusColor(p.status), border: '1.5px solid #363B4D' }}/>
+                  )}
                 </div>
                 <div className="sp-contact-item-info">
                   <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
@@ -1177,8 +1209,10 @@ function SoftphoneApp() {
       <div key={p.id || 'you'} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }}>
         <div style={{ position: 'relative', flexShrink: 0 }}>
           <Avatar name={p.name} size={32}/>
-          {!isYou && <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
-            borderRadius: '50%', background: STATUS_COLOR[p.status] || '#94CC86', border: '1.5px solid #363B4D' }}/>}
+          {!isYou && p.type === 'User' && agentStatusColor(p.status) && (
+            <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
+              borderRadius: '50%', background: agentStatusColor(p.status), border: '1.5px solid #363B4D' }}/>
+          )}
         </div>
         <div style={{ flex: 1, minWidth: 0 }}>
           <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{p.name}{isYou && <span style={{ color: '#8D99AE', fontWeight: 400 }}> (You)</span>}</div>
@@ -1320,7 +1354,7 @@ function SoftphoneApp() {
               <div style={{ position: 'relative' }}>
                 <Avatar name={transferTarget.name} size={36}/>
                 <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
-                  borderRadius: '50%', background: STATUS_COLOR[transferTarget.status] || '#94CC86', border: '1.5px solid #363B4D' }}/>
+                  borderRadius: '50%', background: agentStatusColor(transferTarget.status) || '#94CC86', border: '1.5px solid #363B4D' }}/>
               </div>
               <div style={{ flex: 1 }}>
                 <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{transferTarget.name}</div>
@@ -1357,8 +1391,10 @@ function SoftphoneApp() {
                 <div key={a.id} className="sp-contact-item" onClick={() => setTransferTarget(a)}>
                   <div style={{ position: 'relative', flexShrink: 0 }}>
                     <Avatar name={a.name} size={32}/>
-                    <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
-                      borderRadius: '50%', background: STATUS_COLOR[a.status], border: '1.5px solid #363B4D' }}/>
+                    {agentStatusColor(a.status) && (
+                      <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
+                        borderRadius: '50%', background: agentStatusColor(a.status), border: '1.5px solid #363B4D' }}/>
+                    )}
                   </div>
                   <div className="sp-contact-item-info">
                     <div className="sp-contact-item-name">{a.name}</div>
