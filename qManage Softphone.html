@@ -6,366 +6,232 @@
 <title>qManage Softphone</title>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,400;0,500;0,600;0,700;1,500&display=swap" rel="stylesheet" />
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  body {
-    font-family: 'Montserrat', sans-serif;
-    background: #f0f2f5;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-  }
+  :root { --sp-width: 350px; }  /* softphone panel width (Figma frames are 400) */
+  body { font-family: 'Montserrat', sans-serif; background: #F4F6FB; min-height: 100vh; overflow: hidden; }
+  button { font-family: 'Montserrat', sans-serif; }
+  img { display: block; flex-shrink: 0; }
 
-  /* ── qManage App Shell ── */
-  .qm-bg { position: fixed; inset: 0; background: #fff; overflow: hidden; }
+  /* ── Type scale (Figma text styles) ── */
+  .t-title-xs  { font-weight: 600; font-size: 12px; line-height: 16px; letter-spacing: 0.1px; }
+  .t-title-sm  { font-weight: 600; font-size: 14px; line-height: 18px; letter-spacing: 0.1px; }
+  .t-title-md  { font-weight: 600; font-size: 16px; line-height: 20px; letter-spacing: 0.15px; }
+  .t-body-sm   { font-weight: 500; font-size: 12px; line-height: 14px; letter-spacing: 0.4px; }
+  .t-body-md   { font-weight: 500; font-size: 14px; line-height: 18px; letter-spacing: 0.25px; }
+  .t-body-lg   { font-weight: 500; font-size: 16px; line-height: 20px; letter-spacing: 0.5px; }
+  .t-accent-sm { font-weight: 400; font-size: 12px; line-height: 14px; letter-spacing: 0; }
+  .t-accent-md { font-weight: 400; font-size: 14px; line-height: 18px; letter-spacing: 0.25px; }
+  .t-semi-md   { font-weight: 600; font-size: 14px; line-height: 18px; letter-spacing: 0; }
+  .nowrap { white-space: nowrap; }
+  .ellipsis { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+  /* ── qManage app header ── */
   .qm-header {
-    height: 64px; background: #fff; border-bottom: 1px solid #CED0D4;
-    display: flex; align-items: center; padding: 0 24px; gap: 16px;
-    position: relative; z-index: 1;
+    position: fixed; top: 0; left: 0; right: 0; height: 64px; z-index: 10;
+    display: flex; align-items: center; gap: 16px; padding: 8px 24px 12px 24px;
+    background: #FFFFFF; border-bottom: 1px solid #CED0D4; overflow: hidden;
   }
-  .qm-logo {
-    display: flex; align-items: center; gap: 6px;
-    font-family: 'Montserrat', sans-serif;
-    font-weight: 700; font-size: 22px; color: #363B4D;
-  }
+  .qm-left { flex: 1 0 auto; display: flex; gap: 16px; align-items: center; }
   .qm-search {
-    flex: 1; max-width: 500px; margin: 0 auto;
-    height: 40px; border-radius: 4px; border: 1px solid #CED0D4;
-    background: #F4F6FB; display: flex; align-items: center;
-    padding: 0 12px; gap: 8px; color: #8D99AE; font-size: 14px;
-    font-family: 'Montserrat', sans-serif;
+    flex: 0 1 500px; min-width: 250px; height: 40px; padding: 8px 12px;
+    display: flex; gap: 8px; align-items: center; background: #F2F3F7; border-radius: 8px; color: #8D99AE;
   }
-  .qm-header-right { display: flex; align-items: center; gap: 16px; margin-left: auto; }
-  .qm-icon-btn {
-    width: 36px; height: 36px; border-radius: 4px;
-    background: none; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: #5F6475; transition: background 0.15s;
-  }
-  .qm-icon-btn:hover { background: #F4F6FB; }
-  .qm-phone-btn {
-    width: 36px; height: 36px; border-radius: 4px;
-    background: none; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: #5F6475; transition: all 0.15s; position: relative;
-  }
-  .qm-phone-btn:hover { background: #F4F6FB; }
-  .qm-add-ticket {
-    height: 36px; padding: 0 16px; border-radius: 4px;
-    background: #007FAD; border: none; cursor: pointer;
-    color: #fff; font-family: 'Montserrat', sans-serif;
-    font-size: 14px; font-weight: 600;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .qm-avatar {
-    width: 32px; height: 32px; border-radius: 50%;
-    background: #A4495D; display: flex; align-items: center;
-    justify-content: center; color: #fff; font-size: 12px; font-weight: 700;
-  }
-  .qm-content { padding: 32px; background: #F4F6FB; min-height: calc(100vh - 64px); }
-
-  /* ── Softphone Widget ── */
-  .sp-widget {
-    width: 450px; height: 550px; border-radius: 10px;
-    background: #363B4D;
-    box-shadow: 0px 8px 32px 0px rgba(0,0,0,0.28), 0px 0px 2px 0px rgba(0,0,0,0.16);
-    overflow: hidden; font-family: 'Montserrat', sans-serif;
-    position: fixed; z-index: 1000; user-select: none;
-    display: flex; flex-direction: column;
-  }
-  .sp-widget-content { flex: 1; overflow: hidden; display: flex; flex-direction: column; min-height: 0; }
-  .sp-widget-scroll { flex: 1; overflow-y: auto; min-height: 0; }
-
-  /* ── Minimized Pill ── */
-  .sp-mini {
-    position: fixed; z-index: 1000; background: #363B4D;
-    border-radius: 12px; box-shadow: 0px 8px 24px rgba(0,0,0,0.32);
-    padding: 8px 12px 8px 8px;
-    display: flex; align-items: center; gap: 12px;
-    font-family: 'Montserrat', sans-serif; user-select: none; min-width: 360px;
-  }
-  .sp-mini-handle {
-    width: 22px; height: 32px; display: flex; align-items: center; justify-content: center;
-    color: #5F6475; cursor: grab; flex-shrink: 0;
-  }
-  .sp-mini-handle:active { cursor: grabbing; }
-  .sp-mini-name { color: #fff; font-size: 15px; font-weight: 700; white-space: nowrap; }
-  .sp-mini-timer {
-    color: #fff; font-size: 14px; font-weight: 500;
-    font-variant-numeric: tabular-nums; margin-left: auto; white-space: nowrap;
-  }
-  .sp-mini-end {
-    height: 36px; padding: 0 14px; border-radius: 6px; border: none; cursor: pointer;
-    background: #ED4B52; color: #fff; font-family: 'Montserrat', sans-serif;
-    font-size: 14px; font-weight: 700; display: flex; align-items: center; gap: 6px; flex-shrink: 0;
-  }
-  .sp-mini-end:hover { background: #d43f46; }
-  .sp-mini-expand {
-    width: 32px; height: 32px; background: none; border: none; cursor: pointer;
-    color: #8D99AE; display: flex; align-items: center; justify-content: center;
-    border-radius: 4px; flex-shrink: 0;
-  }
-  .sp-mini-expand:hover { color: #fff; background: rgba(255,255,255,0.06); }
-
-  /* ── Drag Handle ── */
-  .sp-drag-handle {
-    cursor: grab; color: #5F6475;
-    display: flex; align-items: center; padding: 4px 6px; margin-left: -4px;
-  }
-  .sp-drag-handle:active { cursor: grabbing; }
-
-  /* ── Widget Header ── */
-  .sp-header {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 12px 0 6px; height: 48px;
-    border-bottom: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
-  }
-  .sp-header-title { color: #fff; font-size: 14px; font-weight: 600; }
-  .sp-header-actions { display: flex; gap: 2px; align-items: center; }
-  .sp-hbtn {
-    width: 28px; height: 28px; border-radius: 4px;
-    background: none; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    color: #8D99AE; transition: all 0.15s;
-  }
-  .sp-hbtn:hover { background: rgba(255,255,255,0.08); color: #fff; }
-
-  /* ── Body ── */
-  .sp-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
-
-  /* ── Avatar ── */
-  .sp-avatar {
-    border-radius: 50%; display: flex; align-items: center; justify-content: center;
-    font-weight: 700; flex-shrink: 0; color: #fff;
-  }
-
-  /* ── Contact Block ── */
-  .sp-contact-name { color: #fff; font-size: 16px; font-weight: 700; text-align: center; }
-  .sp-contact-number { color: #fff; font-size: 14px; font-weight: 500; text-align: center; }
-  .sp-contact-link { color: #87CFE7; font-size: 12px; font-weight: 500; cursor: pointer; }
-  .sp-contact-link:hover { text-decoration: underline; }
-  .sp-timer-text {
-    color: #fff; font-size: 22px; font-weight: 700; text-align: center;
-    letter-spacing: 1px; font-variant-numeric: tabular-nums;
-  }
-
-  /* ── Action Buttons ── */
-  .sp-actions {
-    display: grid; grid-template-columns: repeat(3, 1fr);
-    gap: 6px 0; justify-items: center; padding: 4px 0;
-  }
-  .sp-action-btn {
-    display: flex; flex-direction: column; align-items: center;
-    gap: 4px; width: 64px; padding: 4px 0; background: none; border: none; cursor: pointer;
-  }
-  .sp-action-icon {
-    width: 42px; height: 42px; border-radius: 50%;
-    background: #5F6475; display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; color: #fff;
-  }
-  .sp-action-icon:hover { background: #4a5066; }
-  .sp-action-icon.active { background: #007FAD; }
-  .sp-action-icon.red { background: #ED4B52; }
-  .sp-action-icon.red:hover { background: #d43f46; }
-  .sp-action-label { color: #CED0D4; font-size: 11px; font-weight: 500; text-align: center; line-height: 1.2; }
-
-  /* ── Dial Pad ── */
-  .sp-dialpad-input-wrap { position: relative; display: flex; align-items: center; }
-  .sp-dialpad-input {
-    width: 100%; height: 40px; border-radius: 20px;
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-    color: #fff; font-size: 15px; font-weight: 700; font-family: 'Montserrat', sans-serif;
-    text-align: center; padding: 0 36px; outline: none; letter-spacing: 1px;
-  }
-  .sp-dialpad-input::placeholder { color: #5F6475; font-weight: 400; }
-  .sp-dialpad-suggestion { font-size: 11px; color: #8D99AE; font-weight: 500; text-align: center; margin-top: -4px; }
-  .sp-backspace {
-    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-    background: none; border: none; cursor: pointer; color: #8D99AE; padding: 4px;
-  }
-  .sp-backspace:hover { color: #fff; }
-  .sp-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 0 32px; justify-items: center; }
-  .sp-key {
-    width: 52px; height: 52px; border-radius: 50%; background: rgba(255,255,255,0.1); border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Montserrat', sans-serif; font-size: 18px; font-weight: 600; color: #fff;
-  }
-  .sp-key:hover { background: rgba(255,255,255,0.17); }
-  .sp-key:active { background: rgba(255,255,255,0.25); }
-  .sp-call-btn {
-    width: 56px; height: 56px; border-radius: 50%;
-    background: #94CC86; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    margin: 0 auto; color: #253322;
-  }
-  .sp-call-btn:hover { background: #7fb872; }
-
-  /* ── Bottom Nav ── */
-  .sp-nav {
-    display: flex; align-items: center; justify-content: space-around;
-    padding: 6px 8px; border-top: 1px solid rgba(255,255,255,0.08);
-    flex-shrink: 0; background: rgba(0,0,0,0.12);
-  }
-  .sp-nav-btn {
-    flex: 1; height: 44px; border-radius: 6px; background: none; border: none; cursor: pointer;
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 2px; color: #8D99AE; transition: all 0.15s;
-    font-family: 'Montserrat', sans-serif; font-size: 9px; font-weight: 600; position: relative;
-  }
-  .sp-nav-btn:hover { color: #fff; }
-  .sp-nav-btn.active { color: #87CFE7; }
-  .sp-nav-btn.call-tab { color: #94CC86; }
-  .sp-nav-btn.call-tab.active { color: #94CC86; }
-  .sp-nav-dot {
-    position: absolute; top: 6px; right: 14px;
-    width: 7px; height: 7px; border-radius: 50%; background: #94CC86;
-    animation: pulse-dot 1.6s ease-out infinite;
-  }
-  @keyframes pulse-dot {
-    0% { box-shadow: 0 0 0 0 rgba(148,204,134,0.5); }
-    100% { box-shadow: 0 0 0 6px rgba(148,204,134,0); }
-  }
-
-  /* ── Call Info Banner ── */
-  .sp-callinfo-banner {
-    display: flex; align-items: center; gap: 10px; padding: 8px 12px;
-    background: rgba(148,204,134,0.1); border-bottom: 1px solid rgba(148,204,134,0.2);
-    cursor: pointer;
-  }
-  .sp-callinfo-banner:hover { background: rgba(148,204,134,0.16); }
-  .sp-callinfo-pulse {
-    width: 8px; height: 8px; border-radius: 50%; background: #94CC86; flex-shrink: 0;
-    animation: pulse-dot 1.6s ease-out infinite;
-  }
-  .sp-callinfo-name { color: #fff; font-size: 12px; font-weight: 600; flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sp-callinfo-timer { color: #94CC86; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
-
-  /* ── History ── */
-  .sp-history-list { display: flex; flex-direction: column; gap: 2px; }
-  .sp-history-item { display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-radius: 4px; cursor: pointer; }
-  .sp-history-item:hover { background: rgba(255,255,255,0.06); }
-  .sp-history-info { flex: 1; min-width: 0; }
-  .sp-history-name { color: #fff; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .sp-history-meta { color: #8D99AE; font-size: 11px; font-weight: 500; }
-  .sp-history-call-btn {
-    width: 28px; height: 28px; border-radius: 50%; background: rgba(148,204,134,0.15);
-    border: none; cursor: pointer; flex-shrink: 0;
-    display: flex; align-items: center; justify-content: center; color: #94CC86;
-  }
-  .sp-history-call-btn:hover { background: #94CC86; color: #253322; }
-
-  /* ── Voicemail ── */
-  .sp-voicemail-item { padding: 10px 4px; border-radius: 4px; cursor: pointer; display: flex; flex-direction: column; gap: 6px; }
-  .sp-voicemail-item:hover { background: rgba(255,255,255,0.06); }
-  .sp-voicemail-row { display: flex; align-items: center; gap: 8px; }
-  .sp-voicemail-play {
-    width: 28px; height: 28px; border-radius: 50%; background: #007FAD; border: none; cursor: pointer;
-    display: flex; align-items: center; justify-content: center; color: #fff; flex-shrink: 0;
-  }
-  .sp-voicemail-bar { flex: 1; height: 3px; border-radius: 2px; background: rgba(255,255,255,0.15); overflow: hidden; }
-  .sp-voicemail-progress { height: 100%; background: #007FAD; }
-
-  /* ── Contacts ── */
-  .sp-contact-search {
-    width: 100%; height: 36px; border-radius: 4px;
-    background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.12);
-    color: #fff; font-size: 13px; font-family: 'Montserrat', sans-serif;
-    padding: 0 12px; outline: none;
-  }
-  .sp-contact-search::placeholder { color: #5F6475; }
-  .sp-contacts-list { display: flex; flex-direction: column; gap: 2px; }
-  .sp-contact-item { display: flex; align-items: center; gap: 10px; padding: 8px 4px; border-radius: 4px; cursor: pointer; }
-  .sp-contact-item:hover { background: rgba(255,255,255,0.06); }
-  .sp-contact-item-info { flex: 1; min-width: 0; }
-  .sp-contact-item-name { color: #fff; font-size: 13px; font-weight: 600; }
-  .sp-contact-item-num { color: #8D99AE; font-size: 11px; font-weight: 500; }
-
-  /* ── Buttons ── */
-  .sp-btn-secondary {
-    flex: 1; height: 36px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.2);
-    background: rgba(255,255,255,0.06); color: #fff; cursor: pointer;
-    font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600;
-  }
-  .sp-btn-secondary:hover { background: rgba(255,255,255,0.12); }
-  .sp-btn-primary {
-    flex: 1; height: 36px; border-radius: 4px; border: none; background: #007FAD;
-    color: #fff; cursor: pointer; font-family: 'Montserrat', sans-serif;
-    font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .sp-btn-primary:hover { background: #005f82; }
-  .sp-btn-danger {
-    width: 100%; height: 40px; border-radius: 6px; border: none; background: #ED4B52;
-    color: #fff; cursor: pointer; font-family: 'Montserrat', sans-serif;
-    font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .sp-btn-danger:hover { background: #d43f46; }
-  .sp-btn-accept {
-    width: 100%; height: 40px; border-radius: 6px; border: none; background: #94CC86;
-    color: #253322; cursor: pointer; font-family: 'Montserrat', sans-serif;
-    font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 6px;
-  }
-  .sp-btn-accept:hover { background: #7fb872; }
-
-  /* ── Divider ── */
-  .sp-divider { height: 1px; background: rgba(255,255,255,0.08); }
-
-  /* ── Badge ── */
-  .sp-badge {
-    display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 3px;
-    font-size: 11px; font-weight: 600;
-    background: rgba(135,207,231,0.15); color: #87CFE7; border: 1px solid rgba(135,207,231,0.3);
-  }
-
-  /* ── Header Call Status Chip ── */
+  .qm-right { flex: 1 0 auto; display: flex; justify-content: flex-end; align-items: center; gap: 24px; }
+  .qm-buttons { display: flex; gap: 16px; align-items: center; }
+  .qm-buttons > * { flex-shrink: 0; white-space: nowrap; }
+  .qm-icon-btn { width: 36px; height: 36px; padding: 0 4px; border-radius: 4px; background: #F2F3F7; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .qm-call-chip {
-    display: none; align-items: center; gap: 6px; padding: 0 12px; height: 32px;
-    border-radius: 16px; font-family: 'Montserrat', sans-serif;
-    font-size: 12px; font-weight: 700; white-space: nowrap; cursor: pointer;
-    transition: all 0.2s;
+    display: flex; align-items: center; height: 36px; padding: 8px; border: none; border-radius: 4px;
+    background: #94CC86; color: #253322; cursor: pointer; overflow: hidden;
   }
-  .qm-call-chip.incoming  { display: flex; background: #94CC86; color: #253322; }
-  .qm-call-chip.outgoing  { display: flex; background: #94CC86; color: #253322; }
-  .qm-call-chip.active-call { display: flex; background: #94CC86; color: #253322; }
-  .qm-simulate-btn {
-    height: 32px; padding: 0 14px; border-radius: 6px;
-    border: 1px solid #CED0D4; background: none; cursor: pointer;
-    font-family: 'Montserrat', sans-serif; font-size: 13px; font-weight: 600; color: #5F6475;
+  .qm-call-chip span { padding: 0 8px; }
+  .qm-remote { display: flex; align-items: center; height: 36px; padding: 0 8px; border-radius: 4px; background: #F2F3F7; border: none; color: #5F6475; cursor: pointer; }
+  .qm-remote span { padding: 0 8px; }
+  .qm-add-ticket { display: flex; align-items: center; height: 36px; padding: 8px; border-radius: 4px; background: #007FAD; border: 1px solid #007FAD; color: #fff; cursor: pointer; }
+  .qm-add-ticket span { padding: 0 8px; }
+  .qm-star { width: 30px; height: 30px; border-radius: 16px; background: #fff; border: none; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  .qm-avatar { width: 32px; height: 32px; border-radius: 100px; background: #A4495D; display: flex; align-items: center; justify-content: center; }
+  /* ── Workspace / home page (Figma "My Workspace" 2458:43293) ── */
+  .qm-content {
+    position: fixed; top: 64px; left: 0; right: 0; bottom: 0; overflow: auto;
+    background: url(assets/icons/home-background.png) top center / cover no-repeat, #FDFDFD;
   }
-  .qm-simulate-btn:hover { background: #F4F6FB; }
+  .hm-page { height: 100%; min-height: 720px; padding: 40px 100px; display: flex; flex-direction: column; gap: 48px; color: #363B4D; }
+  .hm-head { display: flex; justify-content: space-between; align-items: flex-end; }
+  .hm-grid { flex: 1; min-height: 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-template-rows: auto minmax(420px, 1fr); gap: 24px; }
+  .hm-btn-icon { width: 36px; height: 36px; padding: 0 4px; border-radius: 4px; border: none; background: #F2F3F7; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .hm-btn-icon:hover { background: #e6e8ee; }
+  .hm-card {
+    background: #FFFFFF; border: 1px solid #CED0D4; border-radius: 8px; box-shadow: 0 2px 7px 0 rgba(0,125,171,0.10);
+  }
+  .hm-stat { padding: 16px 24px; display: flex; align-items: center; gap: 24px; overflow: hidden; cursor: pointer; text-align: left; font-family: inherit; }
+  .hm-stat:hover { border-color: #8D99AE; }
+  .hm-tile { width: 48px; height: 48px; padding: 4px; border-radius: 4px; flex-shrink: 0; }
+  .hm-stat-label { font-weight: 500; font-size: 16px; line-height: 20px; letter-spacing: 0.5px; color: #5F6475; white-space: nowrap; }
+  .hm-stat-num { font-weight: 500; font-size: 32px; line-height: 40px; color: #363B4D; }
+  .hm-track { flex: 1; height: 12px; background: #F4F6FB; border-radius: 8px; overflow: hidden; position: relative; }
+  .hm-panel { padding: 16px; display: flex; flex-direction: column; gap: 16px; overflow: hidden; min-height: 0; }
+  .hm-panel-title { font-weight: 600; font-size: 18px; line-height: 24px; color: #363B4D; white-space: nowrap; }
+  .hm-list { display: flex; flex-direction: column; gap: 12px; overflow-y: auto; min-height: 0; }
+  .hm-check { display: flex; gap: 8px; align-items: center; border: none; background: none; cursor: pointer; padding: 0; color: #5F6475; }
+  .hm-check-off { width: 24px; height: 24px; display: flex; align-items: center; justify-content: center; }
+  .hm-check-off::before { content: ''; width: 18px; height: 18px; border: 2px solid #5F6475; border-radius: 2px; }
+  .hm-ticket { flex-shrink: 0; background: #FFFFFF; border: 1px solid #CED0D4; border-radius: 8px; padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; }
+  .hm-ticket:hover { background: #F2F3F7; }
+  .hm-row { display: flex; justify-content: space-between; align-items: center; gap: 16px; width: 100%; }
+  .hm-av { width: 20px; height: 20px; border-radius: 100px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 8px; line-height: normal; letter-spacing: 0.1px; }
+  .hm-av24 { width: 24px; height: 24px; border-radius: 100px; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center; color: #fff; font-weight: 600; font-size: 12px; line-height: normal; letter-spacing: 0.1px; }
+  .hm-activity { flex-shrink: 0; background: #FFFFFF; border: 1px solid #CED0D4; border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 8px; cursor: pointer; }
+  .hm-activity:hover { background: #F7F8FB; }
+  .hm-act-line { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; color: #363B4D; }
 
-  /* ── Toast ── */
-  .sp-toast-notif {
-    position: fixed; top: 72px; left: 50%; transform: translateX(-50%);
-    background: #363B4D; border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 6px; padding: 12px 20px; color: #fff; font-size: 13px; font-weight: 500;
-    z-index: 3000; box-shadow: 0 4px 16px rgba(0,0,0,0.3); animation: toastIn 0.3s ease;
-  }
-  @keyframes toastIn {
-    from { opacity: 0; transform: translateX(-50%) translateY(-8px); }
-    to { opacity: 1; transform: translateX(-50%) translateY(0); }
-  }
+  /* ── Prototype controls (not part of the design) ── */
+  .demo-fab { position: fixed; left: 16px; bottom: 16px; z-index: 900; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
+  .demo-card { display: inline-flex; flex-direction: column; gap: 10px; padding: 16px; border: 1px dashed #CED0D4; border-radius: 8px; background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
+  .demo-card h3 { font-size: 12px; font-weight: 600; color: #8D99AE; text-transform: uppercase; letter-spacing: 0.6px; }
+  .demo-row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .demo-btn { height: 32px; padding: 0 12px; border-radius: 4px; border: 1px solid #CED0D4; background: #fff; color: #363B4D; font-size: 13px; font-weight: 500; cursor: pointer; }
+  .demo-btn:hover { background: #F4F6FB; }
+  .demo-btn.on { background: #363B4D; color: #fff; border-color: #363B4D; }
 
-  /* ── Incoming Pulse Ring ── */
-  @keyframes pulse-ring {
-    0% { transform: scale(1); opacity: 0.6; }
-    100% { transform: scale(1.6); opacity: 0; }
+  /* ── Softphone panel ── */
+  .sp-panel {
+    position: fixed; z-index: 1000; width: var(--sp-width); background: #363B4D; border-radius: 8px;
+    box-shadow: 0 0 2px 0 rgba(0,0,0,0.16), 0 1px 4px 0 rgba(0,0,0,0.16), 0 12px 32px rgba(0,0,0,0.18);
+    display: flex; flex-direction: column; overflow: hidden; color: #fff; user-select: none;
   }
-  .sp-avatar-pulse { position: relative; display: inline-flex; align-items: center; justify-content: center; }
-  .sp-avatar-pulse::before, .sp-avatar-pulse::after {
-    content: ''; position: absolute; width: 100%; height: 100%; border-radius: 50%;
-    background: rgba(0,127,173,0.35); animation: pulse-ring 1.4s ease-out infinite;
+  .sp-head {
+    flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 4px;
+    background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), #363B4D;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
   }
-  .sp-avatar-pulse::after { animation-delay: 0.6s; }
+  .sp-head-left { display: flex; gap: 8px; align-items: center; }
+  .sp-head-right { display: flex; align-items: center; }
+  .sp-hbtn { width: 40px; height: 40px; padding: 8px; border-radius: 200px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .sp-hbtn:hover { background: rgba(255,255,255,0.08); }
+  .sp-hbtn.drag { cursor: grab; }
+  .sp-hbtn.drag:active { cursor: grabbing; }
+  .sp-chip { display: flex; align-items: center; gap: 8px; height: 24px; padding: 4px 8px; border-radius: 200px; background: #CED0D4; color: #363B4D; font-variant-numeric: tabular-nums; }
 
-  ::-webkit-scrollbar { width: 4px; }
-  ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+  .sp-banner {
+    flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 8px 16px;
+    background: rgba(148,204,134,0.2); border-bottom: 1px solid rgba(255,255,255,0.1); overflow: hidden; cursor: pointer;
+  }
+  .sp-banner:hover { background: rgba(148,204,134,0.26); }
+  .sp-banner-left { display: flex; align-items: center; gap: 20px; min-width: 0; }
+  .sp-vdiv { width: 1px; height: 23px; background: #CED0D4; flex-shrink: 0; }
+
+  .sp-main { flex: 1 0 0; min-height: 0; width: 100%; display: flex; flex-direction: column; }
+  .sp-scroll { overflow-y: auto; min-height: 0; }
+  .sp-scroll::-webkit-scrollbar { width: 4px; }
+  .sp-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.15); border-radius: 2px; }
+
+  /* Bottom nav */
+  .sp-nav { flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 12px; background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), #363B4D; }
+  .sp-nav-item { width: 75px; padding: 4px; border-radius: 4px; border: none; background: none; cursor: pointer; display: flex; flex-direction: column; gap: 4px; align-items: center; justify-content: center; color: #8D99AE; }
+  .sp-nav-item.on { color: #FFFFFF; }
+  .sp-nav-item:hover { background: rgba(255,255,255,0.05); }
+
+  /* Avatar */
+  .sp-av { border-radius: 100px; display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; color: #fff; font-weight: 600; text-align: center; }
+
+  /* Inputs */
+  .sp-field { height: 40px; width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid #5F6475; border-radius: 8px; overflow: hidden; }
+  .sp-field input { flex: 1; min-width: 0; height: 18px; border: none; outline: none; background: none; color: #fff; font: 500 14px/18px 'Montserrat', sans-serif; letter-spacing: 0.25px; }
+  .sp-field input::placeholder { color: #CED0D4; font-style: italic; }
+  .sp-search { height: 40px; width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 12px; border: 1px solid #5F6475; border-radius: 8px; overflow: hidden; }
+  .sp-search.filled { border-color: #8D99AE; }
+  .sp-search input { flex: 1; min-width: 0; border: none; outline: none; background: none; color: #fff; font: 500 16px/20px 'Montserrat', sans-serif; letter-spacing: 0.5px; }
+  .sp-search input::placeholder { color: #8D99AE; }
+  .sp-icon-btn { border: none; background: none; padding: 0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+  /* Keypad */
+  .sp-keypad { display: inline-grid; grid-template-columns: repeat(3, 48px); column-gap: 24px; row-gap: 16px; }
+  .sp-key { width: 48px; height: 48px; padding: 8px; border-radius: 200px; border: none; background: #5F6475; color: #fff; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .sp-key:hover { background: #6c7184; }
+  .sp-key:active { background: #7a8093; }
+  .sp-key.call { background: #94CC86; }
+  .sp-key.call:hover { background: #86bd78; }
+  .sp-key.call:disabled { background: #4A6643; cursor: default; }
+
+  /* Segmented control */
+  .sp-seg { width: 100%; display: flex; align-items: center; padding: 2px; background: #5F6475; border-radius: 4px; flex-shrink: 0; }
+  .sp-seg button { flex: 1 0 0; padding: 8px; border-radius: 4px; border: none; background: none; color: #fff; cursor: pointer; white-space: nowrap; }
+  .sp-seg button.on { background: #F4F6FB; color: #363B4D; }
+
+  /* Buttons */
+  .sp-btn { height: 36px; padding: 0 16px; border-radius: 4px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; white-space: nowrap; flex-shrink: 0; }
+  .sp-btn.primary { background: #007FAD; border: 1px solid #007FAD; color: #fff; }
+  .sp-btn.primary:hover { background: #006d95; }
+  .sp-btn.secondary { background: #F2F3F7; color: #5F6475; }
+  .sp-btn.secondary:hover { background: #e3e5ec; }
+  .sp-btn.danger { background: #ED4B52; color: #fff; }
+  .sp-btn.danger.bordered { border: 1px solid #ED4B52; }
+  .sp-btn.danger:hover { background: #d9434a; }
+  .sp-btn.success { background: #94CC86; color: #363B4D; }
+  .sp-btn.success.bordered { border: 1px solid #94CC86; }
+  .sp-btn.success:hover { background: #86bd78; }
+  .sp-btn.accept-outline { background: #fff; border: 1px solid #4A6643; color: #4A6643; }
+  .sp-btn.accept-outline:hover { background: #eef5ec; }
+  .sp-btn.full { width: 100%; }
+  .sp-btn:disabled { opacity: 0.5; cursor: default; }
+  .sp-link { display: flex; align-items: center; gap: 8px; height: 24px; padding: 0; border: none; background: none; color: #87CFE7; cursor: pointer; white-space: nowrap; }
+  .sp-link:hover { text-decoration: underline; }
+  .sp-row-call { width: 36px; height: 36px; padding: 0 4px; border-radius: 4px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .sp-row-call:hover { background: rgba(148,204,134,0.15); }
+
+  /* Lists */
+  .sp-list { width: 100%; display: flex; flex-direction: column; gap: 12px; }
+  .sp-div { width: 100%; height: 1px; background: #5F6475; flex-shrink: 0; }
+  .sp-row { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .sp-row-left { display: flex; gap: 4px; align-items: center; min-width: 0; }
+  .sp-col4 { display: flex; flex-direction: column; gap: 4px; justify-content: center; align-items: flex-start; min-width: 0; }
+  .sp-line { display: flex; gap: 8px; align-items: center; white-space: nowrap; }
+  .sp-status { display: flex; gap: 4px; align-items: center; }
+
+  /* Call controls */
+  .sp-ctrls { width: 174px; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; align-content: flex-start; row-gap: 29px; column-gap: 27px; }
+  .sp-ctrl { width: 40px; display: flex; flex-direction: column; gap: 4px; align-items: center; border: none; background: none; padding: 0; cursor: pointer; color: #8D99AE; }
+  .sp-ctrl-circle { width: 36px; height: 36px; padding: 8px; border-radius: 200px; background: #5F6475; display: flex; align-items: center; justify-content: center; }
+  .sp-ctrl:hover .sp-ctrl-circle { background: #6c7184; }
+  .sp-ctrl.on { color: #fff; }
+  .sp-ctrl.on .sp-ctrl-circle { background: #fff; }
+  .sp-ctrl.disabled { opacity: 0.25; pointer-events: none; }
+  .sp-ctrl-label { font-weight: 400; font-size: 12px; line-height: 14px; text-align: center; white-space: nowrap; }
+
+  .sp-lozenge { height: 24px; padding: 4px 8px; border-radius: 4px; display: inline-flex; align-items: center; color: #363B4D; white-space: nowrap; }
+
+  /* Filter dropdown (transfer) */
+  .sp-filter { position: relative; flex: 1 0 0; min-width: 0; height: 36px; display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid #5F6475; border-radius: 4px; cursor: pointer; }
+  .sp-filter input { flex: 1; min-width: 0; height: 18px; border: none; outline: none; background: none; color: #fff; font: 500 14px/18px 'Montserrat', sans-serif; letter-spacing: 0.25px; }
+  .sp-filter input::placeholder { color: #8D99AE; font-style: italic; }
+  .sp-filter-menu { position: absolute; top: 40px; left: -1px; right: -1px; z-index: 5; background: #4A4F61; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); padding: 4px 0; }
+  .sp-filter-menu button { display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: none; color: #fff; cursor: pointer; }
+  .sp-filter-menu button:hover { background: rgba(255,255,255,0.08); }
+  .sp-square { width: 40px; height: 36px; padding: 0 7px; border: 1px solid #5F6475; border-radius: 4px; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .sp-square.on { border-color: #8D99AE; }
+
+  /* Minimized bars */
+  .sp-bar {
+    position: fixed; z-index: 1000; display: flex; align-items: center; justify-content: space-between;
+    padding: 16px; background: #363B4D; border-radius: 8px; color: #fff; user-select: none; overflow: hidden;
+    box-shadow: 0 0 2px rgba(0,0,0,0.16), 0 1px 4px rgba(0,0,0,0.16), 0 12px 32px rgba(0,0,0,0.18);
+  }
+  .sp-bar-handle { cursor: grab; display: flex; }
+  .sp-bar-handle:active { cursor: grabbing; }
+
+  /* Generic toast */
+  .sp-toast {
+    position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 3000;
+    background: #363B4D; color: #fff; border-radius: 4px; padding: 10px 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
+    animation: toastIn .25s ease;
+  }
+  @keyframes toastIn { from { opacity: 0; transform: translate(-50%, -6px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
   /* ── New Ticket Modal ── */
   .nt-overlay {
@@ -445,1266 +311,1627 @@
   }
   .nt-btn-create:hover { background: #005f82; }
 </style>
+</style>
 </head>
 <body>
-
-<!-- Simulated qManage app background -->
-<div class="qm-bg">
-  <div class="qm-header" id="qmHeader">
-    <button class="qm-icon-btn" style="color:#363B4D">
-      <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/></svg>
-    </button>
-    <div class="qm-logo">
-      <span style="color:#00A6E0;font-size:26px;font-weight:900">q</span>Manage
-    </div>
-    <div class="qm-search">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-      Search qManage
-    </div>
-    <button class="qm-simulate-btn" id="simulateCallBtn">Simulate Call</button>
-    <div class="qm-header-right">
-      <div id="qmCallChip" class="qm-call-chip"></div>
-      <button class="qm-phone-btn" id="phoneToggleBtn" title="Softphone">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg>
-      </button>
-      <button class="qm-icon-btn">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/></svg>
-      </button>
-      <button class="qm-add-ticket">+ Add Ticket</button>
-      <div class="qm-avatar">JD</div>
-    </div>
-  </div>
-  <div class="qm-content">
-    <h1 style="font-size:24px;font-weight:700;color:#363B4D;margin-bottom:4px">Hi, John!</h1>
-    <p style="color:#8D99AE;font-size:14px">Here's what's going on today.</p>
-  </div>
-</div>
-
 <div id="app"></div>
 
 <script type="text/babel">
 const { useState, useEffect, useRef, useCallback } = React;
 
 // ─────────────────────────────────────────────────────────────
-// Tweaks Panel (self-contained)
+// Primitives
 // ─────────────────────────────────────────────────────────────
-const __TWEAKS_STYLE = `
-  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
-    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
-    background:rgba(250,249,247,.78);color:#29261b;
-    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
-    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
-    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
-    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
-  .twk-hd{display:flex;align-items:center;justify-content:space-between;
-    padding:10px 8px 10px 14px;cursor:move;user-select:none}
-  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
-  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
-    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
-  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
-  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
-    overflow-y:auto;overflow-x:hidden;min-height:0;
-    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
-  .twk-row{display:flex;flex-direction:column;gap:5px}
-  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
-  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;color:rgba(41,38,27,.72)}
-  .twk-lbl>span:first-child{font-weight:500}
-  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
-    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
-  .twk-toggle[data-on="1"]{background:#34c759}
-  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
-    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
-  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
-  .twk-btn{appearance:none;height:26px;padding:0 12px;border:0;border-radius:7px;
-    background:rgba(0,0,0,.78);color:#fff;font:inherit;font-weight:500;cursor:default}
-  .twk-btn:hover{background:rgba(0,0,0,.88)}
-  .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;
-    border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;
-    background:transparent;flex-shrink:0}
-  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
-  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
-  .twk-swatch::-moz-color-swatch{border:0;border-radius:5.5px}
-`;
-
-function useTweaks(defaults) {
-  const [values, setValues] = useState(defaults);
-  const setTweak = useCallback((keyOrEdits, val) => {
-    const edits = typeof keyOrEdits === 'object' && keyOrEdits !== null
-      ? keyOrEdits : { [keyOrEdits]: val };
-    setValues(prev => ({ ...prev, ...edits }));
-    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
-  }, []);
-  return [values, setTweak];
-}
-
-function TweaksPanel({ children }) {
-  const [open, setOpen] = useState(false);
-  const dragRef = useRef(null);
-  const offsetRef = useRef({ x: 16, y: 16 });
-
-  const clamp = useCallback(() => {
-    const panel = dragRef.current;
-    if (!panel) return;
-    const w = panel.offsetWidth, h = panel.offsetHeight;
-    offsetRef.current = {
-      x: Math.min(Math.max(16, window.innerWidth - w - 16), Math.max(16, offsetRef.current.x)),
-      y: Math.min(Math.max(16, window.innerHeight - h - 16), Math.max(16, offsetRef.current.y)),
-    };
-    panel.style.right = offsetRef.current.x + 'px';
-    panel.style.bottom = offsetRef.current.y + 'px';
-  }, []);
-
-  useEffect(() => {
-    const onMsg = (e) => {
-      if (e?.data?.type === '__activate_edit_mode') setOpen(true);
-      else if (e?.data?.type === '__deactivate_edit_mode') setOpen(false);
-    };
-    window.addEventListener('message', onMsg);
-    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
-    return () => window.removeEventListener('message', onMsg);
-  }, []);
-
-  const onDragStart = (e) => {
-    const panel = dragRef.current;
-    if (!panel) return;
-    const r = panel.getBoundingClientRect();
-    const sx = e.clientX, sy = e.clientY;
-    const startRight = window.innerWidth - r.right;
-    const startBottom = window.innerHeight - r.bottom;
-    const move = (ev) => {
-      offsetRef.current = { x: startRight - (ev.clientX - sx), y: startBottom - (ev.clientY - sy) };
-      clamp();
-    };
-    const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); };
-    window.addEventListener('mousemove', move);
-    window.addEventListener('mouseup', up);
-  };
-
-  if (!open) return null;
-  return (
-    <>
-      <style>{__TWEAKS_STYLE}</style>
-      <div ref={dragRef} className="twk-panel" style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
-        <div className="twk-hd" onMouseDown={onDragStart}>
-          <b>Tweaks</b>
-          <button className="twk-x" onMouseDown={e=>e.stopPropagation()}
-            onClick={() => { setOpen(false); window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*'); }}>✕</button>
-        </div>
-        <div className="twk-body">{children}</div>
-      </div>
-    </>
-  );
-}
-
-function TweakColor({ label, value, onChange }) {
-  return (
-    <div className="twk-row twk-row-h">
-      <div className="twk-lbl"><span>{label}</span></div>
-      <input type="color" className="twk-swatch" value={value} onChange={e=>onChange(e.target.value)} />
-    </div>
-  );
-}
-
-function TweakToggle({ label, value, onChange }) {
-  return (
-    <div className="twk-row twk-row-h">
-      <div className="twk-lbl"><span>{label}</span></div>
-      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
-        onClick={() => onChange(!value)}><i /></button>
-    </div>
-  );
-}
-
-function TweakButton({ label, onClick }) {
-  return <button type="button" className="twk-btn" onClick={onClick}>{label}</button>;
-}
-
-// ─────────────────────────────────────────────────────────────
-// Utilities
-// ─────────────────────────────────────────────────────────────
-const AVATAR_COLORS = ['#007FAD','#A4495D','#2B376B','#6F9965','#7B3746','#8D99AE'];
-function avatarColor(name) {
-  let h = 0;
-  for (let c of name) h = (h * 31 + c.charCodeAt(0)) % AVATAR_COLORS.length;
-  return AVATAR_COLORS[h];
-}
-function initials(name) {
-  return name.split(' ').map(p => p[0]).join('').slice(0, 2).toUpperCase();
-}
-
-const Icon = ({ name, size = 20, color = 'currentColor' }) => {
-  const viewBoxes = {
-    forward: '0 0 15.8333 15.8333',
-    history: '0 0 16.6667 16.6667',
-    contacts: '0 0 15 15',
-  };
-  const paths = {
-    dialpad: <><circle cx="12" cy="19" r="1.5"/><path d="M7 3.5H9.5V6H7zM10.75 3.5H13.25V6H10.75zM14.5 3.5H17V6H14.5zM7 7.25H9.5V9.75H7zM10.75 7.25H13.25V9.75H10.75zM14.5 7.25H17V9.75H14.5zM7 11H9.5V13.5H7zM10.75 11H13.25V13.5H10.75zM14.5 11H17V13.5H14.5z"/></>,
-    call: <path d="M6.62 10.79c1.44 2.83 3.76 5.14 6.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/>,
-    callEnd: <path d="M12 9c-1.6 0-3.15.25-4.6.72v3.1c0 .39-.23.74-.56.9-.98.49-1.87 1.12-2.66 1.85-.18.18-.43.28-.7.28-.28 0-.53-.11-.71-.29L.29 13.08c-.18-.17-.29-.42-.29-.7 0-.28.11-.53.29-.71C3.34 8.78 7.46 7 12 7s8.66 1.78 11.71 4.67c.18.18.29.43.29.71 0 .28-.11.53-.29.71l-2.48 2.48c-.18.18-.43.29-.71.29-.27 0-.52-.1-.7-.28-.79-.74-1.69-1.36-2.67-1.85-.33-.16-.56-.5-.56-.9v-3.1C15.15 9.25 13.6 9 12 9z"/>,
-    mic: <path d="M12 14c1.66 0 2.99-1.34 2.99-3L15 5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3zm5.3-3c0 3-2.54 5.1-5.3 5.1S6.7 14 6.7 11H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c3.28-.48 6-3.3 6-6.72h-1.7z"/>,
-    micOff: <path d="M19 11h-1.7c0 .74-.16 1.43-.43 2.05l1.23 1.23c.56-.98.9-2.09.9-3.28zm-4.02.17c0-.06.02-.11.02-.17V5c0-1.66-1.34-3-3-3S9 3.34 9 5v.18l5.98 5.99zM4.27 3L3 4.27l6.01 6.01V11c0 1.66 1.33 3 2.99 3 .22 0 .44-.03.65-.08l1.66 1.66c-.71.33-1.5.52-2.31.52-2.76 0-5.3-2.1-5.3-5.1H5c0 3.41 2.72 6.23 6 6.72V21h2v-3.28c.91-.13 1.77-.45 2.54-.9L19.73 21 21 19.73 4.27 3z"/>,
-    pause: <path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>,
-    play: <path d="M8 5v14l11-7z"/>,
-    personAdd: <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>,
-    personRemove: <path d="M14 8c0-2.21-1.79-4-4-4S6 5.79 6 8s1.79 4 4 4 4-1.79 4-4zm-2 0c0 1.1-.9 2-2 2s-2-.9-2-2 .9-2 2-2 2 .9 2 2zm-6 10v-2c0-2.21 3.13-3 5-3 .35 0 .69.03 1.02.07C12.1 13.37 12 13.7 12 14.03V16H2v-2zm14-4h-6v2h6v-2z"/>,
-    forward: <path d="M14.125 15.8333C12.3889 15.8333 10.6736 15.4549 8.97917 14.6979C7.28472 13.941 5.74306 12.8681 4.35417 11.4792C2.96528 10.0903 1.89236 8.54861 1.13542 6.85417C0.378472 5.15972 0 3.44444 0 1.70833C0 1.45833 0.0833333 1.25 0.25 1.08333C0.416667 0.916667 0.625 0.833333 0.875 0.833333H4.25C4.44444 0.833333 4.61806 0.899306 4.77083 1.03125C4.92361 1.16319 5.01389 1.31944 5.04167 1.5L5.58333 4.41667C5.61111 4.63889 5.60417 4.82639 5.5625 4.97917C5.52083 5.13194 5.44444 5.26389 5.33333 5.375L3.3125 7.41667C3.59028 7.93056 3.92014 8.42708 4.30208 8.90625C4.68403 9.38542 5.10417 9.84722 5.5625 10.2917C5.99306 10.7222 6.44444 11.1215 6.91667 11.4896C7.38889 11.8576 7.88889 12.1944 8.41667 12.5L10.375 10.5417C10.5 10.4167 10.6632 10.3229 10.8646 10.2604C11.066 10.1979 11.2639 10.1806 11.4583 10.2083L14.3333 10.7917C14.5278 10.8472 14.6875 10.9479 14.8125 11.0937C14.9375 11.2396 15 11.4028 15 11.5833V14.9583C15 15.2083 14.9167 15.4167 14.75 15.5833C14.5833 15.75 14.375 15.8333 14.125 15.8333ZM12.5 6.66667L11.2917 5.5L12.625 4.16667H8.33333V2.5H12.625L11.3333 1.20833L12.5 0L15.8333 3.375L12.5 6.66667Z"/>,
-    history: <path d="M8.33333 1.66667V0H16.6667V1.66667H8.33333ZM8.33333 5V3.33333H16.6667V5H8.33333ZM8.33333 8.33333V6.66667H16.6667V8.33333H8.33333ZM14.125 16.6667C12.3889 16.6667 10.6736 16.2882 8.97917 15.5313C7.28472 14.7743 5.74306 13.7014 4.35417 12.3125C2.96528 10.9236 1.89236 9.38194 1.13542 7.6875C0.378472 5.99306 0 4.27778 0 2.54167C0 2.29167 0.0833333 2.08333 0.25 1.91667C0.416667 1.75 0.625 1.66667 0.875 1.66667H4.25C4.44444 1.66667 4.61806 1.73264 4.77083 1.86458C4.92361 1.99653 5.01389 2.15278 5.04167 2.33333L5.58333 5.25C5.61111 5.47222 5.60417 5.65972 5.5625 5.8125C5.52083 5.96528 5.44444 6.09722 5.33333 6.20833L3.3125 8.25C3.59028 8.76389 3.92014 9.26042 4.30208 9.73958C4.68403 10.2187 5.10417 10.6806 5.5625 11.125C5.99306 11.5556 6.44444 11.9549 6.91667 12.3229C7.38889 12.691 7.88889 13.0278 8.41667 13.3333L10.375 11.375C10.5 11.25 10.6632 11.1562 10.8646 11.0937C11.066 11.0312 11.2639 11.0139 11.4583 11.0417L14.3333 11.625C14.5278 11.6806 14.6875 11.7812 14.8125 11.9271C14.9375 12.0729 15 12.2361 15 12.4167V15.7917C15 16.0417 14.9167 16.25 14.75 16.4167C14.5833 16.5833 14.375 16.6667 14.125 16.6667ZM2.52083 6.66667L3.89583 5.29167L3.54167 3.33333H1.6875C1.75694 3.90278 1.85417 4.46528 1.97917 5.02083C2.10417 5.57639 2.28472 6.125 2.52083 6.66667ZM9.97917 14.125C10.5208 14.3611 11.0729 14.5486 11.6354 14.6875C12.1979 14.8264 12.7639 14.9167 13.3333 14.9583V13.125L11.375 12.7292L9.97917 14.125Z"/>,
-    contacts: <path d="M1.66667 12.375C2.41667 11.6389 3.28819 11.059 4.28125 10.6354C5.27431 10.2118 6.34722 10 7.5 10C8.65278 10 9.72569 10.2118 10.7187 10.6354C11.7118 11.059 12.5833 11.6389 13.3333 12.375V1.66667H1.66667V12.375ZM9.5625 7.47917C10.1319 6.90972 10.4167 6.22222 10.4167 5.41667C10.4167 4.61111 10.1319 3.92361 9.5625 3.35417C8.99306 2.78472 8.30556 2.5 7.5 2.5C6.69444 2.5 6.00694 2.78472 5.4375 3.35417C4.86806 3.92361 4.58333 4.61111 4.58333 5.41667C4.58333 6.22222 4.86806 6.90972 5.4375 7.47917C6.00694 8.04861 6.69444 8.33333 7.5 8.33333C8.30556 8.33333 8.99306 8.04861 9.5625 7.47917ZM1.66667 15C1.20833 15 0.815972 14.8368 0.489583 14.5104C0.163194 14.184 0 13.7917 0 13.3333V1.66667C0 1.20833 0.163194 0.815972 0.489583 0.489583C0.815972 0.163194 1.20833 0 1.66667 0H13.3333C13.7917 0 14.184 0.163194 14.5104 0.489583C14.8368 0.815972 15 1.20833 15 1.66667V13.3333C15 13.7917 14.8368 14.184 14.5104 14.5104C14.184 14.8368 13.7917 15 13.3333 15H1.66667ZM3.10417 13.3333H11.8958C11.2847 12.7917 10.5938 12.3785 9.82292 12.0937C9.05208 11.809 8.27778 11.6667 7.5 11.6667C6.72222 11.6667 5.94097 11.809 5.15625 12.0937C4.37153 12.3785 3.6875 12.7917 3.10417 13.3333ZM6.61458 6.30208C6.37153 6.05903 6.25 5.76389 6.25 5.41667C6.25 5.06944 6.37153 4.77431 6.61458 4.53125C6.85764 4.28819 7.15278 4.16667 7.5 4.16667C7.84722 4.16667 8.14236 4.28819 8.38542 4.53125C8.62847 4.77431 8.75 5.06944 8.75 5.41667C8.75 5.76389 8.62847 6.05903 8.38542 6.30208C8.14236 6.54514 7.84722 6.66667 7.5 6.66667C7.15278 6.66667 6.85764 6.54514 6.61458 6.30208Z"/>,
-    voicemail: <path d="M18.5 6C15.46 6 13 8.46 13 11.5c0 1.33.47 2.55 1.26 3.5H9.74c.79-.95 1.26-2.17 1.26-3.5C11 8.46 8.54 6 5.5 6 2.46 6 0 8.46 0 11.5S2.46 17 5.5 17h13c3.04 0 5.5-2.46 5.5-5.5S21.54 6 18.5 6zM5.5 15C3.57 15 2 13.43 2 11.5S3.57 8 5.5 8 9 9.57 9 11.5 7.43 15 5.5 15zm13 0c-1.93 0-3.5-1.57-3.5-3.5S16.57 8 18.5 8 22 9.57 22 11.5 20.43 15 18.5 15z"/>,
-    callMade: <path d="M9 5v2h6.59L4 18.59 5.41 20 17 8.41V15h2V5z"/>,
-    callReceived: <path d="M20 5.41L18.59 4 7 15.59V9H5v10h10v-2H8.41z"/>,
-    callMissed: <path d="M3 8.41l9 9 7-7V15h2V7h-8v2h4.59L12 14.59l-9-9L1.59 7 3 8.41z"/>,
-    backspace: <path d="M22 3H7c-.69 0-1.23.35-1.59.88L0 12l5.41 8.11c.36.53.9.89 1.59.89h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z"/>,
-    arrowLeft: <path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/>,
-    close: <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>,
-    mail: <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>,
-    minimize: <path d="M6 19h12v2H6z"/>,
-    drag: <><circle cx="9" cy="6" r="1.6"/><circle cx="15" cy="6" r="1.6"/><circle cx="9" cy="12" r="1.6"/><circle cx="15" cy="12" r="1.6"/><circle cx="9" cy="18" r="1.6"/><circle cx="15" cy="18" r="1.6"></circle></>,
-    expand: <path d="M14 4h6v6h-2V7.41l-3.79 3.8-1.42-1.42L16.59 6H14V4zM4 14h2v2.59l3.79-3.8 1.42 1.42L7.41 18H10v2H4v-6z"/>,
-    popout: <path d="M19 19H5V5h7V3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7h-2v7zM14 3v2h3.59l-9.83 9.83 1.41 1.41L19 6.41V10h2V3h-7z"/>,
-    info: <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>,
-    group: <path d="M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z"/>,
-  };
-  return (
-    <svg width={size} height={size} viewBox={viewBoxes[name] || "0 0 24 24"} fill={color}>
-      {paths[name] || <circle cx="12" cy="12" r="5"/>}
-    </svg>
-  );
+// Icons are the Figma-exported SVGs in assets/icons; each is rendered at its root size.
+const ICON_SIZE = {
+  'drag': 24, 'expand': 24, 'clear': 24, 'search': 24, 'row-call': 24, 'filter': 24, 'queue': 24,
+  'history-incoming': 24, 'history-outgoing': 24, 'history-missed': 24,
+  'chevron-down-blue': 24, 'chevron-up-blue': 24, 'person-placeholder': 32,
+  'dot-available': 8, 'dot-busy': 8, 'dot-away': 8, 'mail': 18, 'phone-blue': 18, 'building': 16,
+  'hdr-menu': 24, 'hdr-search': 24, 'hdr-add': 24, 'hdr-communication': 24, 'hdr-notifications': 24, 'hdr-person': 14,
+};
+const Ico = ({ n }) => {
+  if (n === 'hdr-logo') return <img src="assets/icons/hdr-logo.svg" width="195" height="44" alt="qManage" />;
+  const s = ICON_SIZE[n] || 20;
+  return <img src={`assets/icons/${n}.svg`} width={s} height={s} alt="" draggable="false" />;
 };
 
-const Avatar = ({ name, size = 32, color, fontSize }) => {
-  const fs = fontSize || (size >= 80 ? 30 : size >= 48 ? 16 : size >= 40 ? 14 : 12);
-  const bg = color || avatarColor(name);
+const AV_TEXT = { 24: 't-title-xs', 32: 't-title-sm', 48: 't-title-md' };
+const Avatar = ({ p, size = 24, color }) => (
+  <div className="sp-av" style={{ width: size, height: size, background: color || p.color || '#B23C69' }}>
+    {p.unknown
+      ? <Ico n="person-placeholder" />
+      : <span className={AV_TEXT[size]} style={size === 24 ? { lineHeight: 'normal' } : null}>{p.initials}</span>}
+  </div>
+);
+
+const StatusDot = ({ status }) => {
+  const s = STATUS[status];
   return (
-    <div className="sp-avatar" style={{ width: size, height: size, fontSize: fs, background: bg }}>
-      {initials(name)}
+    <div className="sp-status">
+      <Ico n={s.dot} />
+      <span className="t-body-sm" style={{ color: 'inherit' }}>{s.label}</span>
     </div>
   );
 };
 
+const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+const fmtLong = (s) => `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, '0')}s`;
+const digits = (s) => s.replace(/\D/g, '');
+
 // ─────────────────────────────────────────────────────────────
-// Data
+// Data (copied from the Figma V2 mocks)
 // ─────────────────────────────────────────────────────────────
+const STATUS = {
+  available: { dot: 'dot-available', label: 'Available' },
+  busy:      { dot: 'dot-busy',      label: 'On a call' },
+  away:      { dot: 'dot-away',      label: 'Away' },
+  offline:   { dot: 'dot-busy',      label: 'Offline' },
+};
+
+const CHARLIE = {
+  id: 'c1', kind: 'contact', name: 'Charlie Apegian', initials: 'CA', color: '#B23C69',
+  phone: '(555)-123-4567', listNumber: '(555) 123 -4567', company: 'Creative Solutions LLC',
+  email: 'thisisaverylongemailIdontknowwhy@email.com', directPhone: '(123) 456-7890',
+  badge: 'Superuser', companyType: 'Regular Company', billing: 'Per Unit', companyCode: 'CSLLC',
+  comment: 'Comment here!',
+  tickets: [
+    { id: '345234', title: 'Can’t Connect to Server' },
+    { id: '544364', title: 'Error in distribution calculation' },
+    { id: '544365', title: 'Missing data in input file' },
+    { id: '544366', title: 'Invalid format for date entry' },
+    { id: '654347', title: 'User unable to access document after creation' },
+  ],
+};
+
 const CONTACTS = [
-  { id: 1, name: 'Charlie Apegian', number: '(555) 123-4567', email: 'c.apegian@csllc.com',
-    company: 'Creative Solutions LLC', companyType: 'Regular Company', billing: 'Per Unit', companyCode: 'CSLLC', type: 'Superuser',
-    tickets: [
-      { id: '345234', title: "Can't Connect to Server" },
-      { id: '544364', title: 'Error in distribution calculation' },
-      { id: '544365', title: 'Missing data in input file' },
-      { id: '544366', title: 'Invalid format for date entry' },
-      { id: '654347', title: 'User unable to access document after creation' },
-    ]},
-  { id: 2, name: 'Eleanor Foster', number: '(555) 243-4838', email: 'e.foster@techcorp.com',
-    company: 'TechCorp', companyType: 'Enterprise', billing: 'Site License', companyCode: 'TECH', type: 'User',
-    tickets: [{ id: '412009', title: 'Reset MFA token' }, { id: '412044', title: 'Slow report generation' }]},
-  { id: 3, name: 'Joe Smith', number: '(513) 365-4220', email: 'j.smith@example.com',
-    company: 'Acme Inc', companyType: 'Regular Company', billing: 'Per Unit', companyCode: 'ACME', type: 'Admin', tickets: []},
-  { id: 4, name: 'Pam Reynolds', number: '(360) 296-1400', email: 'p.reynolds@example.com',
-    company: 'Reynolds Co', companyType: 'Regular Company', billing: 'Per Unit', companyCode: 'REYN', type: 'User',
-    tickets: [{ id: '502117', title: 'Export to CSV failing' }]},
-  { id: 5, name: 'Marcus Lee', number: '(612) 444-9820', email: 'm.lee@example.com',
-    company: 'LeeGroup', companyType: 'Regular Company', billing: 'Per Unit', companyCode: 'LEE', type: 'User', tickets: []},
+  CHARLIE,
+  { id: 'c2', kind: 'contact', name: 'Eleanor Foster', initials: 'EF', company: 'Creative Solutions LLC', listNumber: '(555) 243 -4838', phone: '(555)-243-4838' },
+  { id: 'c3', kind: 'contact', name: 'Joe Smith',      initials: 'JS', company: 'Apple',         listNumber: '(513) 365 -4220', phone: '(513)-365-4220' },
+  { id: 'c4', kind: 'contact', name: 'Pam Reynolds',   initials: 'PR', company: 'Zendesk',       listNumber: '(360) 296 -1400', phone: '(360)-296-1400' },
+  { id: 'c5', kind: 'contact', name: 'Marcus Lee',     initials: 'ML', company: 'Zeplin',        listNumber: '(612) 444 -9820', phone: '(612)-444-9820' },
+  { id: 'c6', kind: 'contact', name: 'Henry Rhodes',   initials: 'HR', company: 'Smoothie King', listNumber: '(555) 987 -1234', phone: '(555)-987-1234' },
 ];
 
-const HISTORY = [
-  { id: 1, type: 'received', name: 'Charlie Apegian', number: '(555) 123-4567', time: '6:38 PM', duration: '', date: 'Today' },
-  { id: 2, type: 'missed',   name: 'Charlie Apegian', number: '(555) 123-4567', time: '12:55 PM', duration: '', date: 'Today' },
-  { id: 3, type: 'received', name: '(589) 216-4863',  number: '(589) 216-4863', time: '11:38 AM', duration: '35:08', date: 'Today' },
-  { id: 4, type: 'received', name: 'Joe Smith',       number: '(513) 365-4220', time: '9:15 AM',  duration: '23:54', date: 'Today' },
-  { id: 5, type: 'made',     name: 'Pam Reynolds',    number: '(360) 296-1400', time: '5:28 PM',  duration: '16:32', date: 'Yesterday' },
-  { id: 6, type: 'missed',   name: 'Pam Reynolds',    number: '(360) 296-1400', time: '5:08 PM',  duration: '',      date: 'Yesterday' },
-];
+const UNKNOWN_CALLER = {
+  id: 'u1', kind: 'contact', unknown: true, name: '(555) 987-6543', location: 'Rochester, NY',
+  phone: '(555)-987-6543', color: '#8D99AE',
+};
 
-const AGENTS = [
-  { id: 1, name: 'Charlie Stile',   title: 'Product Support Specialist I',  number: '(555) 123-4567', ext: '201', status: 'available' },
-  { id: 2, name: 'Eleanor Foster',  title: 'Product Support Specialist II', number: '(555) 243-4838', ext: '202', status: 'available' },
-  { id: 3, name: 'Joe Smith',       title: 'Product Support Specialist I',  number: '(513) 365-4220', ext: '203', status: 'busy' },
-  { id: 4, name: 'Pam Reynolds',    title: 'Product Support Manager',       number: '(360) 296-1400', ext: '204', status: 'available' },
-  { id: 5, name: 'Marcus Lee',      title: 'Product Support Team Lead',     number: '(612) 444-9820', ext: '205', status: 'offline' },
+const USERS = [
+  { id: 'e1', kind: 'user', name: 'Charlie Stile',  initials: 'CA', title: 'Product Support Specialist I',  ext: '204', status: 'available' },
+  { id: 'e2', kind: 'user', name: 'Eleanor Foster', initials: 'EF', title: 'Product Support Specialist II', ext: '201', status: 'available' },
+  { id: 'e3', kind: 'user', name: 'Joe Smith',      initials: 'JS', title: 'Product Support Specialist I',  ext: '207', status: 'busy' },
+  { id: 'e4', kind: 'user', name: 'Pam Reynolds',   initials: 'PR', title: 'Product Support Manager',       ext: '210', status: 'away' },
+  { id: 'e5', kind: 'user', name: 'Marcus Lee',     initials: 'ML', title: 'Product Support Team Lead',     ext: '212', status: 'offline' },
 ];
 
 const QUEUES = [
-  { id: 'q1', name: 'Sales Queue',     agents: 4, wait: '~2 min' },
-  { id: 'q2', name: 'General Queue',   agents: 7, wait: '~5 min' },
-  { id: 'q3', name: 'Technical Queue', agents: 2, wait: '<1 min' },
+  { id: 'q1', kind: 'queue', name: 'General support',     waiting: '3 waiting', agents: '4 agents available' },
+  { id: 'q2', kind: 'queue', name: 'Billing',             waiting: '0 waiting', agents: '2 agents available' },
+  { id: 'q3', kind: 'queue', name: 'Sales',               waiting: '1 waiting', agents: '1 agent available' },
+  { id: 'q4', kind: 'queue', name: 'Premium Escalations', waiting: '0 waiting', agents: '0 agents available' },
 ];
 
-const ADD_SEARCH_LIST = [
-  { id: 1, name: 'Charlie Apegian', type: 'Customer', number: '(555) 123-4567', status: 'available' },
-  { id: 2, name: 'Eleanor Foster',  type: 'User',     number: '(555) 243-4838', status: 'available' },
-  { id: 3, name: 'Joe Smith',       type: 'User',     number: '(513) 365-4220', status: 'busy' },
-  { id: 4, name: 'Pam Reynolds',    type: 'Customer', number: '(360) 296-1400', status: 'available' },
-  { id: 5, name: 'Marcus Lee',      type: 'Customer', number: '(612) 444-9820', status: 'offline' },
-  { id: 6, name: 'Henry Rhodes',    type: 'Customer', number: '(555) 987-6543', status: 'available' },
+const HISTORY = [
+  { id: 1, dir: 'Incoming', name: '(555) 123-4567',  date: '03/17/26', time: '6:38 PM',  duration: '05:23' },
+  { id: 2, dir: 'Missed',   name: 'Charlie Apegian', date: '03/17/26', time: '12:55 PM', duration: '' },
+  { id: 3, dir: 'Incoming', name: '(589) 216-4863',  date: '03/17/26', time: '11:38 AM', duration: '35:08' },
+  { id: 4, dir: 'Incoming', name: 'Joe Smith',       date: '03/17/26', time: '09:15 AM', duration: '23:54' },
+  { id: 5, dir: 'Outgoing', name: 'Pam Reynolds',    date: '03/16/26', time: '5:28 PM',  duration: '16:32' },
+  { id: 6, dir: 'Missed',   name: 'Pam Reynolds',    date: '03/16/26', time: '5:08 PM',  duration: '' },
+  { id: 7, dir: 'Incoming', name: '(360) 296-1400',  date: '03/16/26', time: '11:38 AM', duration: '35:08' },
 ];
+const HISTORY_ICON = { Incoming: 'history-incoming', Outgoing: 'history-outgoing', Missed: 'history-missed' };
+
+const ME = { id: 'me', kind: 'user', name: 'Emma Langhammer', initials: 'EL', color: '#007FAD' };
+const SP_WIDTH = 350; // keep in sync with --sp-width
+const KEYS = ['1','2','3','4','5','6','7','8','9','*','0','#'];
+
+const contactFromHistory = (h) =>
+  CONTACTS.find(c => c.name === h.name) ||
+  { id: 'n' + digits(h.name), kind: 'contact', unknown: true, name: h.name, phone: h.name.replace(') ', ')-'), color: '#8D99AE' };
+const contactFromNumber = (num) =>
+  ({ id: 'n' + digits(num), kind: 'contact', unknown: true, name: num, phone: num, color: '#8D99AE' });
 
 // ─────────────────────────────────────────────────────────────
-// Drag hook — stable handler via ref, no stale closures
+// Drag hook — position is {r: right, b: bottom} so panels stay docked bottom-right at any size
 // ─────────────────────────────────────────────────────────────
 function useDrag(initial) {
   const [pos, setPos] = useState(initial);
   const posRef = useRef(pos);
   posRef.current = pos;
-
-  const startHandler = useCallback((e) => {
+  const start = useCallback((e) => {
     e.preventDefault();
-    const startX = e.clientX;
-    const startY = e.clientY;
-    const startPosX = posRef.current.x;
-    const startPosY = posRef.current.y;
-    const onMove = (ev) => {
-      const nx = Math.max(8, Math.min(window.innerWidth - 240, startPosX + ev.clientX - startX));
-      const ny = Math.max(8, Math.min(window.innerHeight - 60, startPosY + ev.clientY - startY));
-      setPos({ x: nx, y: ny });
-    };
-    const onUp = () => {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
-    };
-    window.addEventListener('mousemove', onMove);
-    window.addEventListener('mouseup', onUp);
+    // A null position means "not placed yet" — start from wherever the element currently is
+    const rect = e.currentTarget.closest('.sp-panel, .sp-bar').getBoundingClientRect();
+    const sx = e.clientX, sy = e.clientY;
+    const r = posRef.current.r ?? window.innerWidth - rect.right;
+    const b = posRef.current.b ?? window.innerHeight - rect.bottom;
+    const move = (ev) => setPos({
+      r: Math.max(0, Math.min(window.innerWidth - 120, r - (ev.clientX - sx))),
+      b: Math.max(0, Math.min(window.innerHeight - 60, b - (ev.clientY - sy))),
+    });
+    const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); };
+    window.addEventListener('mousemove', move);
+    window.addEventListener('mouseup', up);
   }, []);
+  return [pos, setPos, start];
+}
 
-  return [pos, setPos, startHandler];
+// ─────────────────────────────────────────────────────────────
+// Shared building blocks
+// ─────────────────────────────────────────────────────────────
+const Keypad = ({ onKey, children }) => (
+  <div className="sp-keypad">
+    {KEYS.map(k => (
+      <button key={k} className="sp-key t-semi-md" onClick={() => onKey(k)}>{k}</button>
+    ))}
+    {children}
+  </div>
+);
+
+const Seg = ({ options, value, onChange }) => (
+  <div className="sp-seg">
+    {options.map(o => (
+      <button key={o.id} className={`t-semi-md ${value === o.id ? 'on' : ''}`} onClick={() => onChange(o.id)}>{o.label}</button>
+    ))}
+  </div>
+);
+
+const BackLink = ({ label = 'Back to call', onClick }) => (
+  <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+    <button className="sp-link t-body-md" onClick={onClick}><Ico n="chevron-left-blue" />{label}</button>
+  </div>
+);
+
+const Ctrl = ({ icon, label, on, disabled, onClick }) => (
+  <button className={`sp-ctrl ${on ? 'on' : ''} ${disabled ? 'disabled' : ''}`} onClick={onClick}>
+    <div className="sp-ctrl-circle"><Ico n={icon} /></div>
+    <span className="sp-ctrl-label">{label}</span>
+  </button>
+);
+
+const ListWithDividers = ({ items, render, trailing = true, leading = false }) => (
+  <div className="sp-list">
+    {leading && <div className="sp-div" />}
+    {items.map((it, i) => (
+      <React.Fragment key={it.id}>
+        {render(it)}
+        {(trailing || i < items.length - 1) && <div className="sp-div" />}
+      </React.Fragment>
+    ))}
+  </div>
+);
+
+// Extension (user) row — Users tab, Add someone, Transfer to a user
+const UserRow = ({ u, right, onClick }) => (
+  <div className="sp-row" onClick={onClick} style={onClick ? { cursor: 'pointer' } : null}>
+    <div className="sp-row-left">
+      <Avatar p={u} size={24} color="#B23C69" />
+      <div className="sp-col4">
+        <div className="sp-line" style={{ maxWidth: '100%' }}>
+          <span className="t-title-xs">{u.name}</span>
+          <span className="t-body-sm ellipsis" style={{ color: '#CED0D4' }}>{u.title}</span>
+        </div>
+        <div className="sp-line" style={{ gap: 12, color: '#8D99AE' }}>
+          <span className="t-body-sm">Ext. {u.ext}</span>
+          <StatusDot status={u.status} />
+        </div>
+      </div>
+    </div>
+    {right}
+  </div>
+);
+
+// Transfer-flow user row: name / title / ext+status on three lines
+const TransferUserRow = ({ u, onTransfer }) => (
+  <div className="sp-row">
+    <div className="sp-row-left">
+      <Avatar p={u} size={24} color="#B23C69" />
+      <div className="sp-col4">
+        <span className="t-title-xs nowrap">{u.name}</span>
+        <span className="t-body-sm nowrap" style={{ color: '#CED0D4' }}>{u.title}</span>
+        <div className="sp-line" style={{ gap: 12, color: '#8D99AE' }}>
+          <span className="t-body-sm">Ext. {u.ext}</span>
+          <StatusDot status={u.status} />
+        </div>
+      </div>
+    </div>
+    <button className="sp-btn secondary t-body-md" onClick={onTransfer}>Transfer</button>
+  </div>
+);
+
+const QueueRow = ({ q, right }) => (
+  <div className="sp-row">
+    <div className="sp-row-left">
+      <Ico n="queue" />
+      <div className="sp-col4">
+        <span className="t-title-xs nowrap">{q.name}</span>
+        <div className="sp-line" style={{ gap: 12, color: '#8D99AE' }}>
+          <span className="t-body-sm">{q.waiting}</span>
+          <span className="t-body-sm">{q.agents}</span>
+        </div>
+      </div>
+    </div>
+    {right}
+  </div>
+);
+
+// "Filter By" dropdown (Users / Queues) + square search button — Transfer and Add someone
+const FilterRow = ({ filter, onFilter, search, onSearch }) => {
+  const [menu, setMenu] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  return (
+    <div style={{ display: 'flex', gap: 16, alignItems: 'center', width: '100%', flexShrink: 0 }}>
+      <div className="sp-filter" onClick={() => !searchOpen && setMenu(m => !m)}>
+        {searchOpen ? (
+          <input value={search} placeholder={filter === 'queues' ? 'Search queues' : 'Search users'} autoFocus
+            onChange={e => onSearch(e.target.value)} />
+        ) : (
+          <span className="t-body-md ellipsis" style={{ flex: 1, color: filter === 'queues' ? '#fff' : '#8D99AE', fontStyle: filter === 'queues' ? 'normal' : 'italic' }}>
+            {filter === 'queues' ? 'Queues' : 'Filter By'}
+          </span>
+        )}
+        <Ico n="filter" />
+        {menu && (
+          <div className="sp-filter-menu" onClick={e => e.stopPropagation()}>
+            {[{ id: 'users', label: 'Users' }, { id: 'queues', label: 'Queues' }].map(o => (
+              <button key={o.id} className="t-body-md" onClick={() => { onFilter(o.id); setMenu(false); }}>{o.label}</button>
+            ))}
+          </div>
+        )}
+      </div>
+      <button className={`sp-square ${searchOpen ? 'on' : ''}`} title="Search"
+        onClick={() => { setSearchOpen(o => !o); onSearch(''); setMenu(false); }}>
+        <Ico n="search" />
+      </button>
+    </div>
+  );
+};
+
+// "On this call" style row (32 avatar, title/small name, two-part meta)
+const PartyRow = ({ p, meta, right, padding = 4, color }) => (
+  <div style={{ width: '100%', display: 'flex', gap: 8, alignItems: 'center', padding }}>
+    <div style={{ flex: '1 0 0', minWidth: 0, display: 'flex', gap: 4, alignItems: 'center' }}>
+      <Avatar p={p} size={32} color={color} />
+      <div className="sp-col4">
+        <span className="t-title-sm ellipsis" style={{ maxWidth: '100%' }}>{p.name}</span>
+        <div className="sp-line" style={{ alignItems: 'flex-start', color: '#8D99AE' }}>
+          {meta.map((m, i) => <span key={i} className="t-body-sm">{m}</span>)}
+        </div>
+      </div>
+    </div>
+    {right}
+  </div>
+);
+
+// ─────────────────────────────────────────────────────────────
+// Workspace / home page — Figma "My Workspace" node 2458:43293
+// ─────────────────────────────────────────────────────────────
+const STAT_CARDS = [
+  { id: 'priority', label: 'High Priority Tickets',  value: 9,  tile: '#ED4B52', icon: 'home-card-priority' },
+  { id: 'due',      label: 'Tickets Due Soon',       value: 17, tile: '#FF7C19', icon: 'home-card-due-soon' },
+  { id: 'closed',   label: 'My Tickets Closed Today', value: 5, tile: '#007FAD', icon: 'home-card-closed-today', goal: 20 },
+  { id: 'mentions', label: 'Mentions',               value: 4,  tile: '#A4495D', icon: 'home-card-mentions' },
+];
+
+const JD = { initials: 'JD', color: '#7B3746' };
+const TODOS = [
+  { id: '54983',   title: 'Login page not loading for some users',   who: JD, checklist: [{ text: 'Check permissions and assign to IT' }] },
+  { id: '46467',   title: 'Card declined but funds were deducted',   who: JD },
+  { id: '3467',    title: 'App crashes when uploading a file',       who: { initials: 'CA', color: '#2B376B' },
+    checklist: [{ text: 'Test in beta environment', who: JD }, { text: 'Send to development if issue is confirmed', who: JD }] },
+  { id: '43646',   title: 'Request to upgrade membership',           who: JD },
+  { id: '5678',    title: 'Transfer ownership of account',           who: JD },
+  { id: '54353',   title: 'App crashes when uploading an image',     who: JD },
+  { id: '76532',   title: 'Is there a sandbox environment?',         who: JD },
+  { id: '54365',   title: 'App isn’t loading',                       who: JD, checklist: [{ text: 'Send to development if issue is confirmed', who: JD }] },
+  { id: '#543643', title: 'Login page not loading for some users',   who: JD },
+];
+
+// Activity action lines: [kind, value] pieces — b = semibold verb, m = medium, i = medium italic, av = inline avatar
+const ACTIVITY = [
+  { line: [['b', 'Priority changed from'], ['i', 'Low'], ['m', 'to'], ['i', 'High']], ticket: 'Can’t Connect to Server' },
+  { line: [['b', 'Ticket assigned to'], ['av', 'JD', '#8D99AE'], ['m', 'John Doe']], ticket: 'Server Downtime' },
+  { line: [['b', 'Note added']], ticket: 'If it’s a really long title for a ticket you should' },
+  { line: [['b', 'Contact'], ['av', 'ML', '#2B376B'], ['m', 'Marcus Lee of Company'], ['av', 'ST', '#87CFE7'], ['m', 'StratusCore Technologies'], ['b', 'was added to ticket']],
+    ticket: 'SSL Issue for StratusCore Technologies' },
+  { line: [['b', 'Incoming email from'], ['av', 'JS', '#8D99AE'], ['m', 'Joy Smith']], ticket: 'SSL Issue for StratusCore Technologies', gap: 8 },
+];
+
+const HomeCheckbox = ({ label, checked, onChange }) => (
+  <button className="hm-check t-body-md" role="checkbox" aria-checked={checked} onClick={() => onChange(!checked)}>
+    {checked ? <img src="assets/icons/home-checkbox-checked.svg" width="24" height="24" alt="" /> : <span className="hm-check-off" />}
+    {label}
+  </button>
+);
+
+function HomePage() {
+  const [showTickets, setShowTickets] = useState(true);
+  const [showChecklist, setShowChecklist] = useState(true);
+  const [sortAsc, setSortAsc] = useState(false);
+
+  const todos = TODOS
+    .filter(t => showTickets || (showChecklist && t.checklist))
+    .sort((a, b) => sortAsc ? a.title.localeCompare(b.title) : 0);
+
+  return (
+    <div className="hm-page">
+      <div className="hm-head">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, whiteSpace: 'nowrap' }}>
+          <span style={{ fontWeight: 500, fontSize: 32, lineHeight: '40px' }}>Hi, John!</span>
+          <span className="t-title-md" style={{ color: '#5F6475' }}>Here’s what’s going on today.</span>
+        </div>
+        <button className="hm-btn-icon" title="Customize workspace">
+          <img src="assets/icons/home-settings.svg" width="24" height="24" alt="" />
+        </button>
+      </div>
+
+      <div className="hm-grid">
+        {STAT_CARDS.map(c => (
+          <button key={c.id} className="hm-card hm-stat">
+            <div className="hm-tile" style={{ background: c.tile }}>
+              <img src={`assets/icons/${c.icon}.svg`} width="40" height="40" alt="" />
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: c.goal ? 1 : 'none', minWidth: 0 }}>
+              <span className="hm-stat-label">{c.label}</span>
+              {c.goal ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 24, width: '100%' }}>
+                  <span className="hm-stat-num" style={{ minWidth: 19, textAlign: 'center' }}>{c.value}</span>
+                  <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+                    <div className="hm-track">
+                      <div style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: `${(c.value / c.goal) * 100}%`, background: '#94CC86' }} />
+                    </div>
+                    <span className="t-body-sm nowrap" style={{ color: '#8D99AE' }}>{c.goal - c.value} to go!</span>
+                  </div>
+                </div>
+              ) : (
+                <span className="hm-stat-num">{c.value}</span>
+              )}
+            </div>
+          </button>
+        ))}
+
+        {/* My To-Do List */}
+        <div className="hm-card hm-panel" style={{ gridColumn: 'span 3' }}>
+          <div className="hm-row" style={{ padding: '0 8px', flexShrink: 0 }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span className="hm-panel-title">My To-Do List</span>
+              <span className="t-body-md" style={{ color: '#5F6475' }}>({todos.length})</span>
+            </div>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+              <HomeCheckbox label="Tickets" checked={showTickets} onChange={setShowTickets} />
+              <HomeCheckbox label="Checklist Items" checked={showChecklist} onChange={setShowChecklist} />
+              <button className="hm-btn-icon" title="Sort" onClick={() => setSortAsc(v => !v)}>
+                <img src="assets/icons/home-sort.svg" width="24" height="24" alt="" />
+              </button>
+            </div>
+          </div>
+          <div className="hm-list">
+            {todos.map(t => {
+              const items = showChecklist ? (t.checklist || []) : [];
+              return (
+                <div key={t.id + t.title} className="hm-ticket">
+                  <div className="hm-row">
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0, flex: '0 1 583px' }}>
+                      <span className="t-body-md" style={{ color: '#007FAD', width: 75, flexShrink: 0 }}>{t.id}</span>
+                      <span className="t-semi-md ellipsis" style={{ flex: '0 1 500px' }}>{t.title}</span>
+                    </div>
+                    <span className="nowrap" style={{ fontSize: 12, lineHeight: '14px' }}>
+                      <span style={{ fontWeight: 400, color: '#5F6475' }}>Created at</span>{' '}
+                      <span className="t-body-sm">4/04/24 10:00 AM</span>
+                    </span>
+                    <span style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '2px 8px', fontSize: 12, lineHeight: '14px' }} className="nowrap">
+                      <span style={{ fontWeight: 400 }}>Status</span>
+                      <span className="t-body-sm">To Do</span>
+                    </span>
+                    <span className="hm-av" style={{ background: t.who.color }}>{t.who.initials}</span>
+                  </div>
+                  {items.length > 0 && <div style={{ height: 1, background: '#F2F3F7' }} />}
+                  {items.map((c, i) => (
+                    <div key={i} className="hm-row">
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                        <img src="assets/icons/home-checklist.svg" width="16" height="16" alt="" />
+                        <span className="t-body-sm nowrap" style={{ color: '#5F6475' }}>{c.text}</span>
+                      </div>
+                      {c.who && <span className="hm-av" style={{ background: c.who.color }}>{c.who.initials}</span>}
+                    </div>
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div className="hm-card hm-panel" style={{ boxShadow: 'none' }}>
+          <span className="hm-panel-title" style={{ flexShrink: 0 }}>Recent Activity</span>
+          <div className="hm-list">
+            {ACTIVITY.map((a, i) => (
+              <div key={i} className="hm-activity">
+                <div className="hm-act-line" style={a.gap ? { gap: a.gap } : null}>
+                  {a.line.map(([k, v, color], j) =>
+                    k === 'av' ? <span key={j} className="hm-av24" style={{ background: color }}>{v}</span>
+                    : <span key={j} className={k === 'b' ? 't-semi-md' : 't-body-md'} style={k === 'i' ? { fontStyle: 'italic' } : null}>{v}</span>
+                  )}
+                </div>
+                <div style={{ height: 1, background: '#CED0D4' }} />
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }} className="t-title-sm">
+                  <span style={{ color: '#007FAD', flexShrink: 0 }}>345234</span>
+                  <span className="ellipsis" style={{ flex: 1 }}>{a.ticket}</span>
+                </div>
+                <span className="t-body-sm" style={{ color: '#8D99AE' }}>9/19/24 4:35 PM by Charlie Apegian</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 // ─────────────────────────────────────────────────────────────
 // Main App
 // ─────────────────────────────────────────────────────────────
-const KEYS = ['1','2','3','4','5','6','7','8','9','*','0','#'];
-
 function SoftphoneApp() {
+  // Panel / chrome
   const [open, setOpen] = useState(false);
-  const [screen, setScreen] = useState('idle');         // idle | incoming | outgoing | active
-  const [navTab, setNavTab] = useState('dialpad');      // dialpad | contacts | users | history | call
+  const [minimized, setMinimized] = useState(false);
+  const [toast, setToast] = useState(null);
+  const [wideIncomingBar, setWideIncomingBar] = useState(false);
+  const [demoOpen, setDemoOpen] = useState(false);
+
+  // Idle browsing
+  const [navTab, setNavTab] = useState('keypad');          // keypad | contacts | extensions | history
   const [dialInput, setDialInput] = useState('');
-  const [suggestion, setSuggestion] = useState(null);
-  const [activeContact, setActiveContact] = useState(CONTACTS[0]);
+  const [contactSearch, setContactSearch] = useState('');
+  const [extSearch, setExtSearch] = useState('');
+  const [historyTab, setHistoryTab] = useState('all');
+  const [viewContact, setViewContact] = useState(null);     // idle contact details
+
+  // Call
+  const [screen, setScreen] = useState('idle');             // idle | incoming | outgoing | active | transferred
+  const [caller, setCaller] = useState(CHARLIE);
+  const [incomingExpanded, setIncomingExpanded] = useState(false);
+  const [callView, setCallView] = useState('main');        // main | keypad | details | transfer | add | people
   const [callTimer, setCallTimer] = useState(0);
   const [muted, setMuted] = useState(false);
   const [onHold, setOnHold] = useState(false);
-  const [showKeypad, setShowKeypad] = useState(false);
-  const [historyTab, setHistoryTab] = useState('all');
-  const [contactSearch, setContactSearch] = useState('');
-  const [userSearch, setUserSearch] = useState('');
-  const [selectedContact, setSelectedContact] = useState(null);
-  const [callDetailOpen, setCallDetailOpen] = useState(false);
-  const [transferOpen, setTransferOpen] = useState(false);
+  const [dtmf, setDtmf] = useState('');
+  const [party, setParty] = useState([]);                  // added participants: {...p, status: ringing|connected, since}
+
+  // Transfer
+  const [transferTab, setTransferTab] = useState('extensions'); // extensions | keypad
+  const [transferFilter, setTransferFilter] = useState('users'); // users | queues
   const [transferSearch, setTransferSearch] = useState('');
+  const [transferNumber, setTransferNumber] = useState('');
   const [transferTarget, setTransferTarget] = useState(null);
-  const [transferTab, setTransferTab] = useState('users');
+  const [consult, setConsult] = useState(null);            // { target, swapped }
+  const [consultTimer, setConsultTimer] = useState(0);
+  const [consultMuted, setConsultMuted] = useState(false);
+  const [transferredAfter, setTransferredAfter] = useState(0);
+
+  // Add someone
+  const [addTab, setAddTab] = useState('extensions');      // extensions | keypad
+  const [addFilter, setAddFilter] = useState('users');     // users | queues
+  const [addSearch, setAddSearch] = useState('');
+  const [addNumber, setAddNumber] = useState('');
+
+  // Ticket modal
   const [ticketModalOpen, setTicketModalOpen] = useState(false);
   const [ticketTitle, setTicketTitle] = useState('');
   const [ticketType, setTicketType] = useState('Default');
   const [ticketTitleError, setTicketTitleError] = useState(false);
-  const [toast, setToast] = useState(null);
-  const [minimized, setMinimized] = useState(false);
-  const [addOpen, setAddOpen] = useState(false);
-  const [addSearch, setAddSearch] = useState('');
-  const [participants, setParticipants] = useState([]);
-  const [participantsOpen, setParticipantsOpen] = useState(false);
-  const [askFirstTarget, setAskFirstTarget] = useState(null);
 
-  const timerRef = useRef(null);
+  // Panel opens docked under the header phone button until the user drags it (r/b stay null until then)
+  const [panelPos, setPanelPos, panelDragStart] = useDrag({ r: null, b: null });
+  const panelRef = useRef(null);
+  const stateBtnRef = useRef(null);
+  const searchRef = useRef(null);
+  // Docked positions measured from the header: under the phone button (panel, compact bar) and over the search bar (simple bar)
+  const [anchor, setAnchor] = useState({ top: 72, left: 0, barLeft: 0, wideTop: 0, wideLeft: 0 });
+  const [barPos, , barDragStart] = useDrag({ r: null, b: null });
+  const [wideBarPos, , wideBarDragStart] = useDrag({ r: null, b: null });
 
-  const tweakDefaults = /*EDITMODE-BEGIN*/{
-    "accentColor": "#007FAD",
-    "autoIncoming": true,
-    "showAvatarPulse": true
-  }/*EDITMODE-END*/;
-  const [tweaks, setTweak] = useTweaks(tweakDefaults);
-
-  const isInCall = screen === 'active';
+  const inCall = screen === 'active';
   const isCalling = screen === 'incoming' || screen === 'outgoing' || screen === 'active';
-
-  const [widgetPos, , widgetDragStart] = useDrag({ x: window.innerWidth - 466, y: window.innerHeight - 570 });
-  const [miniPos, , miniDragStart] = useDrag({ x: window.innerWidth - 380, y: window.innerHeight - 80 });
+  const ringingParty = party.filter(p => p.status === 'ringing');
+  const connectedParty = party.filter(p => p.status === 'connected');
+  const isConference = inCall && connectedParty.length > 0 && !consult;
 
   const showToast = useCallback((msg) => {
     setToast(msg);
-    setTimeout(() => setToast(null), 2400);
+    setTimeout(() => setToast(t => (t === msg ? null : t)), 2400);
   }, []);
 
-  // Call timer
+  // Timers
   useEffect(() => {
-    if (isInCall && !onHold) {
-      timerRef.current = setInterval(() => setCallTimer(t => t + 1), 1000);
-    }
-    return () => clearInterval(timerRef.current);
-  }, [isInCall, onHold]);
+    if (!inCall) return;
+    const t = setInterval(() => setCallTimer(s => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [inCall]);
+  useEffect(() => {
+    if (!consult) return;
+    const t = setInterval(() => setConsultTimer(s => s + 1), 1000);
+    return () => clearInterval(t);
+  }, [consult]);
 
-  // Contact suggestion while dialing
+  // Ringing participants pick up after a few seconds
   useEffect(() => {
-    if (dialInput.length >= 4) {
-      const m = CONTACTS.find(c => c.number.replace(/\D/g,'').includes(dialInput.replace(/\D/g,'')));
-      setSuggestion(m || null);
-    } else {
-      setSuggestion(null);
-    }
-  }, [dialInput]);
+    if (ringingParty.length === 0) return;
+    const t = setTimeout(() => {
+      setParty(ps => ps.map(p => p.status === 'ringing' ? { ...p, status: 'connected', since: callTimerRef.current } : p));
+    }, 4000);
+    return () => clearTimeout(t);
+  }, [ringingParty.length]);
+  const callTimerRef = useRef(0);
+  callTimerRef.current = callTimer;
 
-  // qManage header call status chip + simulate btn + phone btn visibility
+  // Auto-trigger an incoming call shortly after load (demo)
   useEffect(() => {
-    const chip = document.getElementById('qmCallChip');
-    const phoneBtn = document.getElementById('phoneToggleBtn');
-    const simBtn = document.getElementById('simulateCallBtn');
-    if (chip) {
-      chip.className = 'qm-call-chip';
-      chip.onclick = () => { setMinimized(false); setOpen(true); };
-      if (screen === 'incoming') {
-        chip.classList.add('incoming');
-        chip.innerHTML = '&#9679;&nbsp; Incoming';
-      } else if (screen === 'outgoing') {
-        chip.classList.add('outgoing');
-        chip.innerHTML = '&#9679;&nbsp; Ringing...';
-      } else if (screen === 'active') {
-        chip.classList.add('active-call');
-        chip.innerHTML = fmt(callTimer);
-      }
-    }
-    if (phoneBtn) phoneBtn.style.display = isCalling ? 'none' : '';
-    if (simBtn) simBtn.style.display = screen === 'idle' ? '' : 'none';
-  }, [screen, callTimer]);
-
-  // Phone button + simulate button in header
-  useEffect(() => {
-    const btn = document.getElementById('phoneToggleBtn');
-    if (!btn) return;
-    const handler = () => {
-      if (minimized) { setMinimized(false); setOpen(true); return; }
-      setOpen(o => !o);
-    };
-    btn.addEventListener('click', handler);
-    return () => btn.removeEventListener('click', handler);
-  }, [minimized]);
-
-  useEffect(() => {
-    const btn = document.getElementById('simulateCallBtn');
-    if (!btn) return;
-    btn.addEventListener('click', triggerIncoming);
-    return () => btn.removeEventListener('click', triggerIncoming);
-  }, []);
-
-  useEffect(() => {
-    const btn = document.getElementById('phoneToggleBtn');
-    if (!btn) return;
-    const active = open || minimized;
-    btn.style.color = active ? tweaks.accentColor : '#5F6475';
-    btn.style.background = active ? `${tweaks.accentColor}22` : 'none';
-  }, [open, minimized, tweaks.accentColor]);
-
-  // Auto-trigger incoming call demo
-  useEffect(() => {
-    if (!tweaks.autoIncoming) return;
-    const t = setTimeout(() => triggerIncoming(), 1500);
+    const t = setTimeout(() => triggerIncoming(CHARLIE), 1500);
     return () => clearTimeout(t);
   }, []);
 
-  // ── Handlers ──
-  const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
-  const agentStatusColor = (s) => s === 'available' ? '#94CC86' : s === 'busy' ? '#ED4B52' : null;
-
-  const startCall = (contact) => {
-    const c = contact || suggestion || { name: dialInput || 'Unknown', number: dialInput };
-    setActiveContact(c);
-    setCallTimer(0);
-    setMuted(false); setOnHold(false); setShowKeypad(false);
-    setScreen('outgoing');
-    setNavTab('call');
-    setTimeout(() => setScreen('active'), 1800);
+  // ── Call handlers ──
+  const resetCallState = () => {
+    setCallView('main'); setMuted(false); setOnHold(false); setDtmf(''); setParty([]);
+    setTransferTab('extensions'); setTransferFilter('users');
+    setTransferSearch(''); setTransferNumber(''); setTransferTarget(null);
+    setConsult(null); setConsultTimer(0); setConsultMuted(false);
+    setAddTab('extensions'); setAddFilter('users'); setAddSearch(''); setAddNumber('');
   };
 
-  const triggerIncoming = () => {
-    setActiveContact(CONTACTS[0]);
+  const triggerIncoming = (c) => {
+    resetCallState();
+    setCaller(c);
+    setIncomingExpanded(false);
     setScreen('incoming');
-    setOpen(true);
-    setMinimized(false);
+    setOpen(true); setMinimized(false);
   };
 
-  const acceptCall = () => {
-    setCallTimer(0); setMuted(false); setOnHold(false); setShowKeypad(false);
+  const startCall = (c) => {
+    resetCallState();
+    setCaller(c);
+    setCallTimer(0);
+    setScreen('outgoing');
+    setOpen(true); setMinimized(false);
+    setTimeout(() => setScreen(s => (s === 'outgoing' ? 'active' : s)), 2500);
+  };
+
+  const acceptCall = (withTicket) => {
+    setCallTimer(0);
     setScreen('active');
-    setNavTab('call');
+    setCallView('main');
+    if (withTicket) { setTicketTitle(''); setTicketTitleError(false); setTicketModalOpen(true); }
   };
 
-  const endCall = () => {
+  const endCall = (msg = 'Call ended') => {
+    resetCallState();
     setScreen('idle');
     setDialInput('');
-    setOnHold(false); setMuted(false); setShowKeypad(false);
+    setNavTab('keypad');
     setMinimized(false);
-    setCallDetailOpen(false);
-    setTransferOpen(false); setTransferTarget(null); setTransferSearch('');
-    setAddOpen(false); setAddSearch(''); setParticipants([]); setParticipantsOpen(false);
-    setTicketModalOpen(false); setTicketTitle(''); setTicketTitleError(false);
-    setAskFirstTarget(null);
-    setNavTab('dialpad');
-    showToast('Call ended');
+    showToast(msg);
   };
 
-  const callBack = (item) => {
-    const c = CONTACTS.find(c => c.name === item.name) || { name: item.name, number: item.number };
-    startCall(c);
+  const doTransfer = () => {
+    setTransferredAfter(callTimer);
+    resetCallState();
+    setScreen('transferred');
+    setMinimized(false); setOpen(true);
   };
 
-  const confirmTransfer = () => {
-    const name = transferTarget?.name;
-    setTransferOpen(false);
-    setTransferTarget(null);
-    setTransferSearch('');
-    endCall();
-    showToast(`Call transferred to ${name}`);
+  const startConsult = (target) => {
+    setConsult({ target, swapped: false });
+    setConsultTimer(0); setConsultMuted(false);
+    setCallView('main');
   };
 
-  const confirmTransferWarm = () => {
-    const target = transferTarget;
-    setTransferOpen(false);
-    setTransferTarget(null);
-    setTransferSearch('');
-    setCallTimer(0);
-    setAskFirstTarget(target);
+  const addParticipant = (p) => {
+    setParty(ps => [...ps, { ...p, color: p.color || '#8D99AE', status: 'ringing', since: callTimer }]);
+    setAddSearch(''); setAddNumber('');
+    setCallView('main');
   };
 
-  const completeWarmTransfer = () => {
-    const target = askFirstTarget;
-    setAskFirstTarget(null);
-    endCall();
-    showToast(`Call transferred to ${target?.name}`);
+  const openTransfer = () => {
+    setTransferTab('extensions'); setTransferFilter('users'); setTransferTarget(null);
+    setTransferSearch(''); setTransferNumber('');
+    setCallView('transfer');
   };
 
-  // ── Render: Dial Pad ──
-  const renderDialpad = (compact = false) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div className="sp-dialpad-input-wrap">
-        <input className="sp-dialpad-input" value={dialInput}
-          onChange={e => setDialInput(e.target.value)} placeholder="Type a name or number" />
-        {dialInput && (
-          <button className="sp-backspace" onClick={() => setDialInput(p => p.slice(0, -1))}>
-            <Icon name="backspace" size={18}/>
+  const openPanel = () => { setMinimized(false); setOpen(true); };
+  const minimize = () => { if (isCalling) { setMinimized(true); setOpen(false); } else setOpen(false); };
+  const closePanel = () => { if (isCalling) minimize(); else { setOpen(false); if (screen === 'transferred') setScreen('idle'); } };
+
+  // ─────────────────────────────────────────────────────────────
+  // Header + banner
+  // ─────────────────────────────────────────────────────────────
+  const headerInfo = () => {
+    if (screen === 'incoming') return { title: 'Incoming call' };
+    if (screen === 'outgoing') return { title: 'Calling...' };
+    if (screen === 'transferred') return { title: 'Call transferred' };
+    if (!inCall) return { title: 'Phone' };
+    if (consult) return { title: 'Consulting', chip: fmt(consultTimer) };
+    const n = 2 + connectedParty.length;
+    switch (callView) {
+      case 'keypad':   return { title: 'On a call', banner: true };
+      case 'details':  return { title: 'Phone', banner: true };
+      case 'transfer': return { title: 'Transfer call', banner: true };
+      case 'add':      return { title: 'Add to call', banner: true };
+      case 'people':   return { title: `Conference call (${n})`, chip: fmt(callTimer) };
+      default:
+        if (ringingParty.length) return { title: 'On a call', chip: fmt(callTimer) };
+        if (isConference) return { title: `Conference call (${n})`, chip: fmt(callTimer) };
+        return { title: 'On a call', chip: fmt(callTimer) };
+    }
+  };
+
+  const renderHeader = ({ title, chip }) => (
+    <div className="sp-head">
+      <div className="sp-head-left">
+        <div className="sp-hbtn drag" onMouseDown={panelDragStart}><Ico n="drag" /></div>
+        <span className="t-title-xs nowrap">{title}</span>
+      </div>
+      <div className="sp-head-right">
+        {chip && <div className="sp-chip t-body-md">{chip}</div>}
+        <button className="sp-hbtn" title="Minimize" onClick={minimize}><Ico n="minimize" /></button>
+        <button className="sp-hbtn" title="Open in new window" onClick={() => showToast('Opened in a new window')}><Ico n="popout" /></button>
+        <button className="sp-hbtn" title="Close" onClick={closePanel}><Ico n="close" /></button>
+      </div>
+    </div>
+  );
+
+  const renderBanner = () => (
+    <div className="sp-banner" onClick={() => setCallView('main')} title="Back to call">
+      <div className="sp-banner-left">
+        <Ico n="banner-phone" />
+        <div className="sp-vdiv" />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+          <Avatar p={caller} size={32} color={caller.unknown ? '#8D99AE' : '#007FAD'} />
+          <span className="t-title-md ellipsis">{caller.name}</span>
+        </div>
+      </div>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <span className="t-accent-md" style={{ fontVariantNumeric: 'tabular-nums' }}>{fmt(callTimer)}</span>
+        <Ico n="chevron-right-white" />
+      </div>
+    </div>
+  );
+
+  // ─────────────────────────────────────────────────────────────
+  // Idle tabs
+  // ─────────────────────────────────────────────────────────────
+  const renderKeypadTab = () => {
+    const q = dialInput.trim().toLowerCase();
+    const qd = digits(q);
+    const matches = !q ? [] : CONTACTS.filter(c =>
+      c.name.toLowerCase().includes(q) || (qd.length >= 3 && digits(c.listNumber).includes(qd))
+    ).slice(0, 3);
+    const dial = () => {
+      if (!q) return;
+      startCall(matches.length === 1 && !qd.length ? matches[0] : (matches[0] && qd.length >= 7 ? matches[0] : contactFromNumber(dialInput.trim())));
+    };
+    return (
+      <div className="sp-main" style={{ padding: 20, alignItems: 'center', justifyContent: 'space-between' }}>
+        <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="sp-field">
+            <input value={dialInput} placeholder="Enter a name or number" autoFocus
+              onChange={e => setDialInput(e.target.value)}
+              onKeyDown={e => {
+                if (e.key === 'Enter') dial();
+              }} />
+            {dialInput && <button className="sp-icon-btn" onClick={() => setDialInput('')} title="Clear"><Ico n="clear" /></button>}
+          </div>
+          {matches.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
+              <span className="t-accent-sm">Matches</span>
+              {matches.map(c => (
+                <div key={c.id} onClick={() => startCall(c)}
+                  style={{ display: 'flex', alignItems: 'center', padding: 4, borderRadius: 4, background: 'rgba(255,255,255,0.05)', cursor: 'pointer' }}>
+                  <div className="sp-row-left">
+                    <Avatar p={c} size={24} color="#B23C69" />
+                    <div className="sp-col4">
+                      <div className="sp-line">
+                        <span className="t-title-xs">{c.name}</span>
+                        <span className="t-body-sm">{c.company}</span>
+                      </div>
+                      <span className="t-body-sm" style={{ color: '#8D99AE' }}>{c.listNumber}</span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+        <Keypad onKey={k => setDialInput(v => v + k)}>
+          <button className="sp-key call" style={{ gridColumn: 2 }} disabled={!q} onClick={dial} title="Call">
+            <Ico n={q ? 'call-enabled' : 'call-disabled'} />
           </button>
+        </Keypad>
+      </div>
+    );
+  };
+
+  const renderContactsTab = () => {
+    if (viewContact) return renderContactDetails(viewContact, () => setViewContact(null), 'Back to contacts');
+    const q = contactSearch.trim().toLowerCase();
+    const list = CONTACTS.filter(c => !q || c.name.toLowerCase().includes(q) || c.company.toLowerCase().includes(q) || digits(c.listNumber).includes(digits(q) || '#'));
+    return (
+      <div className="sp-main" style={{ padding: 20, gap: list.length ? 20 : 24, alignItems: 'center', overflow: 'hidden' }}>
+        <div className={`sp-search ${contactSearch ? 'filled' : ''}`}>
+          <input value={contactSearch} placeholder="Search contacts" onChange={e => setContactSearch(e.target.value)} />
+          {contactSearch
+            ? <button className="sp-icon-btn" onClick={() => setContactSearch('')} title="Clear"><Ico n="clear" /></button>
+            : <Ico n="search" />}
+        </div>
+        {list.length ? (
+          <div className="sp-scroll" style={{ width: '100%', flex: 1 }}>
+            <ListWithDividers items={list} trailing={false} render={c => (
+              <div className="sp-row" style={{ cursor: 'pointer' }} onClick={() => setViewContact(c)}>
+                <div className="sp-row-left">
+                  <Avatar p={c} size={24} color="#B23C69" />
+                  <div className="sp-col4">
+                    <div className="sp-line">
+                      <span className="t-title-xs">{c.name}</span>
+                      <span className="t-body-sm" style={{ color: '#CED0D4' }}>{c.company}</span>
+                    </div>
+                    <span className="t-body-sm" style={{ color: '#8D99AE' }}>{c.listNumber}</span>
+                  </div>
+                </div>
+                <button className="sp-row-call" title={`Call ${c.name}`} onClick={e => { e.stopPropagation(); startCall(c); }}><Ico n="row-call" /></button>
+              </div>
+            )} />
+          </div>
+        ) : (
+          <div style={{ flex: '1 0 0', width: '100%', display: 'flex', flexDirection: 'column', gap: 24, alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ width: 306, display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', textAlign: 'center' }}>
+              <span className="t-body-md">No contacts match "{contactSearch}"</span>
+              <span className="t-body-sm" style={{ color: '#8D99AE' }}>Check the spelling, or search by phone number</span>
+            </div>
+            <button className="sp-btn primary t-body-md" onClick={() => showToast(`New contact: ${contactSearch}`)}>Add Contact</button>
+          </div>
         )}
       </div>
-      {suggestion && <div className="sp-dialpad-suggestion">{suggestion.name}</div>}
-      <div className="sp-keypad">
-        {KEYS.map((k, i) => (
-          <button key={i} className="sp-key" onClick={() => setDialInput(p => p + k)}>
-            {k}
+    );
+  };
+
+  const renderExtensionsTab = () => {
+    const q = extSearch.trim().toLowerCase();
+    const list = USERS.filter(u => !q || u.name.toLowerCase().includes(q) || u.title.toLowerCase().includes(q) || u.ext.includes(q));
+    return (
+      <div className="sp-main" style={{ padding: 20, gap: 20, alignItems: 'center', overflow: 'hidden' }}>
+        <div className={`sp-search ${extSearch ? 'filled' : ''}`}>
+          <input value={extSearch} placeholder="Search extensions" onChange={e => setExtSearch(e.target.value)} />
+          {extSearch
+            ? <button className="sp-icon-btn" onClick={() => setExtSearch('')} title="Clear"><Ico n="clear" /></button>
+            : <Ico n="search" />}
+        </div>
+        <div className="sp-scroll" style={{ width: '100%', flex: 1 }}>
+          <ListWithDividers items={list} render={u => (
+            <UserRow u={u} right={
+              <button className="sp-row-call" title={`Call ${u.name}`} onClick={() => startCall({ ...u, phone: `Ext. ${u.ext}` })}><Ico n="row-call" /></button>
+            } />
+          )} />
+        </div>
+      </div>
+    );
+  };
+
+  const renderHistoryTab = () => {
+    const missed = HISTORY.filter(h => h.dir === 'Missed');
+    const items = historyTab === 'missed' ? missed : HISTORY;
+    return (
+      <div className="sp-main" style={{ padding: items.length ? '16px 20px' : 20, gap: 20, alignItems: 'center', overflow: 'hidden' }}>
+        <Seg value={historyTab} onChange={setHistoryTab}
+          options={[{ id: 'all', label: 'All' }, { id: 'missed', label: `Missed (${missed.length})` }]} />
+        {items.length ? (
+          <div className="sp-scroll" style={{ width: '100%', flex: 1 }}>
+            <ListWithDividers items={items} leading trailing={false} render={h => (
+              <div className="sp-row" style={{ cursor: 'pointer' }} onClick={() => startCall(contactFromHistory(h))}>
+                <div style={{ flex: 1, minWidth: 0, display: 'flex', gap: 4, alignItems: 'flex-start' }}>
+                  <Ico n={HISTORY_ICON[h.dir]} />
+                  <div className="sp-col4 nowrap">
+                    <span className="t-title-sm">{h.name}</span>
+                    <div className="sp-line" style={{ alignItems: 'flex-start', color: '#8D99AE' }}>
+                      <span className="t-body-sm">{h.dir}</span>
+                      <span className="t-body-sm">{h.date}</span>
+                      <span className="t-body-sm">{h.time}</span>
+                    </div>
+                  </div>
+                </div>
+                <span className="t-body-md" style={{ width: 40, visibility: h.duration ? 'visible' : 'hidden' }}>{h.duration || '00:00'}</span>
+                <button className="sp-row-call" title="Call back" onClick={e => { e.stopPropagation(); startCall(contactFromHistory(h)); }}><Ico n="row-call" /></button>
+              </div>
+            )} />
+          </div>
+        ) : (
+          <div style={{ flex: '1 0 0', width: '100%', display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', justifyContent: 'center' }}>
+            <span className="t-body-md">No missed calls</span>
+            <span className="t-body-sm nowrap" style={{ color: '#8D99AE' }}>You're all caught up.</span>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const renderNav = () => {
+    const items = [
+      { id: 'keypad', label: 'Keypad' },
+      { id: 'contacts', label: 'Contacts' },
+      { id: 'extensions', label: 'Extensions' },
+      { id: 'history', label: 'History' },
+    ];
+    return (
+      <div className="sp-nav">
+        {items.map(it => (
+          <button key={it.id} className={`sp-nav-item ${navTab === it.id ? 'on' : ''}`}
+            onClick={() => { setNavTab(it.id); setViewContact(null); }}>
+            <Ico n={`nav-${it.id}-${navTab === it.id ? 'active' : 'inactive'}`} />
+            <span className="t-body-sm nowrap">{it.label}</span>
           </button>
         ))}
       </div>
-      {compact ? (
-        <button onClick={() => {
-          if (!dialInput) return;
-          const newP = { id: Date.now(), name: dialInput, number: dialInput, type: 'Customer', status: 'busy' };
-          setParticipants(prev => [...prev, { ...newP, joinedAt: callTimer }]);
-          setDialInput('');
-          setShowKeypad(false);
-          showToast(`Added ${dialInput} to call`);
-        }} disabled={!dialInput}
-          style={{ height: 40, borderRadius: 6, border: 'none', cursor: 'pointer',
-            background: dialInput ? '#007FAD' : 'rgba(255,255,255,0.08)',
-            color: '#fff', fontFamily: 'Montserrat', fontSize: 14, fontWeight: 700,
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-            opacity: dialInput ? 1 : 0.4 }}>
-          <Icon name="personAdd" size={18}/> Add to Call
-        </button>
-      ) : (
-        <button className="sp-call-btn" onClick={() => startCall()} disabled={!dialInput} style={{ opacity: dialInput ? 1 : 0.4 }}>
-          <Icon name="call" size={20}/>
-        </button>
-      )}
-    </div>
-  );
-
-  // ── Render: History ──
-  const renderHistory = () => {
-    const items = historyTab === 'missed' ? HISTORY.filter(h => h.type === 'missed') : HISTORY;
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <div style={{ display: 'flex', gap: 2, padding: 2, background: 'rgba(0,0,0,0.18)', borderRadius: 6 }}>
-          {[{ id: 'all', label: 'All' }, { id: 'missed', label: 'Missed' }].map(t => (
-            <button key={t.id} onClick={() => setHistoryTab(t.id)}
-              style={{ flex: 1, height: 30, borderRadius: 4, border: 'none', cursor: 'pointer',
-                background: historyTab === t.id ? '#F4F6FB' : 'transparent',
-                color: historyTab === t.id ? '#363B4D' : '#fff',
-                fontFamily: 'Montserrat', fontSize: 12, fontWeight: 700 }}>
-              {t.label}
-            </button>
-          ))}
-        </div>
-        <div className="sp-history-list">
-          {items.map(item => {
-            const iconName = item.type === 'missed' ? 'callMissed' : item.type === 'made' ? 'callMade' : 'callReceived';
-            const iconColor = item.type === 'missed' ? '#ED4B52' : item.type === 'made' ? '#87CFE7' : '#94CC86';
-            return (
-              <div key={item.id} className="sp-history-item">
-                <Icon name={iconName} size={16} color={iconColor}/>
-                <div className="sp-history-info">
-                  <div className="sp-history-name">{item.name}</div>
-                  <div className="sp-history-meta">{item.time}{item.duration && ` · ${item.duration}`}</div>
-                </div>
-                {!isInCall && (
-                  <button className="sp-history-call-btn" onClick={() => callBack(item)}>
-                    <Icon name="call" size={14}/>
-                  </button>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
     );
   };
 
-  // ── Render: Rich Contact Detail Panel ──
-  const renderContactDetail = (c, onBack) => (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-      <button onClick={onBack}
-        style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none',
-          cursor: 'pointer', color: '#87CFE7', fontFamily: 'Montserrat', fontSize: 13, fontWeight: 600,
-          padding: 0, alignSelf: 'flex-start' }}>
-        <Icon name="arrowLeft" size={16}/> Back
-      </button>
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-        <Avatar name={c.name} size={44} fontSize={14}/>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, flex: 1, minWidth: 0 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span style={{ color: '#87CFE7', fontSize: 15, fontWeight: 700 }}>{c.name}</span>
-            <Icon name="info" size={14} color="#8D99AE"/>
-          </div>
-          {c.type && <span className="sp-badge" style={{ alignSelf: 'flex-start' }}>{c.type}</span>}
-          {c.email && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-              <Icon name="mail" size={12} color="#87CFE7"/>
-              <span style={{ color: '#87CFE7', fontSize: 11, fontWeight: 500, wordBreak: 'break-all' }}>{c.email}</span>
-            </div>
-          )}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Icon name="call" size={12} color="#87CFE7"/>
-            <span style={{ color: '#87CFE7', fontSize: 12, fontWeight: 500 }}>{c.number}</span>
-          </div>
-        </div>
-      </div>
-      <div className="sp-divider"/>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <span style={{ color: '#8D99AE', fontSize: 11, fontWeight: 600 }}>Company</span>
-        <span style={{ color: '#87CFE7', fontSize: 14, fontWeight: 700 }}>{c.company}</span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginTop: 2 }}>
-          {c.companyType && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', padding: '2px 8px', borderRadius: 3,
-              fontSize: 11, fontWeight: 600, background: 'rgba(155,127,219,0.18)', color: '#C5B3F0', border: '1px solid rgba(155,127,219,0.3)' }}>
-              {c.companyType}
-            </span>
-          )}
-          {c.billing && (
-            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: '#CED0D4', fontSize: 11 }}>
-              <span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: 2, background: '#FFA630' }}/>{c.billing}
-            </span>
-          )}
-          {c.companyCode && (
-            <span style={{ color: '#8D99AE', fontSize: 11 }}>
-              Company Code <span style={{ color: '#fff', fontWeight: 600, marginLeft: 4 }}>{c.companyCode}</span>
-            </span>
-          )}
-        </div>
-      </div>
-      <div className="sp-divider"/>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <span style={{ color: '#8D99AE', fontSize: 11, fontWeight: 600 }}>Recent Tickets</span>
-          {c.tickets && c.tickets.length > 0 && (
-            <span style={{ color: '#87CFE7', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}>
-              See {c.tickets.length} tickets ▾
-            </span>
-          )}
-        </div>
-        {c.tickets && c.tickets.length > 0 ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginTop: 4 }}>
-            {c.tickets.map(t => (
-              <div key={t.id} style={{ display: 'flex', gap: 10, padding: '4px 0', cursor: 'pointer' }}>
-                <span style={{ color: '#87CFE7', fontSize: 12, fontWeight: 600, minWidth: 54 }}>{t.id}</span>
-                <span style={{ color: '#CED0D4', fontSize: 12 }}>{t.title}</span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <span style={{ color: '#5F6475', fontSize: 12, fontStyle: 'italic' }}>No recent tickets</span>
-        )}
-      </div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <button className="sp-btn-secondary" onClick={() => showToast('Ticket created for ' + c.name)}>
-          + Add Ticket
-        </button>
-        {!isInCall && (
-          <button className="sp-btn-primary" onClick={() => { onBack(); startCall(c); }}>
-            <Icon name="call" size={14}/> Call
-          </button>
-        )}
-      </div>
-    </div>
-  );
-
-  // ── Render: Contacts ──
-  const renderContacts = () => {
-    if (selectedContact) {
-      return renderContactDetail(selectedContact, () => setSelectedContact(null));
-    }
-    const filtered = CONTACTS.filter(c =>
-      c.name.toLowerCase().includes(contactSearch.toLowerCase()) || c.number.includes(contactSearch)
-    );
+  // ─────────────────────────────────────────────────────────────
+  // Contact details (in call, and from the Contacts tab)
+  // ─────────────────────────────────────────────────────────────
+  const renderContactDetails = (c, onBack, backLabel = 'Back to call') => {
+    const full = c.id === CHARLIE.id ? CHARLIE : c;
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <input className="sp-contact-search" placeholder="Search contacts..."
-          value={contactSearch} onChange={e => setContactSearch(e.target.value)}/>
-        <div className="sp-contacts-list">
-          {filtered.map(c => (
-            <div key={c.id} className="sp-contact-item" onClick={() => setSelectedContact(c)}>
-              <Avatar name={c.name} size={32}/>
-              <div className="sp-contact-item-info">
-                <div className="sp-contact-item-name">{c.name}</div>
-                <div className="sp-contact-item-num">{c.company || c.number}</div>
+      <div className="sp-main sp-scroll" style={{ padding: 20, overflowY: 'auto' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
+          <BackLink label={backLabel} onClick={onBack} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, width: '100%' }}>
+            <Avatar p={full} size={48} color="#B23C69" />
+            <div style={{ flex: '1 0 0', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, height: 20 }}>
+                <span className="t-title-md" style={{ color: '#87CFE7' }}>{full.name}</span>
+                <Ico n="rmx" />
+                <Ico n="info-blue" />
               </div>
-              {!isInCall && (
-                <button className="sp-history-call-btn" onClick={e => { e.stopPropagation(); startCall(c); }}>
-                  <Icon name="call" size={14}/>
+              {full.badge && <span className="sp-lozenge t-body-md" style={{ background: '#E2E6F5' }}>{full.badge}</span>}
+              {full.email && (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
+                  <Ico n="mail" />
+                  <span className="ellipsis" style={{ flex: '1 0 0', fontWeight: 500, fontSize: 14, letterSpacing: 0.4, color: '#87CFE7' }}>{full.email}</span>
+                </div>
+              )}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <Ico n="phone-blue" />
+                <span style={{ fontWeight: 500, fontSize: 14, letterSpacing: 0.4, color: '#87CFE7' }}>{full.directPhone || full.phone}</span>
+              </div>
+            </div>
+          </div>
+          <div className="sp-div" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }} className="t-body-md">
+              <span style={{ color: '#8D99AE' }}>Company</span>
+              <span className="ellipsis" style={{ color: '#87CFE7' }}>{full.company}</span>
+            </div>
+            {full.companyType && (
+              <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                <span className="t-body-md" style={{ color: '#8D99AE' }}>Type</span>
+                <span className="sp-lozenge t-body-md" style={{ background: '#BCC4E8' }}>{full.companyType}</span>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <Ico n="building" />
+                  <span className="t-body-md">{full.billing}</span>
+                </div>
+              </div>
+            )}
+            {full.companyCode && (
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center', fontWeight: 500, fontSize: 14, letterSpacing: 0.4 }}>
+                <span style={{ color: '#8D99AE' }}>Company Code</span>
+                <span>{full.companyCode}</span>
+              </div>
+            )}
+          </div>
+          <div className="sp-div" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12, width: '100%' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+              <span className="t-title-sm" style={{ color: '#8D99AE' }}>Recent Tickets</span>
+              {full.tickets && full.tickets.length > 0 && (
+                <button className="sp-link t-body-md" style={{ height: 18 }} onClick={() => showToast(`Showing ${full.tickets.length} tickets`)}>
+                  See {full.tickets.length} tickets <Ico n="drop-down-blue" />
                 </button>
               )}
             </div>
-          ))}
-        </div>
-      </div>
-    );
-  };
-
-  // ── Render: Users ──
-  const renderUsers = () => {
-    const filtered = AGENTS.filter(a =>
-      a.name.toLowerCase().includes(userSearch.toLowerCase()) || a.title.toLowerCase().includes(userSearch.toLowerCase())
-    );
-    return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-      <input className="sp-contact-search" placeholder="Search users..."
-        value={userSearch} onChange={e => setUserSearch(e.target.value)}/>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {filtered.map(a => {
-        const dotColor = agentStatusColor(a.status);
-        return (
-          <div key={a.id} className="sp-contact-item">
-            <div style={{ position: 'relative', flexShrink: 0 }}>
-              <Avatar name={a.name} size={32}/>
-              {dotColor && (
-                <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
-                  borderRadius: '50%', background: dotColor, border: '1.5px solid #363B4D' }}/>
-              )}
-            </div>
-            <div className="sp-contact-item-info">
-              <div className="sp-contact-item-name">{a.name}</div>
-              <div className="sp-contact-item-num">{a.title}</div>
-            </div>
-            {!isInCall && (
-              <button className="sp-history-call-btn" onClick={() => startCall({ name: a.name, number: a.number })}>
-                <Icon name="call" size={14}/>
-              </button>
+            {full.tickets && full.tickets.length ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
+                {full.tickets.map(t => (
+                  <div key={t.id} className="t-body-md" style={{ display: 'flex', gap: 16, alignItems: 'center', width: '100%' }}>
+                    <span style={{ color: '#87CFE7', flexShrink: 0, cursor: 'pointer' }}>{t.id}</span>
+                    <span className="ellipsis" style={{ flex: 1 }}>{t.title}</span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <span className="t-body-md" style={{ color: '#8D99AE' }}>No recent tickets</span>
             )}
           </div>
-        );
-      })}
-      </div>
-    </div>
-    );
-  };
-
-  // ── Render: Add Participant Search ──
-  const renderAddSearch = () => {
-    const filtered = ADD_SEARCH_LIST.filter(p =>
-      p.name.toLowerCase().includes(addSearch.toLowerCase()) || p.number.includes(addSearch)
-    );
-    const addedIds = new Set([...participants.map(p => p.id), activeContact.id]);
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <button onClick={() => { setAddOpen(false); setAddSearch(''); }}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none',
-            cursor: 'pointer', color: '#87CFE7', fontFamily: 'Montserrat', fontSize: 13, fontWeight: 600,
-            padding: '2px 0', alignSelf: 'flex-start' }}>
-          <Icon name="arrowLeft" size={16}/> Back
-        </button>
-        <input className="sp-contact-search" placeholder="Search users or contacts..."
-          value={addSearch} onChange={e => setAddSearch(e.target.value)} autoFocus/>
-        <div className="sp-contacts-list">
-          {filtered.map(p => {
-            const alreadyAdded = addedIds.has(p.id);
-            return (
-              <div key={p.id} className="sp-contact-item"
-                style={{ opacity: alreadyAdded ? 0.45 : 1, cursor: alreadyAdded ? 'default' : 'pointer' }}
-                onClick={() => {
-                  if (alreadyAdded) return;
-                  setParticipants(prev => [...prev, { ...p, joinedAt: callTimer }]);
-                  setAddOpen(false); setAddSearch('');
-                }}>
-                <div style={{ position: 'relative', flexShrink: 0 }}>
-                  <Avatar name={p.name} size={32}/>
-                  {p.type === 'User' && agentStatusColor(p.status) && (
-                    <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
-                      borderRadius: '50%', background: agentStatusColor(p.status), border: '1.5px solid #363B4D' }}/>
-                  )}
-                </div>
-                <div className="sp-contact-item-info">
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span className="sp-contact-item-name">{p.name}</span>
-                    <span style={{ color: '#8D99AE', fontSize: 10, fontWeight: 500 }}>{p.type}</span>
-                  </div>
-                  <div className="sp-contact-item-num">{p.number}</div>
-                </div>
-                {alreadyAdded && <span style={{ color: '#8D99AE', fontSize: 10, fontWeight: 600, flexShrink: 0 }}>{p.id === activeContact.id ? 'In Call' : 'Added'}</span>}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-    );
-  };
-
-  // ── Render: Participants List (All Users in call) ──
-  const renderParticipantsList = () => {
-    const customers = participants.filter(p => p.type === 'Customer');
-    const users = participants.filter(p => p.type === 'User');
-    const renderRow = (p, isYou = false, isFixed = false) => (
-      <div key={p.id || 'you'} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 0' }}>
-        <div style={{ position: 'relative', flexShrink: 0 }}>
-          <Avatar name={p.name} size={32}/>
-          {!isYou && p.type === 'User' && agentStatusColor(p.status) && (
-            <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
-              borderRadius: '50%', background: agentStatusColor(p.status), border: '1.5px solid #363B4D' }}/>
+          <button className="sp-btn primary full t-body-md" onClick={() => { setTicketTitle(''); setTicketTitleError(false); setTicketModalOpen(true); }}>Add Ticket</button>
+          {!inCall && (
+            <button className="sp-btn success full t-body-md" onClick={() => { setViewContact(null); startCall(full); }}>Call</button>
           )}
         </div>
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ color: '#fff', fontSize: 13, fontWeight: 600 }}>{p.name}{isYou && <span style={{ color: '#8D99AE', fontWeight: 400 }}> (You)</span>}</div>
-          <div style={{ color: '#94CC86', fontSize: 11, fontWeight: 500 }}>In call</div>
-        </div>
-        {!isYou && !isFixed && (
-          <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8D99AE', padding: 4, borderRadius: 4 }}
-            onClick={() => setParticipants(prev => prev.filter(x => x.id !== p.id))}
-            title="Remove from call">
-            <Icon name="personRemove" size={18}/>
-          </button>
-        )}
-      </div>
-    );
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-        <button onClick={() => setParticipantsOpen(false)}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none',
-            cursor: 'pointer', color: '#87CFE7', fontFamily: 'Montserrat', fontSize: 13, fontWeight: 600,
-            padding: '2px 0', alignSelf: 'flex-start' }}>
-          <Icon name="arrowLeft" size={16}/> Back
-        </button>
-        <div>
-          <div style={{ color: '#8D99AE', fontSize: 11, fontWeight: 600, marginBottom: 4 }}>Customers ({customers.length + 1})</div>
-          {renderRow(activeContact, false, true)}
-          {customers.map(p => renderRow(p))}
-        </div>
-        {(users.length > 0 || true) && (
-          <div>
-            <div style={{ color: '#8D99AE', fontSize: 11, fontWeight: 600, marginBottom: 4 }}>Users ({users.length + 1})</div>
-            {users.map(p => renderRow(p))}
-            {renderRow({ id: 'you', name: 'Emma Langhammer', status: 'available' }, true)}
-          </div>
-        )}
-        <div className="sp-divider" style={{ margin: '4px 0' }}/>
-        <div className="sp-actions">
-          {[
-            { icon: muted ? 'micOff' : 'mic', label: muted ? 'Unmute' : 'Mute', action: () => setMuted(m => !m), active: muted },
-            { icon: onHold ? 'play' : 'pause', label: onHold ? 'Resume' : 'Hold', action: () => setOnHold(h => !h), active: onHold },
-            { icon: 'dialpad', label: 'Keypad', action: () => { setParticipantsOpen(false); setShowKeypad(true); } },
-            { icon: 'personAdd', label: 'Add', action: () => { setParticipantsOpen(false); setAddOpen(true); } },
-            { icon: 'forward', label: 'Transfer', action: () => { setParticipantsOpen(false); setTransferOpen(true); setTransferTab('users'); } },
-            { icon: 'callEnd', label: 'End', action: endCall, red: true },
-          ].map((a, i) => (
-            <button key={i} className="sp-action-btn" onClick={a.action}>
-              <div className={`sp-action-icon ${a.red ? 'red' : ''} ${a.active ? 'active' : ''}`}>
-                <Icon name={a.icon} size={18}/>
-              </div>
-              <span className="sp-action-label">{a.label}</span>
-            </button>
-          ))}
-        </div>
       </div>
     );
   };
 
-  // ── Render: Active Call Tab ──
-  const renderCallTab = () => {
-    if (askFirstTarget) {
+  // ─────────────────────────────────────────────────────────────
+  // Incoming
+  // ─────────────────────────────────────────────────────────────
+  const incomingButtons = () => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%' }}>
+      <button className="sp-btn success full t-body-md" onClick={() => acceptCall(true)}>Accept &amp; Add Ticket</button>
+      <div style={{ display: 'flex', gap: 8, width: '100%' }}>
+        <button className="sp-btn danger t-body-md" style={{ flex: 1 }} onClick={() => endCall('Call declined')}>Decline</button>
+        <button className="sp-btn accept-outline t-body-md" style={{ flex: 1 }} onClick={() => acceptCall(false)}>Accept</button>
+      </div>
+    </div>
+  );
+
+  const renderIncoming = () => {
+    const c = caller;
+    if (c.unknown) {
       return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center' }}>
-          <Avatar name={askFirstTarget.name} size={64} fontSize={20}/>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
-            <span className="sp-contact-name">{askFirstTarget.name}</span>
-            <span style={{ color: '#8D99AE', fontSize: 12 }}>{askFirstTarget.number}</span>
+        <div style={{ padding: '32px 16px', display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }} className="nowrap">
+              <span className="t-title-md">{c.location || c.name}</span>
+              <span className="t-body-md">{c.phone}</span>
+            </div>
+            <span className="t-body-md" style={{ color: '#8D99AE' }}>This caller is not in your contacts.</span>
           </div>
-          <span className="sp-timer-text">{fmt(callTimer)}</span>
-          <div className="sp-actions">
-            {[
-              { icon: muted ? 'micOff' : 'mic', label: muted ? 'Unmute' : 'Mute', action: () => setMuted(m => !m), active: muted },
-              { icon: onHold ? 'play' : 'pause', label: onHold ? 'Resume' : 'Hold', action: () => setOnHold(h => !h), active: onHold },
-              { icon: 'dialpad', label: 'Keypad', action: () => setShowKeypad(s => !s) },
-              { icon: 'personAdd', label: 'Add', action: null, disabled: true },
-              { icon: 'forward', label: 'Transfer', action: null, disabled: true },
-              { icon: 'callEnd', label: 'End', action: endCall, red: true },
-            ].map((a, i) => (
-              <button key={i} className="sp-action-btn" onClick={a.action || undefined}
-                style={a.disabled ? { opacity: 0.3, pointerEvents: 'none' } : {}}>
-                <div className={`sp-action-icon ${a.red ? 'red' : ''} ${a.active ? 'active' : ''}`}>
-                  <Icon name={a.icon} size={18}/>
-                </div>
-                <span className="sp-action-label">{a.label}</span>
-              </button>
-            ))}
-          </div>
-          <button onClick={completeWarmTransfer}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, background: '#007FAD', border: 'none',
-              borderRadius: 20, padding: '10px 20px', cursor: 'pointer', color: '#fff',
-              fontFamily: 'Montserrat', fontSize: 13, fontWeight: 700, width: '100%', justifyContent: 'center' }}>
-            <Icon name="call" size={16} color="#fff"/> Transfer {activeContact.name}
-          </button>
+          {incomingButtons()}
         </div>
       );
     }
-    if (callDetailOpen && activeContact) {
-      const c = CONTACTS.find(x => x.name === activeContact.name) || activeContact;
-      return renderContactDetail(c, () => setCallDetailOpen(false));
-    }
-    if (addOpen) return renderAddSearch();
-    if (participantsOpen) return renderParticipantsList();
-    return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, alignItems: 'center', position: 'relative' }}>
-        {participants.length > 0 && (
-          <button onClick={() => setParticipantsOpen(true)}
-            style={{ position: 'absolute', top: 0, right: 0, display: 'flex', alignItems: 'center', gap: 4,
-              background: 'rgba(0,127,173,0.2)', border: '1px solid rgba(0,127,173,0.4)', borderRadius: 12,
-              padding: '3px 8px', cursor: 'pointer', color: '#87CFE7',
-              fontFamily: 'Montserrat', fontSize: 10, fontWeight: 700 }}>
-            <Icon name="group" size={13}/> +{participants.length} in call
-          </button>
-        )}
-        <Avatar name={activeContact.name} size={64} fontSize={20} color={tweaks.accentColor}/>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 3, alignItems: 'center' }}>
-          <span className="sp-contact-name">{activeContact.name}</span>
-          <span style={{ color: '#8D99AE', fontSize: 12 }}>{activeContact.number}</span>
-          {activeContact.company && <span style={{ color: '#8D99AE', fontSize: 12 }}>{activeContact.company}</span>}
-          <button onClick={() => setCallDetailOpen(true)}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#87CFE7',
-              fontFamily: 'Montserrat', fontSize: 12, fontWeight: 600, padding: '2px 0', marginTop: 1 }}>
-            Contact Details ›
-          </button>
+    const contactRow = (
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }} className="nowrap">
+          <span className="t-title-md">{c.name}</span>
+          <span className="t-body-md">{c.phone}</span>
         </div>
-        <span className="sp-timer-text" style={{ marginTop: 2 }}>{onHold ? 'On Hold' : fmt(callTimer)}</span>
-        {showKeypad ? (
-          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8 }}>
-            <button onClick={() => setShowKeypad(false)}
-              style={{ display: 'flex', alignItems: 'center', gap: 6, background: 'none', border: 'none',
-                cursor: 'pointer', color: '#87CFE7', fontFamily: 'Montserrat', fontSize: 13, fontWeight: 600,
-                padding: '4px 0', alignSelf: 'flex-start' }}>
-              <Icon name="arrowLeft" size={16}/> Back to call
-            </button>
-            {renderDialpad(true)}
-          </div>
-        ) : (
-          <div className="sp-actions">
-            {[
-              { icon: muted ? 'micOff' : 'mic', label: muted ? 'Unmute' : 'Mute', action: () => setMuted(m => !m), active: muted },
-              { icon: onHold ? 'play' : 'pause', label: onHold ? 'Resume' : 'Hold', action: () => setOnHold(h => !h), active: onHold },
-              { icon: 'dialpad', label: 'Keypad', action: () => setShowKeypad(s => !s) },
-              { icon: 'personAdd', label: 'Add', action: () => setAddOpen(true), active: participants.length > 0 },
-              { icon: 'forward', label: 'Transfer', action: () => { setTransferOpen(true); setTransferTab('users'); } },
-              { icon: 'callEnd', label: 'End', action: endCall, red: true },
-            ].map((a, i) => (
-              <button key={i} className="sp-action-btn" onClick={a.action}>
-                <div className={`sp-action-icon ${a.red ? 'red' : ''} ${a.active ? 'active' : ''}`}>
-                  <Icon name={a.icon} size={18}/>
-                </div>
-                <span className="sp-action-label">{a.label}</span>
-              </button>
-            ))}
-          </div>
-        )}
+        <button className="sp-icon-btn" title={incomingExpanded ? 'Hide details' : 'Show details'} onClick={() => setIncomingExpanded(x => !x)}>
+          <Ico n={incomingExpanded ? 'chevron-up-blue' : 'chevron-down-blue'} />
+        </button>
       </div>
     );
-  };
-
-  // ── Render: Transfer (inline in widget) ──
-  const renderTransferInline = () => {
-    const isQueue = transferTab === 'queues';
-    const pool = isQueue ? QUEUES : AGENTS;
-    const filtered = pool.filter(a =>
-      a.name.toLowerCase().includes(transferSearch.toLowerCase()) ||
-      (!isQueue && a.title.toLowerCase().includes(transferSearch.toLowerCase()))
-    );
     return (
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-        <button onClick={() => { setTransferOpen(false); setTransferTarget(null); setTransferSearch(''); }}
-          style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none',
-            cursor: 'pointer', color: '#87CFE7', fontFamily: 'Montserrat', fontSize: 13, fontWeight: 600,
-            padding: '2px 0', alignSelf: 'flex-start' }}>
-          <Icon name="arrowLeft" size={16}/> Back
-        </button>
-        {transferTarget ? (
-          <>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 0' }}>
-              {transferTarget.agents != null ? (
-                <div style={{ width: 44, height: 44, borderRadius: '50%', background: 'rgba(135,207,231,0.15)',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <Icon name="group" size={22} color="#87CFE7"/>
-                </div>
-              ) : (
-                <div style={{ position: 'relative', flexShrink: 0 }}>
-                  <Avatar name={transferTarget.name} size={44}/>
-                  {agentStatusColor(transferTarget.status) && (
-                    <div style={{ position: 'absolute', bottom: 0, right: 0, width: 11, height: 11,
-                      borderRadius: '50%', background: agentStatusColor(transferTarget.status), border: '2px solid #363B4D' }}/>
-                  )}
-                </div>
-              )}
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ color: '#fff', fontSize: 14, fontWeight: 700 }}>{transferTarget.name}</div>
-                {transferTarget.ext && <div style={{ color: '#8D99AE', fontSize: 11 }}>Ext. {transferTarget.ext}</div>}
-                <div style={{ color: '#8D99AE', fontSize: 11 }}>
-                  {transferTarget.agents != null
-                    ? `${transferTarget.agents} agents · wait ${transferTarget.wait}`
-                    : transferTarget.title}
-                </div>
-                {transferTarget.number && <div style={{ color: '#8D99AE', fontSize: 11 }}>{transferTarget.number}</div>}
-              </div>
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              {!isQueue && (
-                <button className="sp-btn-secondary" style={{ flex: 1 }} onClick={confirmTransferWarm}>Ask First</button>
-              )}
-              <button className="sp-btn-primary" style={{ flex: 1 }} onClick={confirmTransfer}>Transfer Now</button>
-            </div>
-            <button style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#8D99AE',
-              fontFamily: 'Montserrat', fontSize: 12, fontWeight: 600, padding: '4px 0', alignSelf: 'center' }}
-              onClick={() => setTransferTarget(null)}>Cancel</button>
-          </>
-        ) : (
-          <>
-            <div style={{ display: 'flex', gap: 2, padding: 2, background: 'rgba(0,0,0,0.18)', borderRadius: 6 }}>
-              {['users', 'queues'].map(t => (
-                <button key={t} onClick={() => { setTransferTab(t); setTransferSearch(''); }}
-                  style={{ flex: 1, height: 30, borderRadius: 4, border: 'none', cursor: 'pointer',
-                    background: transferTab === t ? '#F4F6FB' : 'transparent',
-                    color: transferTab === t ? '#363B4D' : '#fff',
-                    fontFamily: 'Montserrat', fontSize: 12, fontWeight: 700, textTransform: 'capitalize' }}>
-                  {t.charAt(0).toUpperCase() + t.slice(1)}
-                </button>
-              ))}
-            </div>
-            <input className="sp-contact-search" placeholder={isQueue ? 'Search queues...' : 'Search users...'}
-              value={transferSearch} onChange={e => setTransferSearch(e.target.value)} autoFocus/>
-            <div className="sp-contacts-list">
-              {filtered.map(a => (
-                <div key={a.id} className="sp-contact-item" style={{ cursor: 'pointer' }} onClick={() => setTransferTarget(a)}>
-                  {a.agents != null ? (
-                    <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(135,207,231,0.12)',
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                      <Icon name="group" size={16} color="#87CFE7"/>
-                    </div>
-                  ) : (
-                    <div style={{ position: 'relative', flexShrink: 0 }}>
-                      <Avatar name={a.name} size={32}/>
-                      {agentStatusColor(a.status) && (
-                        <div style={{ position: 'absolute', bottom: 0, right: 0, width: 10, height: 10,
-                          borderRadius: '50%', background: agentStatusColor(a.status), border: '1.5px solid #363B4D' }}/>
-                      )}
-                    </div>
-                  )}
-                  <div className="sp-contact-item-info">
-                    <div className="sp-contact-item-name">{a.name}</div>
-                    <div className="sp-contact-item-num">
-                      {a.agents != null ? `${a.agents} agents · wait ${a.wait}` : a.title}
+      <div style={{ padding: '32px 16px', display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center' }}>
+        {!incomingExpanded ? contactRow : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%' }}>
+            {contactRow}
+            <div style={{ border: '1px solid #5F6475', borderRadius: 8, padding: 12, display: 'flex', flexDirection: 'column', gap: 12, overflow: 'hidden', width: '100%' }}>
+              <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                <Avatar p={c} size={48} color="#B23C69" />
+                <div style={{ flex: '1 0 0', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  <div style={{ display: 'flex', gap: 8, alignItems: 'center', height: 20 }}>
+                    <span className="t-title-md" style={{ color: '#87CFE7', cursor: 'pointer' }}>{c.name}</span>
+                    <Ico n="rmx" />
+                    <Ico n="info-grey" />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
+                    {c.email && (
+                      <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: '100%' }}>
+                        <Ico n="mail" />
+                        <span className="ellipsis" style={{ flex: '1 0 0', fontWeight: 500, fontSize: 14, letterSpacing: 0.4, color: '#87CFE7' }}>{c.email}</span>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <Ico n="phone-blue" />
+                      <span style={{ fontWeight: 500, fontSize: 14, letterSpacing: 0.4, color: '#87CFE7' }}>{c.directPhone || c.phone}</span>
                     </div>
                   </div>
                 </div>
+              </div>
+              <div className="sp-div" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <div className="t-body-md" style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }}>
+                  <span style={{ color: '#8D99AE' }}>Company</span>
+                  <span className="ellipsis" style={{ color: '#87CFE7' }}>{c.company}</span>
+                </div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  {c.billing && (
+                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                      <Ico n="building" />
+                      <span className="t-body-md">{c.billing}</span>
+                    </div>
+                  )}
+                  {c.companyCode && <>
+                    <span style={{ fontWeight: 500, fontSize: 14, letterSpacing: 0.4, color: '#8D99AE' }}>Company Code</span>
+                    <span style={{ fontWeight: 500, fontSize: 14, letterSpacing: 0.4 }}>{c.companyCode}</span>
+                  </>}
+                </div>
+              </div>
+              <div className="sp-div" />
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
+                  <span className="t-title-sm" style={{ color: '#8D99AE' }}>Recent Tickets</span>
+                  {c.tickets && c.tickets.length > 0 && (
+                    <button className="sp-link t-body-md" style={{ height: 18 }} onClick={() => showToast(`Showing ${c.tickets.length} tickets`)}>
+                      See {c.tickets.length} tickets <Ico n="drop-down-blue" />
+                    </button>
+                  )}
+                </div>
+                {(c.tickets || []).map(t => (
+                  <div key={t.id} className="t-body-md" style={{ display: 'flex', gap: 16, alignItems: 'center', width: '100%' }}>
+                    <span style={{ color: '#87CFE7', flexShrink: 0, cursor: 'pointer' }}>{t.id}</span>
+                    <span className="ellipsis" style={{ flex: 1 }}>{t.title}</span>
+                  </div>
+                ))}
+              </div>
+              {c.comment && (
+                <div className="t-body-md" style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
+                  <span style={{ color: '#8D99AE' }}>Comment</span>
+                  <span className="ellipsis">{c.comment}</span>
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+        {incomingButtons()}
+      </div>
+    );
+  };
+
+  // ─────────────────────────────────────────────────────────────
+  // Active call views
+  // ─────────────────────────────────────────────────────────────
+  const callControls = () => (
+    <div className="sp-ctrls">
+      <Ctrl icon={muted ? 'mic-dark' : 'mic-off'} label={muted ? 'Unmute' : 'Mute'} on={muted} onClick={() => setMuted(m => !m)} />
+      <Ctrl icon={onHold ? 'play-dark' : 'pause'} label={onHold ? 'Resume' : 'Hold'} on={onHold} onClick={() => setOnHold(h => !h)} />
+      <Ctrl icon="dialpad" label="Keypad" disabled={onHold} onClick={() => setCallView('keypad')} />
+      <Ctrl icon="person-add" label="Add" onClick={() => { setAddTab('extensions'); setAddFilter('users'); setAddSearch(''); setCallView('add'); }} />
+      <Ctrl icon="transfer" label="Transfer" onClick={openTransfer} />
+    </div>
+  );
+
+  const renderOutgoing = () => (
+    <div className="sp-main" style={{ padding: '32px 20px', gap: 20, alignItems: 'center', justifyContent: 'center' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
+        <Avatar p={caller} size={48} color={caller.unknown ? '#8D99AE' : '#B23C69'} />
+        <span className="t-title-md">{caller.name}</span>
+        <div className="t-body-md" style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', textAlign: 'center' }}>
+          {!caller.unknown && caller.phone && <span>{caller.phone}</span>}
+          <span style={{ color: '#8D99AE' }}>Calling...</span>
+        </div>
+      </div>
+      <button className="sp-btn danger full t-body-md" onClick={() => endCall('Call cancelled')}>Cancel</button>
+    </div>
+  );
+
+  const renderCallMain = () => {
+    if (ringingParty.length) {
+      // Adding — ringing
+      return (
+        <div className="sp-main" style={{ padding: 20, gap: 20, alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ flex: '1 0 0', width: '100%', display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
+              <span className="t-accent-sm">On this call</span>
+              <PartyRow p={caller} color={caller.unknown ? '#8D99AE' : '#B23C69'} meta={['On hold', fmt(callTimer)]} />
+              <div className="sp-div" />
+              {connectedParty.map(p => (
+                <React.Fragment key={p.id}>
+                  <PartyRow p={p} meta={['Connected', fmt(callTimer - p.since)]} />
+                  <div className="sp-div" />
+                </React.Fragment>
+              ))}
+              {ringingParty.map(p => (
+                <React.Fragment key={p.id}>
+                  <PartyRow p={p} meta={['Ringing...']} right={
+                    <button className="sp-btn secondary t-body-md" onClick={() => setParty(ps => ps.filter(x => x.id !== p.id))}>Cancel</button>
+                  } />
+                  <div className="sp-div" />
+                </React.Fragment>
               ))}
             </div>
-          </>
-        )}
-      </div>
-    );
-  };
-
-  // ── Render: Bottom Nav ──
-  const renderNav = () => {
-    const items = [
-      { id: 'dialpad',  icon: 'dialpad',   label: 'Keypad' },
-      { id: 'contacts', icon: 'contacts',  label: 'Contacts' },
-      { id: 'users',    icon: 'group',     label: 'Users' },
-      { id: 'history',  icon: 'history',   label: 'History' },
-    ];
-    if (isInCall) items.unshift({ id: 'call', icon: 'call', label: 'Call', isCall: true });
+            {callControls()}
+          </div>
+          <button className="sp-btn danger t-body-md" style={{ width: 'calc(100% - 24px)' }} onClick={() => endCall()}>End</button>
+        </div>
+      );
+    }
+    if (isConference) {
+      const people = [caller, ...connectedParty, ME];
+      const first = (n) => n.split(' ')[0];
+      const names = [caller, ...connectedParty].map(p => p.unknown ? p.name : first(p.name)).join(', ') + ', & you';
+      return (
+        <div className="sp-main" style={{ padding: 20, gap: 20, alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ flex: '1 0 0', width: '100%', display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center' }}>
+                {people.map((p, i) => (
+                  <div key={p.id} style={{ marginRight: i < people.length - 1 ? -8 : 0 }}>
+                    <Avatar p={p} size={48} color={i === 0 ? (p.unknown ? '#8D99AE' : '#B23C69') : p.color} />
+                  </div>
+                ))}
+              </div>
+              <span className="t-title-md" style={{ textAlign: 'center' }}>{names}</span>
+              <button className="sp-link t-body-md" onClick={() => setCallView('people')}>
+                {people.length} people <Ico n="chevron-right-blue" />
+              </button>
+            </div>
+            {callControls()}
+          </div>
+          <button className="sp-btn danger full t-body-md" onClick={() => endCall('Call ended for everyone')}>End Call for Everyone</button>
+          <button className="sp-btn secondary full t-body-md" onClick={() => endCall('You left the call')}>Leave Call</button>
+        </div>
+      );
+    }
+    // Single call (known or unknown)
     return (
-      <div className="sp-nav">
-        {items.map(n => (
-          <button key={n.id} className={`sp-nav-btn ${navTab === n.id ? 'active' : ''} ${n.isCall ? 'call-tab' : ''}`}
-            onClick={() => setNavTab(n.id)} title={n.label}>
-            <Icon name={n.icon} size={20}/>
-            <span>{n.label}</span>
-            {n.isCall && navTab !== 'call' && <span className="sp-nav-dot"/>}
-          </button>
-        ))}
+      <div className="sp-main" style={{ padding: '32px 20px', gap: 20, alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+          <Avatar p={caller} size={48} color={caller.unknown ? '#8D99AE' : '#B23C69'} />
+          <span className="t-title-md">{caller.name}</span>
+          <div className="t-body-md" style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', textAlign: 'center' }}>
+            {caller.unknown ? <span>Not in contacts</span> : <>
+              {caller.phone && <span>{caller.phone}</span>}
+              {caller.company && <span>{caller.company}</span>}
+            </>}
+          </div>
+          {!caller.unknown && caller.kind === 'contact' && (
+            <button className="sp-link t-body-md" onClick={() => setCallView('details')}>
+              Contact Details <Ico n="chevron-right-blue" />
+            </button>
+          )}
+        </div>
+        {callControls()}
+        {caller.unknown && (
+          <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16, padding: 16, borderRadius: 4, border: '1px solid #5F6475', background: 'rgba(255,255,255,0.1)' }}>
+            <span className="t-body-md">Who is this?</span>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+              <button className="sp-btn secondary t-body-md" onClick={() => showToast('New contact created')}>New Contact</button>
+              <button className="sp-btn secondary t-body-md" onClick={() => showToast('Linked to existing contact')}>Link to Existing</button>
+            </div>
+          </div>
+        )}
+        <button className="sp-btn danger full t-body-md" onClick={() => endCall()}>End</button>
       </div>
     );
   };
 
-  // ── Render: Incoming Call Screen ──
-  const renderIncoming = () => (
-    <div className="sp-body" style={{ gap: 14, alignItems: 'center', padding: '24px 20px' }}>
-      <div className={tweaks.showAvatarPulse ? 'sp-avatar-pulse' : ''}>
-        <Avatar name={activeContact.name} size={72} fontSize={22} color={tweaks.accentColor}/>
+  const renderInCallKeypad = () => (
+    <div className="sp-main" style={{ padding: 20, gap: 32, alignItems: 'center' }}>
+      <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
+        <div className="sp-field">
+          <input value={dtmf} readOnly placeholder="" />
+          {dtmf && <button className="sp-icon-btn" onClick={() => setDtmf('')} title="Clear"><Ico n="clear" /></button>}
+        </div>
       </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
-        <span className="sp-contact-name">{activeContact.name}</span>
-        <span className="sp-contact-number" style={{ fontSize: 13, color: '#CED0D4' }}>{activeContact.number}</span>
-        {activeContact.company && <span style={{ color: '#8D99AE', fontSize: 12 }}>{activeContact.company}</span>}
-        <span style={{ color: '#8D99AE', fontSize: 12, marginTop: 4 }}>Incoming call...</span>
-      </div>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', marginTop: 6 }}>
-        <button className="sp-btn-accept" onClick={acceptCall}>
-          <Icon name="call" size={16}/> Accept
-        </button>
-        <button onClick={() => { acceptCall(); setTicketTitle(''); setTicketTitleError(false); setTicketModalOpen(true); }}
-          style={{ height: 40, borderRadius: 6, border: '1px solid rgba(135,207,231,0.4)',
-            background: 'rgba(135,207,231,0.1)', color: '#87CFE7', fontFamily: 'Montserrat',
-            fontSize: 14, fontWeight: 700, cursor: 'pointer',
-            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-          <Icon name="call" size={16}/> Accept &amp; Create Ticket
-        </button>
-        <button className="sp-btn-danger" onClick={endCall}>
-          <Icon name="callEnd" size={16}/> Decline
-        </button>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' }}>
+        <Keypad onKey={k => setDtmf(v => v + k)} />
+        <button className="sp-link t-body-md" style={{ color: '#fff' }} onClick={() => setCallView('main')}>Hide keypad</button>
       </div>
     </div>
   );
 
-  // ── Render: Outgoing (Ringing) Screen ──
-  const renderOutgoing = () => (
-    <div className="sp-body" style={{ gap: 14, alignItems: 'center', padding: '24px 20px' }}>
-      <Avatar name={activeContact.name} size={72} fontSize={22} color={tweaks.accentColor}/>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center' }}>
-        <span className="sp-contact-name">{activeContact.name}</span>
-        <span className="sp-contact-number" style={{ fontSize: 13, color: '#CED0D4' }}>{activeContact.number || activeContact.name}</span>
-        <span style={{ color: '#8D99AE', fontSize: 12, marginTop: 4 }}>Ringing...</span>
+  const renderPeople = () => {
+    const contacts = [{ ...caller, isCaller: true }, ...connectedParty.filter(p => p.kind !== 'user')];
+    const users = connectedParty.filter(p => p.kind === 'user');
+    const remove = (p) => {
+      if (p.isCaller) { endCall(`${p.name} removed — call ended`); return; }
+      setParty(ps => ps.filter(x => x.id !== p.id));
+      if (connectedParty.length <= 1) setCallView('main');
+    };
+    return (
+      <div className="sp-main" style={{ padding: 20, gap: 20, alignItems: 'center' }}>
+        <BackLink onClick={() => setCallView('main')} />
+        <div className="sp-scroll" style={{ flex: '1 0 0', width: '100%', display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
+            <span className="t-accent-sm">Contacts ({contacts.length})</span>
+            {contacts.map(p => (
+              <PartyRow key={p.id} p={p} color={p.isCaller ? (p.unknown ? '#8D99AE' : '#B23C69') : p.color}
+                meta={['Connected', fmt(p.isCaller ? callTimer : callTimer - p.since)]}
+                right={<button className="sp-btn secondary t-body-md" onClick={() => remove(p)}>Remove</button>} />
+            ))}
+          </div>
+          <div className="sp-div" />
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
+            <span className="t-accent-sm">Users ({users.length + 1})</span>
+            {users.map(p => (
+              <React.Fragment key={p.id}>
+                <PartyRow p={p} padding="8px 0 8px 8px" meta={['Connected', fmt(callTimer - p.since)]}
+                  right={<button className="sp-btn secondary t-body-md" onClick={() => remove(p)}>Remove</button>} />
+                <div className="sp-div" />
+              </React.Fragment>
+            ))}
+            <div style={{ padding: 8 }}>
+              <PartyRow p={{ ...ME, name: `${ME.name} (you)` }} color={ME.color} padding={0} meta={['Connected', fmt(callTimer)]} />
+            </div>
+            <div className="sp-div" />
+          </div>
+        </div>
+        <button className="sp-btn secondary full t-body-md" onClick={() => { setAddTab('extensions'); setAddFilter('users'); setAddSearch(''); setCallView('add'); }}>Add Someone</button>
       </div>
-      <button className="sp-btn-danger" onClick={endCall} style={{ width: '100%', marginTop: 6 }}>
-        <Icon name="callEnd" size={16}/> Cancel
+    );
+  };
+
+  // ── Add someone ──
+  const renderAdd = () => {
+    const q = addSearch.trim().toLowerCase();
+    const onCall = new Set(party.map(p => p.id));
+    const users = USERS.filter(u => !onCall.has(u.id) && (!q || u.name.toLowerCase().includes(q) || u.title.toLowerCase().includes(q) || u.ext.includes(q)));
+    const queues = QUEUES.filter(x => !q || x.name.toLowerCase().includes(q));
+    return (
+      <div className="sp-main" style={{ padding: 16, gap: 16, overflow: 'hidden' }}>
+        <BackLink onClick={() => setCallView('main')} />
+        <Seg value={addTab} onChange={setAddTab}
+          options={[{ id: 'extensions', label: 'Extensions' }, { id: 'keypad', label: 'Keypad' }]} />
+        {addTab === 'keypad' ? (
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' }}>
+            <div className="sp-field">
+              <input value={addNumber} placeholder="Enter a number" autoFocus onChange={e => setAddNumber(e.target.value)}
+                onKeyDown={e => { if (e.key === 'Enter' && addNumber.trim()) addParticipant(contactFromNumber(addNumber.trim())); }} />
+              {addNumber && <button className="sp-icon-btn" onClick={() => setAddNumber('')} title="Clear"><Ico n="clear" /></button>}
+            </div>
+            <Keypad onKey={k => setAddNumber(v => v + k)}>
+              <button className="sp-key call" style={{ gridColumn: 2 }} disabled={!addNumber.trim()} title="Add to call"
+                onClick={() => addParticipant(contactFromNumber(addNumber.trim()))}>
+                <Ico n={addNumber.trim() ? 'call-enabled' : 'call-disabled'} />
+              </button>
+            </Keypad>
+          </div>
+        ) : <>
+          <FilterRow filter={addFilter} onFilter={setAddFilter} search={addSearch} onSearch={setAddSearch} />
+          <div className="sp-scroll" style={{ flex: 1, width: '100%' }}>
+            {addFilter === 'users'
+              ? <ListWithDividers items={users} render={u => (
+                  <UserRow u={u} right={
+                    <button className="sp-row-call" title={`Add ${u.name}`} onClick={() => addParticipant(u)}><Ico n="row-call" /></button>
+                  } />
+                )} />
+              : <ListWithDividers items={queues} render={x => (
+                  <QueueRow q={x} right={
+                    <button className="sp-row-call" title={`Add ${x.name}`} onClick={() => addParticipant({ ...x, initials: x.name.split(' ').map(w => w[0]).join('').slice(0, 2) })}><Ico n="row-call" /></button>
+                  } />
+                )} />}
+          </div>
+        </>}
+      </div>
+    );
+  };
+
+  // ── Transfer ──
+  const renderTransfer = () => {
+    if (transferTarget) {
+      const t = transferTarget;
+      return (
+        <div className="sp-main" style={{ padding: 20 }}>
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'flex-start', width: '100%' }}>
+            <BackLink onClick={() => setTransferTarget(null)} />
+            <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', justifyContent: 'center' }}>
+              <Avatar p={t} size={48} color="#8D99AE" />
+              <span className="t-title-md">{t.name}</span>
+              <div className="sp-line" style={{ gap: 12 }}>
+                <span className="t-body-sm">Ext. {t.ext}</span>
+                <span className="t-body-sm">{t.title}</span>
+              </div>
+              <StatusDot status={t.status} />
+            </div>
+            <div style={{ display: 'flex', gap: 16, width: '100%', justifyContent: 'center' }}>
+              <button className="sp-btn secondary t-body-md" style={{ flex: 1 }} onClick={() => startConsult(t)}>Consult First</button>
+              <button className="sp-btn primary t-body-md" style={{ flex: 1 }} onClick={doTransfer}>Transfer Now</button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+    const q = transferSearch.trim().toLowerCase();
+    const users = USERS.filter(u => !q || u.name.toLowerCase().includes(q) || u.title.toLowerCase().includes(q) || u.ext.includes(q));
+    const queues = QUEUES.filter(x => !q || x.name.toLowerCase().includes(q));
+    const numberOk = transferNumber.trim().length > 0;
+    return (
+      <div className="sp-main" style={{ padding: 20, overflow: 'hidden' }}>
+        <div style={{ flex: 1, minHeight: 0, display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'flex-start', width: '100%' }}>
+          <BackLink onClick={() => setCallView('main')} />
+          <Seg value={transferTab} onChange={setTransferTab}
+            options={[{ id: 'extensions', label: 'Extensions' }, { id: 'keypad', label: 'Keypad' }]} />
+          {transferTab === 'keypad' ? (
+            <div style={{ flex: 1, width: '100%', display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' }}>
+              <div className="sp-field">
+                <input value={transferNumber} placeholder="Enter a number" autoFocus onChange={e => setTransferNumber(e.target.value)} />
+                {transferNumber && <button className="sp-icon-btn" onClick={() => setTransferNumber('')} title="Clear"><Ico n="clear" /></button>}
+              </div>
+              <Keypad onKey={k => setTransferNumber(v => v + k)} />
+              <div style={{ display: 'flex', gap: 16, width: '100%', justifyContent: 'center' }}>
+                <button className="sp-btn secondary t-body-md" style={{ flex: 1 }} disabled={!numberOk}
+                  onClick={() => startConsult(contactFromNumber(transferNumber.trim()))}>Consult First</button>
+                <button className="sp-btn primary t-body-md" style={{ flex: 1 }} disabled={!numberOk} onClick={doTransfer}>Transfer Now</button>
+              </div>
+            </div>
+          ) : <>
+            <FilterRow filter={transferFilter} onFilter={setTransferFilter} search={transferSearch} onSearch={setTransferSearch} />
+            <div className="sp-scroll" style={{ flex: 1, width: '100%' }}>
+              {transferFilter === 'queues'
+                ? <ListWithDividers items={queues} render={x => (
+                    <QueueRow q={x} right={<button className="sp-btn secondary t-body-md" onClick={doTransfer}>Transfer</button>} />
+                  )} />
+                : <ListWithDividers items={users} render={u => (
+                    <TransferUserRow u={u} onTransfer={() => setTransferTarget(u)} />
+                  )} />}
+            </div>
+          </>}
+        </div>
+      </div>
+    );
+  };
+
+  // ── Consulting ──
+  const renderConsulting = () => {
+    const target = consult.target;
+    const held = consult.swapped ? target : caller;
+    const talking = consult.swapped ? caller : target;
+    const heldColor = held === caller ? (caller.unknown ? '#8D99AE' : '#B23C69') : '#8D99AE';
+    const talkColor = talking === caller ? (caller.unknown ? '#8D99AE' : '#B23C69') : '#8D99AE';
+    const talkMeta = talking.ext ? [`Ext. ${talking.ext}`, fmt(consultTimer)] : [fmt(consult.swapped ? callTimer : consultTimer)];
+    return (
+      <div className="sp-main" style={{ padding: 20, gap: 20, alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ flex: '1 0 0', width: '100%', display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
+            <span className="t-accent-sm">On hold</span>
+            <PartyRow p={held} color={heldColor} meta={['On hold', fmt(held === caller ? callTimer : consultTimer)]}
+              right={<button className="sp-btn secondary t-body-md" onClick={() => setConsult(c => ({ ...c, swapped: !c.swapped }))}>Swap</button>} />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
+            <span className="t-accent-sm">Talking to</span>
+            <div style={{ background: 'rgba(255,255,255,0.05)', borderRadius: 4, padding: 8 }}>
+              <PartyRow p={talking} color={talkColor} padding={0} meta={talkMeta} />
+            </div>
+          </div>
+          <div className="sp-ctrls">
+            <Ctrl icon={consultMuted ? 'mic-dark' : 'mic-off'} label={consultMuted ? 'Unmute' : 'Mute'} on={consultMuted} onClick={() => setConsultMuted(m => !m)} />
+            <Ctrl icon="dialpad" label="Keypad" onClick={() => showToast('Keypad sends tones to ' + talking.name)} />
+            <Ctrl icon="merge" label="Merge" onClick={() => {
+              const t = consult.target;
+              setConsult(null);
+              setParty(ps => [...ps, { ...t, color: '#8D99AE', status: 'connected', since: callTimer }]);
+              setCallView('main');
+            }} />
+          </div>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%', alignItems: 'center' }}>
+          <button className="sp-btn primary full t-body-md" onClick={doTransfer}>Complete Transfer</button>
+          <button className="sp-btn secondary full t-body-md" onClick={() => { setConsult(null); setCallView('main'); }}>Cancel &amp; Return to Caller</button>
+        </div>
+      </div>
+    );
+  };
+
+  // ── Transferred ──
+  const renderTransferred = () => (
+    <div className="sp-main" style={{ padding: 32, gap: 32, alignItems: 'center' }}>
+      <div className="t-body-md" style={{ width: 'calc(100% + 8px)', flexShrink: 0, padding: 16, borderRadius: 8, background: '#C9E5C3', color: '#363B4D', display: 'flex', alignItems: 'center' }}>
+        Call transferred successfully!
+      </div>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, alignItems: 'center' }}>
+        <Avatar p={caller} size={48} color={caller.unknown ? '#8D99AE' : '#B23C69'} />
+        <span className="t-title-md">{caller.name}</span>
+        <div className="t-body-md" style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', textAlign: 'center' }}>
+          {!caller.unknown && caller.phone && <span>{caller.phone}</span>}
+          {caller.company && <span>{caller.company}</span>}
+        </div>
+      </div>
+      <span className="t-body-md">{fmtLong(transferredAfter)}</span>
+      <button className="sp-btn secondary full t-body-md" onClick={() => { setScreen('idle'); setNavTab('keypad'); }}>Done</button>
+    </div>
+  );
+
+  // ─────────────────────────────────────────────────────────────
+  // Panel body routing
+  // ─────────────────────────────────────────────────────────────
+  const renderBody = () => {
+    if (screen === 'incoming') return renderIncoming();
+    if (screen === 'outgoing') return renderOutgoing();
+    if (screen === 'transferred') return renderTransferred();
+    if (inCall) {
+      if (consult) return renderConsulting();
+      switch (callView) {
+        case 'keypad':   return renderInCallKeypad();
+        case 'details':  return renderContactDetails(caller, () => setCallView('main'));
+        case 'transfer': return renderTransfer();
+        case 'add':      return renderAdd();
+        case 'people':   return renderPeople();
+        default:         return renderCallMain();
+      }
+    }
+    return <>
+      {navTab === 'keypad' && renderKeypadTab()}
+      {navTab === 'contacts' && renderContactsTab()}
+      {navTab === 'extensions' && renderExtensionsTab()}
+      {navTab === 'history' && renderHistoryTab()}
+      {renderNav()}
+    </>;
+  };
+
+  // ─────────────────────────────────────────────────────────────
+  // Minimized bars
+  // ─────────────────────────────────────────────────────────────
+  const renderBar = () => {
+    if (screen === 'incoming' && wideIncomingBar) {
+      return (
+        <div className="sp-bar" style={{ width: 733, padding: '12px 16px', ...(wideBarPos.r == null
+          ? { top: anchor.wideTop, left: anchor.wideLeft }   // centered over the search bar
+          : { right: wideBarPos.r, bottom: wideBarPos.b }) }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <div className="sp-bar-handle" onMouseDown={wideBarDragStart}><Ico n="drag" /></div>
+            <div className="t-title-sm nowrap" style={{ display: 'flex', flexDirection: 'column', gap: 8, justifyContent: 'center' }}>
+              <span>{caller.unknown ? caller.location : caller.name}</span>
+              <span>{caller.phone}</span>
+            </div>
+          </div>
+          <span className="t-body-sm nowrap">Incoming...</span>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <button className="sp-btn danger bordered t-body-md" onClick={() => endCall('Call declined')}>Decline</button>
+            <button className="sp-btn success bordered t-body-md" onClick={() => { acceptCall(true); openPanel(); }}>Accept &amp; Add Ticket</button>
+            <button className="sp-btn t-body-md" style={{ background: '#fff', border: '1px solid #6F9965', color: '#4A6643' }} onClick={() => { acceptCall(false); openPanel(); }}>Accept</button>
+            <button className="sp-icon-btn" title="Expand" onClick={openPanel}><Ico n="expand" /></button>
+          </div>
+        </div>
+      );
+    }
+    let label, status, buttons;
+    const twoLine = (name) => {
+      if (caller.unknown) return <span className="nowrap">{name}</span>;
+      const parts = name.split(' ');
+      return parts.length > 1 ? <>{parts[0]}<br />{parts.slice(1).join(' ')}</> : name;
+    };
+    if (screen === 'incoming') {
+      label = twoLine(caller.name); status = 'Incoming...';
+      buttons = <>
+        <button className="sp-btn danger bordered t-body-md" onClick={() => endCall('Call declined')}>Decline</button>
+        <button className="sp-btn success bordered t-body-md" onClick={() => { acceptCall(false); openPanel(); }}>Accept</button>
+      </>;
+    } else if (screen === 'outgoing') {
+      label = twoLine(caller.name); status = 'Calling...';
+      buttons = <button className="sp-btn danger t-body-md" onClick={() => endCall('Call cancelled')}>Cancel</button>;
+    } else if (isConference) {
+      label = `${2 + connectedParty.length} people`; status = `Conference ${fmt(callTimer)}`;
+      buttons = <button className="sp-btn danger t-body-md" onClick={() => endCall('Call ended for everyone')}>End</button>;
+    } else if (onHold) {
+      label = twoLine(caller.name); status = `On hold ${fmt(callTimer)}`;
+      buttons = <button className="sp-btn success bordered t-body-md" onClick={() => setOnHold(false)}>Resume</button>;
+    } else {
+      label = twoLine(caller.name); status = fmt(callTimer);
+      buttons = <button className="sp-btn danger t-body-md" onClick={() => endCall()}>End</button>;
+    }
+    return (
+      <div className="sp-bar" style={{ width: 500, ...(barPos.r == null
+        ? { top: anchor.top, left: anchor.barLeft }   // under the phone button
+        : { right: barPos.r, bottom: barPos.b }) }}>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <div className="sp-bar-handle" onMouseDown={barDragStart}><Ico n="drag" /></div>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <Avatar p={caller} size={24} color={caller.unknown ? '#8D99AE' : '#B23C69'} />
+            <span className="t-title-sm" style={{ maxWidth: isConference ? 'none' : 120, whiteSpace: isConference ? 'nowrap' : 'normal' }}>{label}</span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+          <span className="t-body-sm nowrap" style={{ fontVariantNumeric: 'tabular-nums' }}>{status}</span>
+          {buttons}
+          <button className="sp-icon-btn" title="Expand" onClick={openPanel}><Ico n="expand" /></button>
+        </div>
+      </div>
+    );
+  };
+
+  // ─────────────────────────────────────────────────────────────
+  // qManage app header
+  // ─────────────────────────────────────────────────────────────
+  const renderStateButton = () => {
+    const focus = () => openPanel();
+    if (screen === 'incoming') return <button className="qm-call-chip t-body-md" onClick={focus}><span>Incoming...</span><Ico n="hdr-call-chip-phone" /></button>;
+    if (screen === 'outgoing') return <button className="qm-call-chip t-body-md" onClick={focus}><span>Ringing...</span><Ico n="hdr-call-chip-phone" /></button>;
+    if (screen === 'active') return <button className="qm-call-chip t-body-md" onClick={focus}><span style={{ fontVariantNumeric: 'tabular-nums' }}>{fmt(callTimer)}</span><Ico n="hdr-call-chip-phone" /></button>;
+    return (
+      <button className="qm-icon-btn" title="Phone" onClick={() => (open ? setOpen(false) : openPanel())}>
+        <Ico n="hdr-add" />
       </button>
-    </div>
-  );
-
-  // ── Render: Main Widget Content ──
-  const headerTitle = () => {
-    if (screen === 'incoming') return 'Incoming Call';
-    if (screen === 'outgoing') return 'Calling...';
-    const tabNames = { dialpad: 'Keypad', contacts: 'Contacts', users: 'Users', history: 'Call History', call: 'Active Call' };
-    return tabNames[navTab] || 'Softphone';
-  };
-
-  const renderMainContent = () => {
-    if (screen === 'incoming') return (
-      <div className="sp-widget-content">
-        <div className="sp-widget-scroll">{renderIncoming()}</div>
-        {renderNav()}
-      </div>
-    );
-    if (screen === 'outgoing') return (
-      <div className="sp-widget-content">
-        <div className="sp-widget-scroll">{renderOutgoing()}</div>
-        {renderNav()}
-      </div>
-    );
-    return (
-      <div className="sp-widget-content">
-        {isInCall && navTab !== 'call' && !transferOpen && (
-          <div className="sp-callinfo-banner" onClick={() => setNavTab('call')}>
-            <Avatar name={activeContact.name} size={28} fontSize={11} color={tweaks.accentColor}/>
-            <span className="sp-callinfo-name">{activeContact.name}</span>
-            <span className="sp-callinfo-timer">{fmt(callTimer)}</span>
-            <Icon name="expand" size={14} color="#8D99AE"/>
-          </div>
-        )}
-        <div className="sp-widget-scroll">
-          <div className="sp-body">
-            {transferOpen && isInCall ? renderTransferInline() : (
-              <>
-                {navTab === 'dialpad'  && renderDialpad()}
-                {navTab === 'contacts' && renderContacts()}
-                {navTab === 'users'    && renderUsers()}
-                {navTab === 'history'  && renderHistory()}
-                {navTab === 'call' && isInCall && renderCallTab()}
-              </>
-            )}
-          </div>
-        </div>
-        {renderNav()}
-      </div>
     );
   };
 
-  // ── Render: Minimized Pill (handles active, outgoing, and incoming) ──
-  const renderMiniSmall = () => {
-    const isRinging = screen === 'incoming' || screen === 'outgoing';
-    return (
-      <div className="sp-mini" style={{ left: miniPos.x, top: miniPos.y }}>
-        <div className="sp-mini-handle" onMouseDown={miniDragStart}>
-          <Icon name="drag" size={20}/>
-        </div>
-        <Avatar name={activeContact.name} size={36} fontSize={13} color={tweaks.accentColor}/>
-        <span className="sp-mini-name">{activeContact.name}</span>
-        {isRinging
-          ? <span className="sp-mini-timer" style={{ color: '#8D99AE' }}>Ringing...</span>
-          : <span className="sp-mini-timer">{onHold ? 'On Hold' : fmt(callTimer)}</span>
-        }
-        <button className="sp-mini-end" onClick={endCall}>
-          <Icon name="callEnd" size={14}/> {isRinging ? 'Cancel' : 'End'}
-        </button>
-        <button className="sp-mini-expand" onClick={() => { setMinimized(false); setOpen(true); if (isInCall) setNavTab('call'); }} title="Expand">
-          <Icon name="expand" size={16}/>
-        </button>
-      </div>
-    );
-  };
+  // Docked positions, kept inside the window
+  const measureAnchor = useCallback(() => {
+    const btn = stateBtnRef.current, search = searchRef.current;
+    if (!btn || !search) return;
+    const clampLeft = (x, w) => Math.round(Math.max(8, Math.min(x, window.innerWidth - w - 8)));
+    const b = btn.getBoundingClientRect();
+    const sr = search.getBoundingClientRect();
+    const next = {
+      top: Math.round(b.bottom + 8),                       // just below the phone button
+      left: clampLeft(b.left, SP_WIDTH),                        // panel: left edges aligned
+      barLeft: clampLeft(b.left, 500),                     // compact bar: left edges aligned
+      wideTop: Math.max(0, Math.round(sr.top + sr.height / 2 - 34)),   // 68px bar centred on the search bar
+      wideLeft: clampLeft(sr.left + sr.width / 2 - 733 / 2, 733),
+    };
+    setAnchor(a => (Object.keys(next).every(k => a[k] === next[k]) ? a : next));
+  }, []);
+  React.useLayoutEffect(measureAnchor);
+  useEffect(() => {
+    window.addEventListener('resize', measureAnchor);
+    return () => window.removeEventListener('resize', measureAnchor);
+  }, [measureAnchor]);
+
+  // Once dragged, keep the panel on screen when its height changes (e.g. expanding the incoming card)
+  React.useLayoutEffect(() => {
+    const el = panelRef.current;
+    if (!el || panelPos.r == null) return;
+    const r = el.getBoundingClientRect();
+    if (r.top < 8) setPanelPos(p => ({ ...p, b: Math.max(8, p.b - (8 - r.top)) }));
+  });
+
+  const head = headerInfo();
+  const panelHeight = screen === 'incoming' ? 'auto' : 600;
 
   return (
     <>
-      {minimized && isCalling && renderMiniSmall()}
-
-      {open && !minimized && (
-        <div className="sp-widget" style={{ left: widgetPos.x, top: widgetPos.y }}>
-          <div className="sp-header">
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-              <div className="sp-drag-handle" onMouseDown={widgetDragStart}>
-                <Icon name="drag" size={18}/>
+      <div className="qm-header">
+        <div className="qm-left">
+          <Ico n="hdr-menu" />
+          <Ico n="hdr-logo" />
+        </div>
+        <div className="qm-search" ref={searchRef}>
+          <span className="t-body-lg" style={{ flex: 1 }}>Search qManage</span>
+          <Ico n="hdr-search" />
+        </div>
+        <div className="qm-right">
+          <div className="qm-buttons">
+            <div ref={stateBtnRef} style={{ display: 'flex' }}>{renderStateButton()}</div>
+            <button className="qm-remote t-body-md"><Ico n="hdr-agent" /><span>Remote Support</span></button>
+            <button className="qm-add-ticket t-body-md" onClick={() => { setTicketTitle(''); setTicketTitleError(false); setTicketModalOpen(true); }}><span>Add Ticket</span></button>
+            <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                <Ico n="hdr-communication" />
+                <Ico n="hdr-notifications" />
               </div>
-              <span className="sp-header-title">{headerTitle()}</span>
-            </div>
-            <div className="sp-header-actions">
-              <button className="sp-hbtn" title="Minimize" onClick={() => { setMinimized(true); setOpen(false); }}>
-                <Icon name="minimize" size={14}/>
-              </button>
-              <button className="sp-hbtn" title="Pop out" onClick={() => showToast('Popped out')}>
-                <Icon name="popout" size={14}/>
-              </button>
-              <button className="sp-hbtn" onClick={() => setOpen(false)} title="Close">
-                <Icon name="close" size={14}/>
-              </button>
+              <button className="qm-star" title="Ticket summary"><Ico n="hdr-ai-star" /></button>
             </div>
           </div>
-          {renderMainContent()}
+          <div className="qm-avatar"><Ico n="hdr-person" /></div>
+        </div>
+      </div>
+
+      <div className="qm-content">
+        <HomePage />
+      </div>
+
+      <div className="demo-fab">
+        {demoOpen && (
+          <div className="demo-card">
+            <h3>Prototype controls</h3>
+            <div className="demo-row">
+              <button className="demo-btn" onClick={() => triggerIncoming(CHARLIE)}>Incoming call — known contact</button>
+              <button className="demo-btn" onClick={() => triggerIncoming(UNKNOWN_CALLER)}>Incoming call — unknown number</button>
+            </div>
+            <div className="demo-row">
+              <span style={{ fontSize: 13, color: '#5F6475' }}>Minimized incoming bar:</span>
+              <button className={`demo-btn ${!wideIncomingBar ? 'on' : ''}`} onClick={() => setWideIncomingBar(false)}>Compact</button>
+              <button className={`demo-btn ${wideIncomingBar ? 'on' : ''}`} onClick={() => setWideIncomingBar(true)}>Simple (wide)</button>
+            </div>
+          </div>
+        )}
+        <button className={`demo-btn ${demoOpen ? 'on' : ''}`} onClick={() => setDemoOpen(o => !o)}>Prototype controls</button>
+      </div>
+
+      {minimized && isCalling && renderBar()}
+
+      {open && !minimized && (
+        <div ref={panelRef} className="sp-panel" style={{ height: panelHeight, ...(panelPos.r == null
+          ? { top: anchor.top, left: anchor.left }
+          : { right: panelPos.r, bottom: panelPos.b }) }}>
+          {renderHeader(head)}
+          {head.banner && renderBanner()}
+          {renderBody()}
         </div>
       )}
 
-      {toast && <div className="sp-toast-notif">{toast}</div>}
+      {toast && <div className="sp-toast t-body-md">{toast}</div>}
 
       {ticketModalOpen && (
         <div className="nt-overlay" onClick={e => { if (e.target === e.currentTarget) setTicketModalOpen(false); }}>
@@ -1763,19 +1990,6 @@ function SoftphoneApp() {
           </div>
         </div>
       )}
-
-      <TweaksPanel>
-        <TweakColor label="Accent color" value={tweaks.accentColor} onChange={v => setTweak('accentColor', v)}/>
-        <TweakToggle label="Avatar pulse on incoming" value={tweaks.showAvatarPulse} onChange={v => setTweak('showAvatarPulse', v)}/>
-        <TweakToggle label="Auto-trigger incoming call" value={tweaks.autoIncoming} onChange={v => setTweak('autoIncoming', v)}/>
-        <TweakButton label="Simulate incoming call" onClick={triggerIncoming}/>
-        {isCalling && (
-          <TweakButton label={minimized ? 'Expand to widget' : 'Minimize to pill'} onClick={() => {
-            if (minimized) { setMinimized(false); setOpen(true); }
-            else { setMinimized(true); setOpen(false); }
-          }}/>
-        )}
-      </TweaksPanel>
     </>
   );
 }

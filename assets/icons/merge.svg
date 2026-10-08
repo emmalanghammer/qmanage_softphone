@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="merge_type">
+<mask id="mask0_0_151" style="mask-type:alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
+<rect id="Bounding box" width="20" height="20" fill="#D9D9D9"/>
+</mask>
+<g mask="url(#mask0_0_151)">
+<path id="merge_type_2" d="M13.8333 16.6666L9.16667 11.9999V5.72909L7 7.89575L5.8125 6.70825L10 2.52075L14.1667 6.68742L12.9792 7.87492L10.8333 5.72909V11.3333L15 15.4999L13.8333 16.6666ZM6.16667 16.6874L5 15.5208L7.64583 12.8541L8.83333 14.0416L6.16667 16.6874Z" fill="white"/>
+</g>
+</g>
+</svg>
