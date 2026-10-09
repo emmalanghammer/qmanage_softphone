@@ -90,6 +90,40 @@
   .hm-activity:hover { background: #F7F8FB; }
   .hm-act-line { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; color: #363B4D; }
 
+  /* ── Ticket detail view (Figma "Ticket Detail View" 1890:24506) ── */
+  .td-page { min-height: 100%; background: #F2F8FB; color: #363B4D; display: flex; flex-direction: column; gap: 16px; }
+  .td-titlebar { background: #fff; border-bottom: 1px solid #CED0D4; box-shadow: 0 2px 7px rgba(0,125,171,0.10); padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+  .td-h { font-weight: 500; font-size: 24px; line-height: 26px; white-space: nowrap; }
+  .td-accent { font-weight: 400; font-size: 14px; line-height: 18px; color: #5F6475; white-space: nowrap; }
+  .td-label { font-weight: 500; font-size: 12px; line-height: 16px; letter-spacing: 0.4px; color: #5F6475; }
+  .td-card-title { font-weight: 600; font-size: 18px; line-height: 24px; color: #363B4D; white-space: nowrap; }
+  .td-empty { font-weight: 500; font-size: 14px; line-height: 18px; letter-spacing: 0.25px; color: #8D99AE; text-align: center; }
+  .td-select { height: 28px; background: #fff; border: 1px solid #CED0D4; border-radius: 4px; display: flex; align-items: center; cursor: pointer; }
+  .td-btn2 { height: 36px; padding: 0 8px; border-radius: 4px; border: none; background: #F2F3F7; color: #5F6475; cursor: pointer; display: flex; align-items: center; flex-shrink: 0; }
+  .td-btn2:hover, .td-icon-btn:hover { background: #e6e8ee; }
+  .td-icon-btn { width: 36px; height: 36px; padding: 0 4px; border-radius: 4px; border: none; background: #F2F3F7; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .td-primary { height: 36px; padding: 8px; border-radius: 4px; border: 1px solid #007FAD; background: #007FAD; color: #fff; cursor: pointer; display: flex; align-items: center; flex-shrink: 0; }
+  .td-primary:hover { background: #006d95; }
+  .td-body { padding: 0 16px 16px; display: flex; gap: 16px; align-items: flex-start; }
+  .td-left { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  .td-right { flex: 0 0 632px; min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+  .td-card { background: #fff; border: 1px solid #CED0D4; border-radius: 8px; box-shadow: 0 2px 7px 0 rgba(0,125,171,0.10); padding: 16px; display: flex; flex-direction: column; gap: 16px; }
+  .td-card-head { display: flex; justify-content: space-between; align-items: center; height: 24px; }
+  .td-plain { border: none; background: none; padding: 0; cursor: pointer; display: flex; align-items: center; gap: 8px; color: #007FAD; }
+  .td-chev { transition: transform 0.15s; }
+  .td-chev.collapsed { transform: rotate(-90deg); }
+  .td-field { flex: 1 1 0; min-width: 200px; display: flex; flex-direction: column; gap: 4px; }
+  .td-control { position: relative; height: 36px; background: #fff; border: 1px solid #CED0D4; border-radius: 4px; padding: 8px; display: flex; align-items: center; gap: 8px; }
+  .td-control input, .td-control select {
+    flex: 1; min-width: 0; height: 18px; border: none; outline: none; background: none; appearance: none; -webkit-appearance: none;
+    font: 500 14px/18px 'Montserrat', sans-serif; letter-spacing: 0.25px; color: #363B4D; cursor: pointer;
+  }
+  .td-control input::placeholder { color: #CED0D4; font-style: italic; }
+  .td-control:focus-within { border-color: #007FAD; }
+  .td-control img { pointer-events: none; }
+  .td-jump { width: 32px; height: 32px; border: none; background: none; border-radius: 4px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .td-jump:hover { background: #F2F3F7; }
+
   /* ── Prototype controls (not part of the design) ── */
   .demo-fab { position: fixed; left: 16px; bottom: 16px; z-index: 900; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; }
   .demo-card { display: inline-flex; flex-direction: column; gap: 10px; padding: 16px; border: 1px dashed #CED0D4; border-radius: 8px; background: #fff; box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
@@ -100,8 +134,9 @@
   .demo-btn.on { background: #363B4D; color: #fff; border-color: #363B4D; }
 
   /* ── Softphone panel ── */
+  /* Softphone sits above the New Ticket overlay (z 2000) so the call stays usable while ticketing */
   .sp-panel {
-    position: fixed; z-index: 1000; width: var(--sp-width); background: #363B4D; border-radius: 8px;
+    position: fixed; z-index: 2100; width: var(--sp-width); background: #363B4D; border-radius: 8px;
     box-shadow: 0 0 2px 0 rgba(0,0,0,0.16), 0 1px 4px 0 rgba(0,0,0,0.16), 0 12px 32px rgba(0,0,0,0.18);
     display: flex; flex-direction: column; overflow: hidden; color: #fff; user-select: none;
   }
@@ -218,7 +253,7 @@
 
   /* Minimized bars */
   .sp-bar {
-    position: fixed; z-index: 1000; display: flex; align-items: center; justify-content: space-between;
+    position: fixed; z-index: 2100; display: flex; align-items: center; justify-content: space-between;
     padding: 16px; background: #363B4D; border-radius: 8px; color: #fff; user-select: none; overflow: hidden;
     box-shadow: 0 0 2px rgba(0,0,0,0.16), 0 1px 4px rgba(0,0,0,0.16), 0 12px 32px rgba(0,0,0,0.18);
   }
@@ -772,6 +807,205 @@ function HomePage() {
 }
 
 // ─────────────────────────────────────────────────────────────
+// Ticket detail view — Figma "Ticket Detail View" node 1890:24506
+// Shown in place of the workspace once a ticket is created from the New Ticket form.
+// ─────────────────────────────────────────────────────────────
+const TD_DEFAULT_DESC = "The issue reported involves a malfunction in the system's notification feature. Users are experiencing delays in receiving alerts, which affects their workflow. This problem may require a thorough investigation to identify the root cause. Please ensure to check the server logs and user settings for any discrepancies. The expected resolution time is within 48 hours, pending further analysis.";
+
+const TD_SECTIONS = [
+  { id: 'contacts',   title: 'Contacts',           icon: 'contacts',           jump: 'td-jump-contacts',       add: true, empty: 'Add a contact to get started.', pad: '64px 0' },
+  { id: 'details',    title: 'Ticket Details',     icon: 'ticket-details',     jump: 'td-jump-ticket-details' },
+  { id: 'custom',     title: 'Custom Fields',      icon: 'custom-fields',      jump: 'td-jump-custom-fields',  viewAll: true, empty: 'Open custom fields and fill out any you want to display here.', pad: '32px 0' },
+  { id: 'attach',     title: 'Attachments',        icon: 'attachments',        jump: 'td-jump-attachments',    add: true },
+  { id: 'links',      title: 'Links',              icon: 'links',              jump: 'td-jump-links',          add: true, empty: 'Add a link to get started.', pad: '32px 0' },
+  { id: 'time',       title: 'Time Spent',         icon: 'time-spent',         jump: 'td-jump-time' },
+  { id: 'agreements', title: 'Service Agreements', icon: 'service-agreements', jump: 'td-jump-agreements',     add: true, empty: 'Add a service agreement to get started.', pad: '16px 0' },
+  { id: 'jira',       title: 'Jira Issues',        icon: 'jira',               jump: 'td-jump-jira',           add: true, empty: 'Add a Jira issue to get started.', pad: '16px 32px' },
+];
+
+const TdIco = ({ n, s = 24 }) => <img src={`assets/icons/${n}.svg`} width={s} height={s} alt="" draggable="false" />;
+
+const TdField = ({ label, icon = 'td-field-caret', placeholder, labelExtra, style }) => (
+  <div className="td-field" style={style}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <span className="td-label">{label}</span>
+      {labelExtra}
+    </div>
+    <label className="td-control">
+      {icon === 'td-field-caret'
+        ? <select defaultValue=""><option value="" /><option>Low</option><option>Medium</option><option>High</option></select>
+        : <input placeholder={placeholder} />}
+      {icon && <TdIco n={icon} s={20} />}
+    </label>
+  </div>
+);
+
+function TicketDetail({ ticket }) {
+  const [collapsed, setCollapsed] = useState({});
+  const [closed, setClosed] = useState(false);
+  const refs = useRef({});
+  const jump = (id) => refs.current[id] && refs.current[id].scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  const renderBody = (sec) => {
+    if (sec.id === 'details') return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', gap: 16 }}><TdField label="Priority" /><TdField label="Due Date" icon="td-calendar" placeholder="mm/dd/yy" /></div>
+        <div style={{ display: 'flex', gap: 16 }}><TdField label="Product" /><TdField label="Category" /></div>
+        <div style={{ display: 'flex', gap: 16 }}>
+          <TdField label="Project" labelExtra={<button className="td-plain" title="Link project"><TdIco n="td-link" s={16} /></button>} />
+          <TdField label="Responsible" />
+        </div>
+        <div style={{ display: 'flex', gap: 16 }}><TdField label="Ticket Tags" icon={null} /></div>
+        <div style={{ display: 'flex', gap: 16 }}><TdField label="Support Queue" style={{ flex: '0 0 calc((100% - 16px) / 2)' }} /></div>
+      </div>
+    );
+    if (sec.id === 'attach') return (
+      <label style={{ height: 146, background: '#F0FBFF', border: '1px dashed #CED0D4', borderRadius: 8, padding: 16, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
+        <input type="file" style={{ display: 'none' }} />
+        <TdIco n="td-upload" s={32} />
+        <div className="t-body-md" style={{ display: 'flex', gap: 4 }}>
+          <span style={{ color: '#007FAD' }}>Choose a file</span>
+          <span style={{ color: '#5F6475' }}>or drag and drop anywhere</span>
+        </div>
+      </label>
+    );
+    if (sec.id === 'time') return (
+      <div style={{ border: '1px solid #CED0D4', borderRadius: 8, padding: '8px 0', display: 'flex' }}>
+        {['Billable Hours', 'Non-Billable Hours', 'Total'].map((cap, i) => (
+          <div key={cap} style={{ flex: '1 1 0', display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', padding: '0 16px', color: '#5F6475', borderLeft: i ? '1px solid #CED0D4' : 'none' }}>
+            <span className="t-title-sm">0h 0m</span>
+            <span className="t-body-md nowrap">{cap}</span>
+          </div>
+        ))}
+      </div>
+    );
+    return <div className="td-empty nowrap" style={{ padding: sec.pad }}>{sec.empty}</div>;
+  };
+
+  return (
+    <div className="td-page">
+      <div className="td-titlebar">
+        <div style={{ display: 'flex', gap: 32, alignItems: 'center' }}>
+          <div className="td-h" style={{ display: 'flex', gap: 8 }}><span>#{ticket.number}</span><span>{ticket.title}</span></div>
+          <button className="td-plain" title="Rename"><TdIco n="td-edit-pencil" /></button>
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 16 }}>
+          <div style={{ display: 'flex', gap: 32, alignItems: 'center', minWidth: 0 }}>
+            <div style={{ background: '#2B376B', borderRadius: 4, padding: '4px 8px', display: 'flex', alignItems: 'center', color: '#fff', flexShrink: 0 }}>
+              <TdIco n="td-warning" s={20} /><span className="t-body-md nowrap" style={{ padding: '0 8px' }}>Limited Access</span>
+            </div>
+            <a href="#" onClick={e => e.preventDefault()} className="nowrap" style={{ fontSize: 14, fontWeight: 400, color: '#007FAD', textDecoration: 'underline' }}>Created at 4/04/24 10:00 AM</a>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span className="td-accent">Assigned to</span>
+              <div className="td-select" style={{ width: 194, padding: '0 8px', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  <span className="hm-av" style={{ background: '#2B376B' }}>CA</span>
+                  <span className="t-body-md nowrap">Charlie Apegian</span>
+                </div>
+                <TdIco n="td-caret-down" />
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span className="td-accent">Status</span>
+              <div className="td-select" style={{ height: 'auto', padding: '2px 4px 2px 8px', gap: 8 }}>
+                <span className="t-body-md" style={{ padding: '2px 8px' }}>None</span>
+                <TdIco n="td-caret-down" />
+              </div>
+            </div>
+          </div>
+          <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+            <button className="td-btn2" onClick={() => setClosed(c => !c)} aria-pressed={closed}
+              style={closed ? { background: '#E6F3E2' } : null}>
+              <span style={{ position: 'relative', display: 'flex' }}>
+                <TdIco n="td-checkbox-unchecked" s={20} />
+                {closed && <span style={{ position: 'absolute', inset: 4, background: '#94CC86', borderRadius: 2 }} />}
+              </span>
+              <span className="t-body-md" style={{ padding: '0 8px' }}>Closed</span>
+            </button>
+            <button className="td-icon-btn" title="Remote connection"><TdIco n="td-connect-off" /></button>
+            <button className="td-icon-btn" title="Watchers"><TdIco n="td-group" /></button>
+            <button className="td-icon-btn" title="Visibility"><TdIco n="td-visibility" /></button>
+            <button className="td-icon-btn" title="History"><TdIco n="td-history" /></button>
+            <button className="td-primary"><span className="t-body-md" style={{ padding: '0 8px' }}>Actions</span><TdIco n="td-caret-down-white" s={20} /></button>
+          </div>
+        </div>
+      </div>
+
+      <div className="td-body">
+        <div className="td-left">
+          <div className="td-card">
+            <div className="td-card-head">
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                <TdIco n="td-description" /><span className="td-card-title">Description</span>
+                <button className="td-plain" title="Edit description"><TdIco n="td-edit-pencil" /></button>
+              </div>
+              <button className="td-plain t-body-md" style={{ height: 24 }}><TdIco n="td-section-plus" />Create Checklist</button>
+            </div>
+            <p className="t-body-md" style={{ color: '#5F6475', whiteSpace: 'pre-wrap' }}>{ticket.description || TD_DEFAULT_DESC}</p>
+          </div>
+
+          <div className="td-card" style={{ height: 601, overflow: 'hidden' }}>
+            <div className="td-card-head">
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}><TdIco n="td-activity" /><span className="td-card-title">Activity</span></div>
+              <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                <button className="td-primary" style={{ border: 'none' }}><TdIco n="td-add-white" s={20} /><span className="t-body-md" style={{ padding: '0 8px' }}>Add Note</span></button>
+                <button className="td-plain" title="Expand"><TdIco n="td-open-in-full" /></button>
+              </div>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <div className="td-field" style={{ flex: '0 0 226px' }}>
+                <span className="td-label">Find</span>
+                <label className="td-control"><input placeholder="Search Activity" style={{ cursor: 'text' }} /><TdIco n="td-search" s={20} /></label>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button className="td-plain" title="Sort"><TdIco n="td-arrow-downward" /></button>
+                <button className="td-plain" title="Filter"><TdIco n="td-filter" /></button>
+              </div>
+            </div>
+            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '64px 0' }}>
+              <span className="td-empty nowrap">No activity yet. Add a note to get started.</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="td-right">
+          <div className="td-card" style={{ padding: '8px 16px', flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+              <span className="td-accent">Jump to</span>
+              <div style={{ display: 'flex', gap: 8 }}>
+                {TD_SECTIONS.map(sec => (
+                  <button key={sec.id} className="td-jump" title={sec.title} onClick={() => jump(sec.id)}><TdIco n={sec.jump} /></button>
+                ))}
+              </div>
+            </div>
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', alignSelf: 'stretch' }}>
+              <div style={{ width: 1, alignSelf: 'stretch', background: '#CED0D4' }} />
+              <button className="td-plain" title="Customize sections"><TdIco n="home-settings" /></button>
+            </div>
+          </div>
+
+          {TD_SECTIONS.map(sec => (
+            <div key={sec.id} ref={el => (refs.current[sec.id] = el)} className="td-card" style={{ scrollMarginTop: 16 }}>
+              <div className="td-card-head">
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}><TdIco n={`td-${sec.icon}`} /><span className="td-card-title">{sec.title}</span></div>
+                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                  {sec.viewAll && <button className="td-plain t-body-md" style={{ height: 24 }}>View All</button>}
+                  {sec.add && <button className="td-plain" title={`Add to ${sec.title}`}><TdIco n="td-section-plus" /></button>}
+                  <button className="td-plain" title={collapsed[sec.id] ? 'Expand' : 'Collapse'} onClick={() => setCollapsed(c => ({ ...c, [sec.id]: !c[sec.id] }))}>
+                    <span className={`td-chev ${collapsed[sec.id] ? 'collapsed' : ''}`} style={{ display: 'flex' }}><TdIco n="td-chevron-down" /></span>
+                  </button>
+                </div>
+              </div>
+              {!collapsed[sec.id] && renderBody(sec)}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────
 // Main App
 // ─────────────────────────────────────────────────────────────
 function SoftphoneApp() {
@@ -821,6 +1055,9 @@ function SoftphoneApp() {
   // Ticket modal
   const [ticketModalOpen, setTicketModalOpen] = useState(false);
   const [ticketTitle, setTicketTitle] = useState('');
+  const [ticketDesc, setTicketDesc] = useState('');
+  const [openTicket, setOpenTicket] = useState(null);    // ticket shown in place of the workspace after Create
+  const ticketSeq = useRef(0);
   const [ticketType, setTicketType] = useState('Default');
   const [ticketTitleError, setTicketTitleError] = useState(false);
 
@@ -1874,7 +2111,7 @@ function SoftphoneApp() {
       <div className="qm-header">
         <div className="qm-left">
           <Ico n="hdr-menu" />
-          <Ico n="hdr-logo" />
+          <button className="sp-icon-btn" title="Go to workspace" onClick={() => setOpenTicket(null)}><Ico n="hdr-logo" /></button>
         </div>
         <div className="qm-search" ref={searchRef}>
           <span className="t-body-lg" style={{ flex: 1 }}>Search qManage</span>
@@ -1898,7 +2135,7 @@ function SoftphoneApp() {
       </div>
 
       <div className="qm-content">
-        <HomePage />
+        {openTicket ? <TicketDetail ticket={openTicket} /> : <HomePage />}
       </div>
 
       <div className="demo-fab">
@@ -1974,7 +2211,7 @@ function SoftphoneApp() {
                 <div className="nt-desc-toolbar">
                   {['B','I','U','≡','≡','≡','⋮≡','⋮≡'].map((t,i) => <button key={i} className="nt-tool">{t}</button>)}
                 </div>
-                <textarea className="nt-desc-area" placeholder=""/>
+                <textarea className="nt-desc-area" placeholder="" value={ticketDesc} onChange={e => setTicketDesc(e.target.value)}/>
               </div>
             </div>
             <div className="nt-footer">
@@ -1983,8 +2220,9 @@ function SoftphoneApp() {
               <button className="nt-btn-create" onClick={() => {
                 if (!ticketTitle.trim()) { setTicketTitleError(true); return; }
                 setTicketModalOpen(false);
-                showToast('Ticket created: ' + ticketTitle);
-                setTicketTitle('');
+                ticketSeq.current += 1;
+                setOpenTicket({ number: ticketSeq.current, title: ticketTitle.trim(), description: ticketDesc.trim(), type: ticketType });
+                setTicketTitle(''); setTicketDesc('');
               }}>Create</button>
             </div>
           </div>
