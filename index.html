@@ -306,8 +306,6 @@
     position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 2000;
     display: flex; align-items: center; justify-content: center;
   }
-  /* While a call panel is docked right, the form sits to its left with a 16px gap */
-  .nt-overlay.docked { align-items: flex-start; justify-content: flex-start; }
   .nt-modal {
     background: #fff; border-radius: 6px; width: 560px; max-width: 96vw;
     box-shadow: 0 8px 40px rgba(0,0,0,0.22); font-family: 'Montserrat', sans-serif;
@@ -527,9 +525,10 @@ function useDrag(initial) {
     const sx = e.clientX, sy = e.clientY;
     const r = posRef.current.r ?? window.innerWidth - rect.right;
     const b = posRef.current.b ?? window.innerHeight - rect.bottom;
+    // Keep the whole element on screen while dragging
     const move = (ev) => setPos({
-      r: Math.max(0, Math.min(window.innerWidth - 120, r - (ev.clientX - sx))),
-      b: Math.max(0, Math.min(window.innerHeight - 60, b - (ev.clientY - sy))),
+      r: Math.max(0, Math.min(window.innerWidth - rect.width, r - (ev.clientX - sx))),
+      b: Math.max(0, Math.min(window.innerHeight - rect.height, b - (ev.clientY - sy))),
     });
     const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); };
     window.addEventListener('mousemove', move);
@@ -1137,10 +1136,8 @@ function SoftphoneApp() {
   const [ticketTitleError, setTicketTitleError] = useState(false);
   const [ticketContacts, setTicketContacts] = useState([]);  // chips in the form's Contacts field
   const [callLink, setCallLink] = useState(null);            // call attached to the ticket form: { id, callerName, logged, duration }
-  const [dockRight, setDockRight] = useState(false);         // panel docked right of the ticket form (Accept & Add Ticket)
   const [whoMode, setWhoMode] = useState(null);              // unknown caller: null | 'new' | 'link'
   const [newContactName, setNewContactName] = useState('');
-  const [vw, setVw] = useState(window.innerWidth);
   const [announce, setAnnounce] = useState('');              // aria-live text
   const returnFocusRef = useRef(null);
 
@@ -1251,7 +1248,8 @@ function SoftphoneApp() {
     setTicketTitle(''); setTicketDesc(''); setTicketTitleError(false);
     setTicketContacts([contactChip(c)]);
     setCallLink({ id: Date.now(), callerName: c.name, logged: false, duration: 0 });
-    setDockRight(true);
+    // Collapse the call to the minimized bar so the centred form is unobstructed
+    setMinimized(true); setOpen(false);
     setTicketModalOpen(true);
   };
 
@@ -1270,7 +1268,6 @@ function SoftphoneApp() {
     setNavTab('keypad');
     setMinimized(false);
     setOpen(false);
-    setDockRight(false);
     setWhoMode(null);
     setAnnounce('');
     const text = msg || (wasActive ? `Call ended · ${fmtShort(dur)}` : 'Call ended');
@@ -2186,7 +2183,7 @@ function SoftphoneApp() {
           </div>
           <span className="t-body-sm nowrap">Incoming call</span>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button data-primary-accept className="sp-btn accept-ticket t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`} onClick={() => { acceptCall(true); openPanel(); }}>Accept &amp; Add Ticket</button>
+            <button data-primary-accept className="sp-btn accept-ticket t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`} onClick={() => acceptCall(true)}>Accept &amp; Add Ticket</button>
             <button className="sp-btn accept-plain t-body-md" title="Accept without ticket" onClick={() => { acceptCall(false); openPanel(); }}>Accept</button>
             <button className="sp-btn decline-ghost t-body-md" title={`Decline (${MOD_KEY}+Shift+D)`} onClick={() => endCall('Call declined')}>Decline</button>
             <button className="sp-icon-btn" style={{ width: 32, height: 32 }} title="Expand" aria-label="Expand softphone" onClick={openPanel}><Ico n="expand" /></button>
@@ -2203,7 +2200,7 @@ function SoftphoneApp() {
     if (screen === 'incoming') {
       label = twoLine(caller.name); status = 'Incoming call';
       buttons = <>
-        <button data-primary-accept className="sp-btn accept-ticket t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`} onClick={() => { acceptCall(true); openPanel(); }}>Accept &amp; Add Ticket</button>
+        <button data-primary-accept className="sp-btn accept-ticket t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`} onClick={() => acceptCall(true)}>Accept &amp; Add Ticket</button>
         <button className="sp-btn accept-plain icon-only" title="Accept without ticket" aria-label="Accept without ticket" onClick={() => { acceptCall(false); openPanel(); }}><Ico n="row-call" /></button>
         <button className="sp-btn decline-ghost t-body-md" title={`Decline (${MOD_KEY}+Shift+D)`} onClick={() => endCall('Call declined')}>Decline</button>
       </>;
@@ -2222,7 +2219,7 @@ function SoftphoneApp() {
     }
     return (
       <div className="sp-bar" role="region" aria-label="Softphone call controls" style={{ gap: 24, ...(barPos.r == null
-        ? { top: 64 + 8, right: 16 }   // hugs its content (Figma 2277:10515); docks top-right, below the header
+        ? { top: 8, right: 16 }   // hugs its content (Figma 2277:10515); docks in the top-right corner, over the header
         : { right: barPos.r, bottom: barPos.b }) }}>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <div className="sp-bar-handle" onMouseDown={barDragStart} aria-hidden="true"><Ico n="drag" /></div>
@@ -2293,7 +2290,6 @@ function SoftphoneApp() {
       wideLeft: clampLeft((window.innerWidth - 733) / 2, 733),
     };
     setAnchor(a => (Object.keys(next).every(k => a[k] === next[k]) ? a : next));
-    setVw(w => (w === window.innerWidth ? w : window.innerWidth));
   }, []);
   React.useLayoutEffect(measureAnchor);
   useEffect(() => {
@@ -2308,17 +2304,6 @@ function SoftphoneApp() {
     const r = el.getBoundingClientRect();
     if (r.top < 8) setPanelPos(p => ({ ...p, b: Math.max(8, p.b - (8 - r.top)) }));
   });
-
-  // ── Call panel docked beside the New Ticket form (Accept & Add Ticket) ──
-  const DOCK_TOP = 80, DOCK_MARGIN = 16, MODAL_W = 560, MODAL_MIN = 400;
-  const callPanelShown = open && !minimized && isCalling;
-  const dockSpace = vw - DOCK_MARGIN - SP_WIDTH - DOCK_MARGIN - DOCK_MARGIN;   // room left of the panel for the form
-  const dockedLayout = ticketModalOpen && dockRight && callPanelShown && panelPos.r == null;
-  const modalW = Math.min(MODAL_W, dockSpace);
-  // Not enough room for both: collapse the call to the minimized bar
-  useEffect(() => {
-    if (ticketModalOpen && dockRight && callPanelShown && panelPos.r == null && dockSpace < MODAL_MIN) { setMinimized(true); setOpen(false); }
-  }, [ticketModalOpen, dockRight, callPanelShown, dockSpace]);
 
   // ── Ringing: move focus to Accept & Add Ticket (panel or bar) ──
   useEffect(() => {
@@ -2338,7 +2323,7 @@ function SoftphoneApp() {
       const k = keysRef.current;
       const mod = e.ctrlKey || e.metaKey;
       if (mod && e.shiftKey && e.key.toLowerCase() === 'a' && k.screen === 'incoming') {
-        e.preventDefault(); k.acceptCall(true); k.openPanel();
+        e.preventDefault(); k.acceptCall(true);
       } else if (mod && e.shiftKey && e.key.toLowerCase() === 'd' && k.screen === 'incoming') {
         e.preventDefault(); k.endCall('Call declined');
       } else if (e.key === 'Escape' && k.open) {
@@ -2425,9 +2410,7 @@ function SoftphoneApp() {
       {open && !minimized && (
         <div ref={panelRef} className="sp-panel" role="dialog" aria-labelledby="sp-title" style={{ height: panelHeight, ...(panelPos.r != null
           ? { right: panelPos.r, bottom: panelPos.b }                       // user-dragged position (kept for the session)
-          : dockRight && isCalling
-            ? { top: DOCK_TOP, right: DOCK_MARGIN }                         // docked right, beside the ticket form
-            : { top: anchor.top, left: anchor.left }) }}>
+          : { top: anchor.top, left: anchor.left }) }}>
           {renderHeader(head)}
           {head.banner && renderBanner()}
           {renderBody()}
@@ -2443,10 +2426,9 @@ function SoftphoneApp() {
       )}
 
       {ticketModalOpen && (
-        <div className={`nt-overlay ${dockedLayout ? 'docked' : ''}`} onClick={e => { if (e.target === e.currentTarget) setTicketModalOpen(false); }}
-          style={dockedLayout ? { paddingTop: DOCK_TOP, paddingLeft: vw - DOCK_MARGIN - SP_WIDTH - DOCK_MARGIN - modalW } : null}>
+        <div className="nt-overlay" onClick={e => { if (e.target === e.currentTarget) setTicketModalOpen(false); }}>
           <div className="nt-modal" role="dialog" aria-labelledby="nt-title"
-            style={dockedLayout ? { width: modalW, maxHeight: `calc(100vh - ${DOCK_TOP + DOCK_MARGIN}px)` } : null}>
+>
             <div className="nt-header">
               <span className="nt-title" id="nt-title">New Ticket</span>
               <button className="nt-hbtn" title="Help">?</button>
