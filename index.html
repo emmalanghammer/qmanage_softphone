@@ -211,7 +211,7 @@
   .sp-btn.secondary:hover { background: #e3e5ec; }
   .sp-btn.danger { background: #C8323A; color: #fff; }   /* #C8323A: white text 5.29:1 (AA) */
   .sp-btn.danger:hover { background: #b02a31; }
-  /* Incoming-call actions — same order and weights everywhere: Accept & Add Ticket › Accept › Decline */
+  /* Incoming-call actions — same weights everywhere; Decline always left, accept actions right */
   .sp-btn.accept-ticket { background: #94CC86; color: #363B4D; font-weight: 600; }
   .sp-btn.accept-ticket:hover { background: #86bd78; }
   .sp-btn.accept-plain { background: transparent; border: 1px solid #8D99AE; color: #fff; }
@@ -1658,8 +1658,8 @@ function SoftphoneApp() {
       <button data-primary-accept className="sp-btn accept-ticket full t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`}
         onClick={() => acceptCall(true)}>Accept &amp; Add Ticket</button>
       <div style={{ display: 'flex', gap: 8, width: '100%' }}>
-        <button className="sp-btn accept-plain t-body-md" style={{ flex: 1 }} title="Accept without ticket" onClick={() => acceptCall(false)}>Accept</button>
         <button className="sp-btn decline-ghost t-body-md" style={{ flex: 1 }} title={`Decline (${MOD_KEY}+Shift+D)`} onClick={() => endCall('Call declined')}>Decline</button>
+        <button className="sp-btn accept-plain t-body-md" style={{ flex: 1 }} title="Accept without ticket" onClick={() => acceptCall(false)}>Accept</button>
       </div>
     </div>
   );
@@ -2186,9 +2186,9 @@ function SoftphoneApp() {
           </div>
           <span className="t-body-sm nowrap">Incoming call</span>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button data-primary-accept className="sp-btn accept-ticket t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`} onClick={() => acceptCall(true)}>Accept &amp; Add Ticket</button>
-            <button className="sp-btn accept-plain t-body-md" title="Accept without ticket" onClick={() => { acceptCall(false); openPanel(); }}>Accept</button>
             <button className="sp-btn decline-ghost t-body-md" title={`Decline (${MOD_KEY}+Shift+D)`} onClick={() => endCall('Call declined')}>Decline</button>
+            <button className="sp-btn accept-plain t-body-md" title="Accept without ticket" onClick={() => { acceptCall(false); openPanel(); }}>Accept</button>
+            <button data-primary-accept className="sp-btn accept-ticket t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`} onClick={() => acceptCall(true)}>Accept &amp; Add Ticket</button>
             <button className="sp-icon-btn" style={{ width: 32, height: 32 }} title="Expand" aria-label="Expand softphone" onClick={openPanel}><Ico n="expand" /></button>
           </div>
         </div>
@@ -2203,9 +2203,9 @@ function SoftphoneApp() {
     if (screen === 'incoming') {
       label = twoLine(caller.name); status = 'Incoming call';
       buttons = <>
-        <button data-primary-accept className="sp-btn accept-ticket t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`} onClick={() => acceptCall(true)}>Accept &amp; Add Ticket</button>
-        <button className="sp-btn accept-plain icon-only" title="Accept without ticket" aria-label="Accept without ticket" onClick={() => { acceptCall(false); openPanel(); }}><Ico n="row-call" /></button>
         <button className="sp-btn decline-ghost t-body-md" title={`Decline (${MOD_KEY}+Shift+D)`} onClick={() => endCall('Call declined')}>Decline</button>
+        <button className="sp-btn accept-plain icon-only" title="Accept without ticket" aria-label="Accept without ticket" onClick={() => { acceptCall(false); openPanel(); }}><Ico n="row-call" /></button>
+        <button data-primary-accept className="sp-btn accept-ticket t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`} onClick={() => acceptCall(true)}>Accept &amp; Add Ticket</button>
       </>;
     } else if (screen === 'outgoing') {
       label = twoLine(caller.name); status = 'Calling...';
