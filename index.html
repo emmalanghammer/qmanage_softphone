@@ -205,9 +205,16 @@
   .sp-btn.primary:hover { background: #006d95; }
   .sp-btn.secondary { background: #F2F3F7; color: #5F6475; }
   .sp-btn.secondary:hover { background: #e3e5ec; }
-  .sp-btn.danger { background: #ED4B52; color: #fff; }
-  .sp-btn.danger.bordered { border: 1px solid #ED4B52; }
-  .sp-btn.danger:hover { background: #d9434a; }
+  .sp-btn.danger { background: #C8323A; color: #fff; }   /* #C8323A: white text 5.29:1 (AA) */
+  .sp-btn.danger:hover { background: #b02a31; }
+  /* Incoming-call actions — same order and weights everywhere: Accept & Add Ticket › Accept › Decline */
+  .sp-btn.accept-ticket { background: #94CC86; color: #363B4D; font-weight: 600; }
+  .sp-btn.accept-ticket:hover { background: #86bd78; }
+  .sp-btn.accept-plain { background: transparent; border: 1px solid #8D99AE; color: #fff; }
+  .sp-btn.accept-plain:hover { background: rgba(255,255,255,0.08); }
+  .sp-btn.decline-ghost { background: transparent; border: 1px solid rgba(255,138,143,0.5); color: #FF8A8F; }  /* 4.91:1 on #363B4D */
+  .sp-btn.decline-ghost:hover { background: rgba(255,138,143,0.12); }
+  .sp-btn.icon-only { width: 36px; padding: 0; }
   .sp-btn.success { background: #94CC86; color: #363B4D; }
   .sp-btn.success.bordered { border: 1px solid #94CC86; }
   .sp-btn.success:hover { background: #86bd78; }
@@ -231,7 +238,7 @@
 
   /* Call controls */
   .sp-ctrls { width: 174px; display: flex; flex-wrap: wrap; justify-content: center; align-items: flex-start; align-content: flex-start; row-gap: 29px; column-gap: 27px; }
-  .sp-ctrl { width: 40px; display: flex; flex-direction: column; gap: 4px; align-items: center; border: none; background: none; padding: 0; cursor: pointer; color: #8D99AE; }
+  .sp-ctrl { width: 40px; display: flex; flex-direction: column; gap: 4px; align-items: center; border: none; background: none; padding: 0; cursor: pointer; color: #AEB7C6; }  /* 5.5:1 */
   .sp-ctrl-circle { width: 36px; height: 36px; padding: 8px; border-radius: 200px; background: #5F6475; display: flex; align-items: center; justify-content: center; }
   .sp-ctrl:hover .sp-ctrl-circle { background: #6c7184; }
   .sp-ctrl.on { color: #fff; }
@@ -264,8 +271,33 @@
   .sp-toast {
     position: fixed; top: 76px; left: 50%; transform: translateX(-50%); z-index: 3000;
     background: #363B4D; color: #fff; border-radius: 4px; padding: 10px 16px; box-shadow: 0 4px 16px rgba(0,0,0,0.3);
-    animation: toastIn .25s ease;
+    animation: toastIn .25s ease; display: flex; align-items: center; gap: 16px;
   }
+  .sp-toast button { border: none; background: none; color: #87CFE7; font: 600 14px/18px 'Montserrat', sans-serif; cursor: pointer; padding: 0; }
+  .sp-toast button:hover { text-decoration: underline; }
+
+  /* Keyboard focus */
+  button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px solid #87CFE7; outline-offset: 2px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
+  /* Header "on a call" pill: phone icon + pulsing dot, no timer */
+  .qm-oncall { position: relative; width: 36px; height: 36px; border-radius: 4px; border: none; background: #E4F2E0; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .qm-oncall:hover { background: #d6ebd1; }
+  .qm-oncall-dot { position: absolute; top: 5px; right: 5px; width: 9px; height: 9px; border-radius: 50%; background: #4CAF50; border: 2px solid #fff; animation: oncallPulse 1.6s ease-out infinite; }
+  @keyframes oncallPulse { 0% { box-shadow: 0 0 0 0 rgba(76,175,80,0.6); } 100% { box-shadow: 0 0 0 7px rgba(76,175,80,0); } }
+
+  /* Call ↔ ticket link (New Ticket form) */
+  .nt-callchip { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; height: 26px; padding: 0 10px; border-radius: 13px; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .nt-callchip.live { background: #E4F2E0; color: #2E5527; }
+  .nt-callchip.logged { background: #F2F3F7; color: #5F6475; }
+  .nt-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+  .nt-chip { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 6px 0 4px; border-radius: 15px; background: #EAF5FA; border: 1px solid #BFE0EE; color: #363B4D; font-size: 13px; font-weight: 600; }
+  .nt-chip small { font-size: 12px; font-weight: 500; color: #5F6475; }
+  .nt-chip.unverified { background: #F7F7F9; border: 1px dashed #A9AFBC; color: #5F6475; }
+  .nt-chip-av { width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 10px; font-weight: 700; flex-shrink: 0; }
+  .nt-chip-x { border: none; background: none; color: #8D99AE; cursor: pointer; font-size: 14px; line-height: 1; padding: 2px 4px; border-radius: 50%; }
+  .nt-chip-x:hover { color: #363B4D; background: rgba(0,0,0,0.06); }
+  .nt-calllog { display: flex; align-items: center; gap: 8px; padding: 8px 10px; margin-bottom: 8px; border-radius: 4px; background: #F4F6FB; border-left: 3px solid #94CC86; font-size: 12px; color: #363B4D; }
   @keyframes toastIn { from { opacity: 0; transform: translate(-50%, -6px); } to { opacity: 1; transform: translate(-50%, 0); } }
 
   /* ── New Ticket Modal ── */
@@ -273,6 +305,8 @@
     position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 2000;
     display: flex; align-items: center; justify-content: center;
   }
+  /* While a call panel is docked right, the form sits to its left with a 16px gap */
+  .nt-overlay.docked { align-items: flex-start; justify-content: flex-start; }
   .nt-modal {
     background: #fff; border-radius: 6px; width: 560px; max-width: 96vw;
     box-shadow: 0 8px 40px rgba(0,0,0,0.22); font-family: 'Montserrat', sans-serif;
@@ -363,7 +397,7 @@ const ICON_SIZE = {
   'history-incoming': 24, 'history-outgoing': 24, 'history-missed': 24,
   'chevron-down-blue': 24, 'chevron-up-blue': 24, 'person-placeholder': 32,
   'dot-available': 8, 'dot-busy': 8, 'dot-away': 8, 'mail': 18, 'phone-blue': 18, 'building': 16,
-  'hdr-menu': 24, 'hdr-search': 24, 'hdr-add': 24, 'hdr-communication': 24, 'hdr-notifications': 24, 'hdr-person': 14,
+  'hdr-menu': 24, 'hdr-phone': 24, 'hdr-search': 24, 'hdr-add': 24, 'hdr-communication': 24, 'hdr-notifications': 24, 'hdr-person': 14,
 };
 const Ico = ({ n }) => {
   if (n === 'hdr-logo') return <img src="assets/icons/hdr-logo.svg" width="195" height="44" alt="qManage" />;
@@ -393,6 +427,15 @@ const StatusDot = ({ status }) => {
 const fmt = (s) => `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 const fmtLong = (s) => `${Math.floor(s / 60)}m ${String(s % 60).padStart(2, '0')}s`;
 const digits = (s) => s.replace(/\D/g, '');
+const fmtShort = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;   // 0:42 — call chips & toasts
+const initialsOf = (name) => name.split(/\s+/).filter(Boolean).map(w => w[0]).join('').slice(0, 2).toUpperCase();
+// Mock dates are relative to today so every list shows the same recent range
+const dateAgo = (days) => {
+  const d = new Date(); d.setDate(d.getDate() - days);
+  return `${String(d.getMonth() + 1).padStart(2, '0')}/${String(d.getDate()).padStart(2, '0')}/${String(d.getFullYear()).slice(2)}`;
+};
+const timeNow = () => new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+const MOD_KEY = /Mac|iPhone|iPad/.test(navigator.platform) ? '⌘' : 'Ctrl';
 
 // ─────────────────────────────────────────────────────────────
 // Data (copied from the Figma V2 mocks)
@@ -449,13 +492,13 @@ const QUEUES = [
 ];
 
 const HISTORY = [
-  { id: 1, dir: 'Incoming', name: '(555) 123-4567',  date: '03/17/26', time: '6:38 PM',  duration: '05:23' },
-  { id: 2, dir: 'Missed',   name: 'Charlie Apegian', date: '03/17/26', time: '12:55 PM', duration: '' },
-  { id: 3, dir: 'Incoming', name: '(589) 216-4863',  date: '03/17/26', time: '11:38 AM', duration: '35:08' },
-  { id: 4, dir: 'Incoming', name: 'Joe Smith',       date: '03/17/26', time: '09:15 AM', duration: '23:54' },
-  { id: 5, dir: 'Outgoing', name: 'Pam Reynolds',    date: '03/16/26', time: '5:28 PM',  duration: '16:32' },
-  { id: 6, dir: 'Missed',   name: 'Pam Reynolds',    date: '03/16/26', time: '5:08 PM',  duration: '' },
-  { id: 7, dir: 'Incoming', name: '(360) 296-1400',  date: '03/16/26', time: '11:38 AM', duration: '35:08' },
+  { id: 1, dir: 'Incoming', name: '(555) 123-4567',  date: dateAgo(0), time: '6:38 PM',  duration: '05:23' },
+  { id: 2, dir: 'Missed',   name: 'Charlie Apegian', date: dateAgo(0), time: '12:55 PM', duration: '' },
+  { id: 3, dir: 'Incoming', name: '(589) 216-4863',  date: dateAgo(0), time: '11:38 AM', duration: '35:08' },
+  { id: 4, dir: 'Incoming', name: 'Joe Smith',       date: dateAgo(0), time: '09:15 AM', duration: '23:54' },
+  { id: 5, dir: 'Outgoing', name: 'Pam Reynolds',    date: dateAgo(1), time: '5:28 PM',  duration: '16:32' },
+  { id: 6, dir: 'Missed',   name: 'Pam Reynolds',    date: dateAgo(1), time: '5:08 PM',  duration: '' },
+  { id: 7, dir: 'Incoming', name: '(360) 296-1400',  date: dateAgo(1), time: '11:38 AM', duration: '35:08' },
 ];
 const HISTORY_ICON = { Incoming: 'history-incoming', Outgoing: 'history-outgoing', Missed: 'history-missed' };
 
@@ -520,8 +563,9 @@ const BackLink = ({ label = 'Back to call', onClick }) => (
   </div>
 );
 
-const Ctrl = ({ icon, label, on, disabled, onClick }) => (
-  <button className={`sp-ctrl ${on ? 'on' : ''} ${disabled ? 'disabled' : ''}`} onClick={onClick}>
+const Ctrl = ({ icon, label, on, toggle, disabled, onClick }) => (
+  <button className={`sp-ctrl ${on ? 'on' : ''} ${disabled ? 'disabled' : ''}`} onClick={onClick}
+    aria-label={label} aria-pressed={toggle ? !!on : undefined} aria-disabled={disabled || undefined}>
     <div className="sp-ctrl-circle"><Ico n={icon} /></div>
     <span className="sp-ctrl-label">{label}</span>
   </button>
@@ -755,7 +799,7 @@ function HomePage() {
                     </div>
                     <span className="nowrap" style={{ fontSize: 12, lineHeight: '14px' }}>
                       <span style={{ fontWeight: 400, color: '#5F6475' }}>Created at</span>{' '}
-                      <span className="t-body-sm">4/04/24 10:00 AM</span>
+                      <span className="t-body-sm">{dateAgo(3)} 10:00 AM</span>
                     </span>
                     <span style={{ display: 'flex', gap: 10, alignItems: 'center', padding: '2px 8px', fontSize: 12, lineHeight: '14px' }} className="nowrap">
                       <span style={{ fontWeight: 400 }}>Status</span>
@@ -796,7 +840,7 @@ function HomePage() {
                   <span style={{ color: '#007FAD', flexShrink: 0 }}>345234</span>
                   <span className="ellipsis" style={{ flex: 1 }}>{a.ticket}</span>
                 </div>
-                <span className="t-body-sm" style={{ color: '#8D99AE' }}>9/19/24 4:35 PM by Charlie Apegian</span>
+                <span className="t-body-sm" style={{ color: '#8D99AE' }}>{dateAgo(1)} 4:35 PM by Charlie Apegian</span>
               </div>
             ))}
           </div>
@@ -879,6 +923,19 @@ function TicketDetail({ ticket }) {
         ))}
       </div>
     );
+    if (sec.id === 'contacts' && ticket.contacts && ticket.contacts.length) return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        {ticket.contacts.map(ch => (
+          <div key={ch.id} style={{ display: 'flex', gap: 12, alignItems: 'center', padding: '8px 12px', border: `1px ${ch.unverified ? 'dashed #A9AFBC' : 'solid #CED0D4'}`, borderRadius: 8 }}>
+            <span className="hm-av24" style={{ background: ch.unverified ? '#A9AFBC' : ch.color }}>{ch.unverified ? '?' : ch.initials}</span>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <span className="t-semi-md">{ch.unverified ? ch.label : ch.name}</span>
+              {ch.sub && <span className="t-body-sm" style={{ color: '#5F6475' }}>{ch.sub}</span>}
+            </div>
+          </div>
+        ))}
+      </div>
+    );
     return <div className="td-empty nowrap" style={{ padding: sec.pad }}>{sec.empty}</div>;
   };
 
@@ -894,7 +951,7 @@ function TicketDetail({ ticket }) {
             <div style={{ background: '#2B376B', borderRadius: 4, padding: '4px 8px', display: 'flex', alignItems: 'center', color: '#fff', flexShrink: 0 }}>
               <TdIco n="td-warning" s={20} /><span className="t-body-md nowrap" style={{ padding: '0 8px' }}>Limited Access</span>
             </div>
-            <a href="#" onClick={e => e.preventDefault()} className="nowrap" style={{ fontSize: 14, fontWeight: 400, color: '#007FAD', textDecoration: 'underline' }}>Created at 4/04/24 10:00 AM</a>
+            <a href="#" onClick={e => e.preventDefault()} className="nowrap" style={{ fontSize: 14, fontWeight: 400, color: '#007FAD', textDecoration: 'underline' }}>Created at {ticket.created}</a>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
               <span className="td-accent">Assigned to</span>
               <div className="td-select" style={{ width: 194, padding: '0 8px', justifyContent: 'space-between' }}>
@@ -962,9 +1019,21 @@ function TicketDetail({ ticket }) {
                 <button className="td-plain" title="Filter"><TdIco n="td-filter" /></button>
               </div>
             </div>
-            <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '64px 0' }}>
-              <span className="td-empty nowrap">No activity yet. Add a note to get started.</span>
-            </div>
+            {ticket.call && ticket.call.logged ? (
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div style={{ display: 'flex', gap: 12, alignItems: 'center', padding: 12, border: '1px solid #CED0D4', borderLeft: '3px solid #94CC86', borderRadius: 8 }}>
+                  <img src="assets/icons/hdr-call-chip-phone.svg" width="20" height="20" alt="" />
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    <span className="t-semi-md">Call with {ticket.call.callerName} · {fmtShort(ticket.call.duration)}</span>
+                    <span className="t-body-sm" style={{ color: '#8D99AE' }}>Logged {ticket.created} by John Doe</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '64px 0' }}>
+                <span className="td-empty nowrap">{ticket.call ? 'Call in progress — it will be logged here when it ends.' : 'No activity yet. Add a note to get started.'}</span>
+              </div>
+            )}
           </div>
         </div>
 
@@ -1004,6 +1073,11 @@ function TicketDetail({ ticket }) {
     </div>
   );
 }
+
+// Contacts-field chip for the New Ticket form, built from the caller
+const contactChip = (c) => c.unknown
+  ? { id: c.id, unverified: true, label: [c.name, c.location, 'Unknown'].filter(Boolean).join(' · ') }
+  : { id: c.id, name: c.name, sub: c.company, initials: c.initials || initialsOf(c.name), color: '#B23C69' };
 
 // ─────────────────────────────────────────────────────────────
 // Main App
@@ -1060,6 +1134,14 @@ function SoftphoneApp() {
   const ticketSeq = useRef(0);
   const [ticketType, setTicketType] = useState('Default');
   const [ticketTitleError, setTicketTitleError] = useState(false);
+  const [ticketContacts, setTicketContacts] = useState([]);  // chips in the form's Contacts field
+  const [callLink, setCallLink] = useState(null);            // call attached to the ticket form: { id, callerName, logged, duration }
+  const [dockRight, setDockRight] = useState(false);         // panel docked right of the ticket form (Accept & Add Ticket)
+  const [whoMode, setWhoMode] = useState(null);              // unknown caller: null | 'new' | 'link'
+  const [newContactName, setNewContactName] = useState('');
+  const [vw, setVw] = useState(window.innerWidth);
+  const [announce, setAnnounce] = useState('');              // aria-live text
+  const returnFocusRef = useRef(null);
 
   // Panel opens docked under the header phone button until the user drags it (r/b stay null until then)
   const [panelPos, setPanelPos, panelDragStart] = useDrag({ r: null, b: null });
@@ -1069,6 +1151,8 @@ function SoftphoneApp() {
   // Docked positions measured from the header: under the phone button (panel, compact bar) and over the search bar (simple bar)
   const [anchor, setAnchor] = useState({ top: 72, left: 0, barLeft: 0, wideTop: 0, wideLeft: 0 });
   const [barPos, , barDragStart] = useDrag({ r: null, b: null });
+  const barRef = useRef(null);
+  const [barW, setBarW] = useState(500);   // measured, so a wider bar (3 incoming actions) still fits on screen
   const [wideBarPos, , wideBarDragStart] = useDrag({ r: null, b: null });
 
   const inCall = screen === 'active';
@@ -1077,9 +1161,11 @@ function SoftphoneApp() {
   const connectedParty = party.filter(p => p.status === 'connected');
   const isConference = inCall && connectedParty.length > 0 && !consult;
 
-  const showToast = useCallback((msg) => {
-    setToast(msg);
-    setTimeout(() => setToast(t => (t === msg ? null : t)), 2400);
+  // Toasts can carry one action (e.g. "Log to ticket"); those stay up longer
+  const showToast = useCallback((msg, action) => {
+    const t = { msg, action, id: Date.now() + Math.random() };
+    setToast(t);
+    setTimeout(() => setToast(cur => (cur && cur.id === t.id ? null : cur)), action ? 6000 : 2400);
   }, []);
 
   // Timers
@@ -1104,6 +1190,8 @@ function SoftphoneApp() {
   }, [ringingParty.length]);
   const callTimerRef = useRef(0);
   callTimerRef.current = callTimer;
+  const ticketModalOpenRef = useRef(false);
+  ticketModalOpenRef.current = ticketModalOpen;
 
   // Auto-trigger an incoming call shortly after load (demo)
   useEffect(() => {
@@ -1122,10 +1210,22 @@ function SoftphoneApp() {
 
   const triggerIncoming = (c) => {
     resetCallState();
+    // Remember where focus was so it can go back when the panel closes
+    const active = document.activeElement;
+    if (active && active !== document.body && !active.closest('.sp-panel, .sp-bar')) returnFocusRef.current = active;
     setCaller(c);
     setIncomingExpanded(false);
+    setWhoMode(null); setNewContactName('');
     setScreen('incoming');
     setOpen(true); setMinimized(false);
+    setAnnounce('');
+    setTimeout(() => setAnnounce(`Incoming call from ${c.unknown ? `${c.name}, ${c.location}` : c.name}`), 50);
+  };
+
+  const restoreFocus = () => {
+    const el = returnFocusRef.current;
+    returnFocusRef.current = null;
+    setTimeout(() => { if (el && document.contains(el)) el.focus(); }, 0);
   };
 
   const startCall = (c) => {
@@ -1141,16 +1241,58 @@ function SoftphoneApp() {
     setCallTimer(0);
     setScreen('active');
     setCallView('main');
-    if (withTicket) { setTicketTitle(''); setTicketTitleError(false); setTicketModalOpen(true); }
+    if (withTicket) openLinkedTicket(caller);
   };
 
-  const endCall = (msg = 'Call ended') => {
+  // New Ticket form pre-filled from the caller, with the live call attached
+  const openLinkedTicket = (c) => {
+    setTicketTitle(''); setTicketDesc(''); setTicketTitleError(false);
+    setTicketContacts([contactChip(c)]);
+    setCallLink({ id: Date.now(), callerName: c.name, logged: false, duration: 0 });
+    setDockRight(true);
+    setTicketModalOpen(true);
+  };
+
+  // Ends (or declines/cancels) the call: logs it to an attached ticket, collapses the panel to the header icon
+  const endCall = (msg) => {
+    const wasActive = screen === 'active';
+    const dur = callTimerRef.current;
+    if (wasActive && callLink && !callLink.logged) {
+      const logged = { ...callLink, callerName: caller.name, logged: true, duration: dur };
+      setCallLink(logged);
+      setOpenTicket(t => (t && t.callId === logged.id ? { ...t, call: logged } : t));
+    }
     resetCallState();
     setScreen('idle');
     setDialInput('');
     setNavTab('keypad');
     setMinimized(false);
-    showToast(msg);
+    setOpen(false);
+    setDockRight(false);
+    setWhoMode(null);
+    setAnnounce('');
+    const text = msg || (wasActive ? `Call ended · ${fmtShort(dur)}` : 'Call ended');
+    if (wasActive && ticketModalOpenRef.current) {
+      const alreadyLinked = callLink && callLink.callerName;
+      showToast(text, { label: 'Log to ticket', fn: () => {
+        if (alreadyLinked) { showToast('Call already logged to this ticket'); return; }
+        setCallLink({ id: Date.now(), callerName: caller.name, logged: true, duration: dur });
+      } });
+    } else {
+      showToast(text);
+    }
+    restoreFocus();
+  };
+
+  // Unknown caller identified mid-call: the caller and the ticket's placeholder chip become the real contact
+  const identifyCaller = (contact, how) => {
+    const known = { ...contact, kind: 'contact', unknown: false, initials: contact.initials || initialsOf(contact.name),
+      phone: caller.phone, location: caller.location, color: undefined };
+    setCaller(known);
+    setTicketContacts(cs => cs.map(ch => (ch.unverified ? contactChip(known) : ch)));
+    setCallLink(l => (l ? { ...l, callerName: known.name } : l));
+    setWhoMode(null); setNewContactName('');
+    showToast(how === 'new' ? `Contact created: ${known.name}` : `Linked to ${known.name}`);
   };
 
   const doTransfer = () => {
@@ -1180,7 +1322,12 @@ function SoftphoneApp() {
 
   const openPanel = () => { setMinimized(false); setOpen(true); };
   const minimize = () => { if (isCalling) { setMinimized(true); setOpen(false); } else setOpen(false); };
-  const closePanel = () => { if (isCalling) minimize(); else { setOpen(false); if (screen === 'transferred') setScreen('idle'); } };
+  const closePanel = () => {
+    if (isCalling) { minimize(); return; }
+    setOpen(false);
+    if (screen === 'transferred') setScreen('idle');
+    restoreFocus();
+  };
 
   // ─────────────────────────────────────────────────────────────
   // Header + banner
@@ -1208,14 +1355,14 @@ function SoftphoneApp() {
   const renderHeader = ({ title, chip }) => (
     <div className="sp-head">
       <div className="sp-head-left">
-        <div className="sp-hbtn drag" onMouseDown={panelDragStart}><Ico n="drag" /></div>
-        <span className="t-title-xs nowrap">{title}</span>
+        <div className="sp-hbtn drag" onMouseDown={panelDragStart} aria-hidden="true" title="Drag to move"><Ico n="drag" /></div>
+        <span id="sp-title" className="t-title-xs nowrap">{title}</span>
       </div>
       <div className="sp-head-right">
-        {chip && <div className="sp-chip t-body-md">{chip}</div>}
-        <button className="sp-hbtn" title="Minimize" onClick={minimize}><Ico n="minimize" /></button>
-        <button className="sp-hbtn" title="Open in new window" onClick={() => showToast('Opened in a new window')}><Ico n="popout" /></button>
-        <button className="sp-hbtn" title="Close" onClick={closePanel}><Ico n="close" /></button>
+        {chip && <div className="sp-chip t-body-md" aria-label={`Call time ${chip}`}>{chip}</div>}
+        <button className="sp-hbtn" title="Minimize (Esc)" aria-label="Minimize softphone" onClick={minimize}><Ico n="minimize" /></button>
+        <button className="sp-hbtn" title="Open in new window" aria-label="Open softphone in new window" onClick={() => showToast('Opened in a new window')}><Ico n="popout" /></button>
+        <button className="sp-hbtn" title="Close" aria-label="Close softphone" onClick={closePanel}><Ico n="close" /></button>
       </div>
     </div>
   );
@@ -1434,7 +1581,7 @@ function SoftphoneApp() {
               {full.email && (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
                   <Ico n="mail" />
-                  <span className="ellipsis" style={{ flex: '1 0 0', fontWeight: 500, fontSize: 14, letterSpacing: 0.4, color: '#87CFE7' }}>{full.email}</span>
+                  {emailButton(full.email)}
                 </div>
               )}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -1489,7 +1636,10 @@ function SoftphoneApp() {
               <span className="t-body-md" style={{ color: '#8D99AE' }}>No recent tickets</span>
             )}
           </div>
-          <button className="sp-btn primary full t-body-md" onClick={() => { setTicketTitle(''); setTicketTitleError(false); setTicketModalOpen(true); }}>Add Ticket</button>
+          <button className="sp-btn primary full t-body-md" onClick={() => {
+            if (inCall) { openLinkedTicket(caller); return; }
+            setTicketTitle(''); setTicketDesc(''); setTicketTitleError(false); setTicketContacts([contactChip(full)]); setCallLink(null); setTicketModalOpen(true);
+          }}>Add Ticket</button>
           {!inCall && (
             <button className="sp-btn success full t-body-md" onClick={() => { setViewContact(null); startCall(full); }}>Call</button>
           )}
@@ -1503,12 +1653,22 @@ function SoftphoneApp() {
   // ─────────────────────────────────────────────────────────────
   const incomingButtons = () => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%' }}>
-      <button className="sp-btn success full t-body-md" onClick={() => acceptCall(true)}>Accept &amp; Add Ticket</button>
+      <button data-primary-accept className="sp-btn accept-ticket full t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`}
+        onClick={() => acceptCall(true)}>Accept &amp; Add Ticket</button>
       <div style={{ display: 'flex', gap: 8, width: '100%' }}>
-        <button className="sp-btn danger t-body-md" style={{ flex: 1 }} onClick={() => endCall('Call declined')}>Decline</button>
-        <button className="sp-btn accept-outline t-body-md" style={{ flex: 1 }} onClick={() => acceptCall(false)}>Accept</button>
+        <button className="sp-btn accept-plain t-body-md" style={{ flex: 1 }} title="Accept without ticket" onClick={() => acceptCall(false)}>Accept</button>
+        <button className="sp-btn decline-ghost t-body-md" style={{ flex: 1 }} title={`Decline (${MOD_KEY}+Shift+D)`} onClick={() => endCall('Call declined')}>Decline</button>
       </div>
     </div>
+  );
+
+  // Truncated email: full address on hover, copy on click
+  const emailButton = (email) => (
+    <button className="ellipsis" title={`${email} — click to copy`}
+      onClick={() => { navigator.clipboard && navigator.clipboard.writeText(email).catch(() => {}); showToast('Email copied'); }}
+      style={{ flex: '1 0 0', border: 'none', background: 'none', padding: 0, cursor: 'copy', textAlign: 'left', fontFamily: 'inherit', fontWeight: 500, fontSize: 14, letterSpacing: 0.4, color: '#87CFE7' }}>
+      {email}
+    </button>
   );
 
   const renderIncoming = () => {
@@ -1533,7 +1693,8 @@ function SoftphoneApp() {
           <span className="t-title-md">{c.name}</span>
           <span className="t-body-md">{c.phone}</span>
         </div>
-        <button className="sp-icon-btn" title={incomingExpanded ? 'Hide details' : 'Show details'} onClick={() => setIncomingExpanded(x => !x)}>
+        <button className="sp-icon-btn" title={incomingExpanded ? 'Hide details' : 'Show details'} aria-label={incomingExpanded ? 'Hide caller details' : 'Show caller details'}
+          aria-expanded={incomingExpanded} onClick={() => setIncomingExpanded(x => !x)}>
           <Ico n={incomingExpanded ? 'chevron-up-blue' : 'chevron-down-blue'} />
         </button>
       </div>
@@ -1556,7 +1717,7 @@ function SoftphoneApp() {
                     {c.email && (
                       <div style={{ display: 'flex', gap: 8, alignItems: 'center', width: '100%' }}>
                         <Ico n="mail" />
-                        <span className="ellipsis" style={{ flex: '1 0 0', fontWeight: 500, fontSize: 14, letterSpacing: 0.4, color: '#87CFE7' }}>{c.email}</span>
+                        {emailButton(c.email)}
                       </div>
                     )}
                     <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
@@ -1567,23 +1728,18 @@ function SoftphoneApp() {
                 </div>
               </div>
               <div className="sp-div" />
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                <div className="t-body-md" style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }}>
-                  <span style={{ color: '#8D99AE' }}>Company</span>
-                  <span className="ellipsis" style={{ color: '#87CFE7' }}>{c.company}</span>
-                </div>
-                <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                  {c.billing && (
-                    <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-                      <Ico n="building" />
-                      <span className="t-body-md">{c.billing}</span>
-                    </div>
-                  )}
-                  {c.companyCode && <>
-                    <span style={{ fontWeight: 500, fontSize: 14, letterSpacing: 0.4, color: '#8D99AE' }}>Company Code</span>
-                    <span style={{ fontWeight: 500, fontSize: 14, letterSpacing: 0.4 }}>{c.companyCode}</span>
-                  </>}
-                </div>
+              {/* One label/value pair per row */}
+              <div className="t-body-md" style={{ display: 'grid', gridTemplateColumns: 'auto minmax(0, 1fr)', columnGap: 12, rowGap: 8, alignItems: 'center' }}>
+                <span style={{ color: '#8D99AE' }}>Company</span>
+                <span className="ellipsis" style={{ color: '#87CFE7' }}>{c.company}</span>
+                {c.billing && <>
+                  <span style={{ color: '#8D99AE' }}>Billing</span>
+                  <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}><Ico n="building" />{c.billing}</span>
+                </>}
+                {c.companyCode && <>
+                  <span style={{ color: '#8D99AE' }}>Company Code</span>
+                  <span>{c.companyCode}</span>
+                </>}
               </div>
               <div className="sp-div" />
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
@@ -1621,8 +1777,8 @@ function SoftphoneApp() {
   // ─────────────────────────────────────────────────────────────
   const callControls = () => (
     <div className="sp-ctrls">
-      <Ctrl icon={muted ? 'mic-dark' : 'mic-off'} label={muted ? 'Unmute' : 'Mute'} on={muted} onClick={() => setMuted(m => !m)} />
-      <Ctrl icon={onHold ? 'play-dark' : 'pause'} label={onHold ? 'Resume' : 'Hold'} on={onHold} onClick={() => setOnHold(h => !h)} />
+      <Ctrl icon={muted ? 'mic-dark' : 'mic-off'} label={muted ? 'Unmute' : 'Mute'} on={muted} toggle onClick={() => setMuted(m => !m)} />
+      <Ctrl icon={onHold ? 'play-dark' : 'pause'} label={onHold ? 'Resume' : 'Hold'} on={onHold} toggle onClick={() => setOnHold(h => !h)} />
       <Ctrl icon="dialpad" label="Keypad" disabled={onHold} onClick={() => setCallView('keypad')} />
       <Ctrl icon="person-add" label="Add" onClick={() => { setAddTab('extensions'); setAddFilter('users'); setAddSearch(''); setCallView('add'); }} />
       <Ctrl icon="transfer" label="Transfer" onClick={openTransfer} />
@@ -1708,7 +1864,7 @@ function SoftphoneApp() {
           <Avatar p={caller} size={48} color={caller.unknown ? '#8D99AE' : '#B23C69'} />
           <span className="t-title-md">{caller.name}</span>
           <div className="t-body-md" style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', textAlign: 'center' }}>
-            {caller.unknown ? <span>Not in contacts</span> : <>
+            {caller.unknown ? <span>{caller.location ? `${caller.location} · Not in contacts` : 'Not in contacts'}</span> : <>
               {caller.phone && <span>{caller.phone}</span>}
               {caller.company && <span>{caller.company}</span>}
             </>}
@@ -1723,10 +1879,33 @@ function SoftphoneApp() {
         {caller.unknown && (
           <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16, padding: 16, borderRadius: 4, border: '1px solid #5F6475', background: 'rgba(255,255,255,0.1)' }}>
             <span className="t-body-md">Who is this?</span>
-            <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-              <button className="sp-btn secondary t-body-md" onClick={() => showToast('New contact created')}>New Contact</button>
-              <button className="sp-btn secondary t-body-md" onClick={() => showToast('Linked to existing contact')}>Link to Existing</button>
-            </div>
+            {whoMode === 'new' ? (
+              <form style={{ display: 'flex', flexDirection: 'column', gap: 8 }}
+                onSubmit={e => { e.preventDefault(); if (newContactName.trim()) identifyCaller({ id: 'new-' + Date.now(), name: newContactName.trim(), company: '' }, 'new'); }}>
+                <div className="sp-field" style={{ height: 36 }}>
+                  <input value={newContactName} autoFocus placeholder="Contact name" aria-label="New contact name" onChange={e => setNewContactName(e.target.value)} />
+                </div>
+                <div style={{ display: 'flex', gap: 8 }}>
+                  <button type="submit" className="sp-btn primary t-body-md" disabled={!newContactName.trim()}>Save Contact</button>
+                  <button type="button" className="sp-btn accept-plain t-body-md" onClick={() => setWhoMode(null)}>Cancel</button>
+                </div>
+              </form>
+            ) : whoMode === 'link' ? (
+              <div className="sp-scroll" style={{ display: 'flex', flexDirection: 'column', gap: 4, maxHeight: 150, overflowY: 'auto' }} role="listbox" aria-label="Link to existing contact">
+                {CONTACTS.slice(1).map(ct => (
+                  <button key={ct.id} role="option" className="sp-btn accept-plain t-body-md" style={{ justifyContent: 'flex-start', gap: 8, border: 'none' }}
+                    onClick={() => identifyCaller(ct, 'link')}>
+                    <Avatar p={ct} size={24} color="#B23C69" /><span>{ct.name}</span><span style={{ color: '#AEB7C6' }}>{ct.company}</span>
+                  </button>
+                ))}
+                <button className="sp-link t-body-md" style={{ alignSelf: 'flex-start' }} onClick={() => setWhoMode(null)}>Cancel</button>
+              </div>
+            ) : (
+              <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
+                <button className="sp-btn secondary t-body-md" onClick={() => setWhoMode('new')}>New Contact</button>
+                <button className="sp-btn secondary t-body-md" onClick={() => setWhoMode('link')}>Link to Existing</button>
+              </div>
+            )}
           </div>
         )}
         <button className="sp-btn danger full t-body-md" onClick={() => endCall()}>End</button>
@@ -1923,7 +2102,7 @@ function SoftphoneApp() {
             </div>
           </div>
           <div className="sp-ctrls">
-            <Ctrl icon={consultMuted ? 'mic-dark' : 'mic-off'} label={consultMuted ? 'Unmute' : 'Mute'} on={consultMuted} onClick={() => setConsultMuted(m => !m)} />
+            <Ctrl icon={consultMuted ? 'mic-dark' : 'mic-off'} label={consultMuted ? 'Unmute' : 'Mute'} on={consultMuted} toggle onClick={() => setConsultMuted(m => !m)} />
             <Ctrl icon="dialpad" label="Keypad" onClick={() => showToast('Keypad sends tones to ' + talking.name)} />
             <Ctrl icon="merge" label="Merge" onClick={() => {
               const t = consult.target;
@@ -1956,7 +2135,7 @@ function SoftphoneApp() {
         </div>
       </div>
       <span className="t-body-md">{fmtLong(transferredAfter)}</span>
-      <button className="sp-btn secondary full t-body-md" onClick={() => { setScreen('idle'); setNavTab('keypad'); }}>Done</button>
+      <button className="sp-btn secondary full t-body-md" onClick={() => { setScreen('idle'); setNavTab('keypad'); setOpen(false); restoreFocus(); }}>Done</button>
     </div>
   );
 
@@ -1993,8 +2172,8 @@ function SoftphoneApp() {
   const renderBar = () => {
     if (screen === 'incoming' && wideIncomingBar) {
       return (
-        <div className="sp-bar" style={{ width: 733, padding: '12px 16px', ...(wideBarPos.r == null
-          ? { top: anchor.wideTop, left: anchor.wideLeft }   // centered over the search bar
+        <div className="sp-bar" role="region" aria-label="Incoming call" style={{ width: 733, padding: '12px 16px', ...(wideBarPos.r == null
+          ? { top: anchor.wideTop, left: anchor.wideLeft }   // just below the header, centred — clear of logo/search
           : { right: wideBarPos.r, bottom: wideBarPos.b }) }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <div className="sp-bar-handle" onMouseDown={wideBarDragStart}><Ico n="drag" /></div>
@@ -2003,12 +2182,12 @@ function SoftphoneApp() {
               <span>{caller.phone}</span>
             </div>
           </div>
-          <span className="t-body-sm nowrap">Incoming...</span>
+          <span className="t-body-sm nowrap">Incoming call</span>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button className="sp-btn danger bordered t-body-md" onClick={() => endCall('Call declined')}>Decline</button>
-            <button className="sp-btn success bordered t-body-md" onClick={() => { acceptCall(true); openPanel(); }}>Accept &amp; Add Ticket</button>
-            <button className="sp-btn t-body-md" style={{ background: '#fff', border: '1px solid #6F9965', color: '#4A6643' }} onClick={() => { acceptCall(false); openPanel(); }}>Accept</button>
-            <button className="sp-icon-btn" title="Expand" onClick={openPanel}><Ico n="expand" /></button>
+            <button data-primary-accept className="sp-btn accept-ticket t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`} onClick={() => { acceptCall(true); openPanel(); }}>Accept &amp; Add Ticket</button>
+            <button className="sp-btn accept-plain t-body-md" title="Accept without ticket" onClick={() => { acceptCall(false); openPanel(); }}>Accept</button>
+            <button className="sp-btn decline-ghost t-body-md" title={`Decline (${MOD_KEY}+Shift+D)`} onClick={() => endCall('Call declined')}>Decline</button>
+            <button className="sp-icon-btn" style={{ width: 32, height: 32 }} title="Expand" aria-label="Expand softphone" onClick={openPanel}><Ico n="expand" /></button>
           </div>
         </div>
       );
@@ -2020,10 +2199,11 @@ function SoftphoneApp() {
       return parts.length > 1 ? <>{parts[0]}<br />{parts.slice(1).join(' ')}</> : name;
     };
     if (screen === 'incoming') {
-      label = twoLine(caller.name); status = 'Incoming...';
+      label = twoLine(caller.name); status = 'Incoming call';
       buttons = <>
-        <button className="sp-btn danger bordered t-body-md" onClick={() => endCall('Call declined')}>Decline</button>
-        <button className="sp-btn success bordered t-body-md" onClick={() => { acceptCall(false); openPanel(); }}>Accept</button>
+        <button data-primary-accept className="sp-btn accept-ticket t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`} onClick={() => { acceptCall(true); openPanel(); }}>Accept &amp; Add Ticket</button>
+        <button className="sp-btn accept-plain icon-only" title="Accept without ticket" aria-label="Accept without ticket" onClick={() => { acceptCall(false); openPanel(); }}><Ico n="row-call" /></button>
+        <button className="sp-btn decline-ghost t-body-md" title={`Decline (${MOD_KEY}+Shift+D)`} onClick={() => endCall('Call declined')}>Decline</button>
       </>;
     } else if (screen === 'outgoing') {
       label = twoLine(caller.name); status = 'Calling...';
@@ -2039,11 +2219,11 @@ function SoftphoneApp() {
       buttons = <button className="sp-btn danger t-body-md" onClick={() => endCall()}>End</button>;
     }
     return (
-      <div className="sp-bar" style={{ width: 500, ...(barPos.r == null
-        ? { top: anchor.top, left: anchor.barLeft }   // under the phone button
+      <div ref={barRef} className="sp-bar" role="region" aria-label="Softphone call controls" style={{ width: screen === 'incoming' ? 'auto' : 500, minWidth: 500, gap: 16, ...(barPos.r == null
+        ? { top: anchor.top, left: Math.max(8, Math.min(anchor.barLeft, vw - barW - 8)) }   // under the phone button, kept on screen
         : { right: barPos.r, bottom: barPos.b }) }}>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <div className="sp-bar-handle" onMouseDown={barDragStart}><Ico n="drag" /></div>
+          <div className="sp-bar-handle" onMouseDown={barDragStart} aria-hidden="true"><Ico n="drag" /></div>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
             <Avatar p={caller} size={24} color={caller.unknown ? '#8D99AE' : '#B23C69'} />
             <span className="t-title-sm" style={{ maxWidth: isConference ? 'none' : 120, whiteSpace: isConference ? 'nowrap' : 'normal' }}>{label}</span>
@@ -2051,8 +2231,8 @@ function SoftphoneApp() {
         </div>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <span className="t-body-sm nowrap" style={{ fontVariantNumeric: 'tabular-nums' }}>{status}</span>
-          {buttons}
-          <button className="sp-icon-btn" title="Expand" onClick={openPanel}><Ico n="expand" /></button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>{buttons}</div>
+          <button className="sp-icon-btn" style={{ width: 32, height: 32 }} title="Expand" aria-label="Expand softphone" onClick={openPanel}><Ico n="expand" /></button>
         </div>
       </div>
     );
@@ -2063,12 +2243,27 @@ function SoftphoneApp() {
   // ─────────────────────────────────────────────────────────────
   const renderStateButton = () => {
     const focus = () => openPanel();
-    if (screen === 'incoming') return <button className="qm-call-chip t-body-md" onClick={focus}><span>Incoming...</span><Ico n="hdr-call-chip-phone" /></button>;
-    if (screen === 'outgoing') return <button className="qm-call-chip t-body-md" onClick={focus}><span>Ringing...</span><Ico n="hdr-call-chip-phone" /></button>;
-    if (screen === 'active') return <button className="qm-call-chip t-body-md" onClick={focus}><span style={{ fontVariantNumeric: 'tabular-nums' }}>{fmt(callTimer)}</span><Ico n="hdr-call-chip-phone" /></button>;
+    const who = caller.unknown ? null : caller.name;
+    if (screen === 'incoming' || screen === 'outgoing') {
+      const label = screen === 'incoming' ? (who || 'Incoming call') : (who ? `Calling ${who}` : 'Calling');
+      const full = screen === 'incoming' ? `Incoming call from ${caller.unknown ? `${caller.name}, ${caller.location}` : caller.name}` : `Calling ${caller.name}`;
+      return (
+        <button className="qm-call-chip t-body-md" onClick={focus} title={full} aria-label={`${full} — open softphone`}>
+          <span className="ellipsis" style={{ maxWidth: 160 }}>{label}</span><Ico n="hdr-call-chip-phone" />
+        </button>
+      );
+    }
+    if (screen === 'active') {
+      const t = `On a call with ${caller.name}`;
+      return (
+        <button className="qm-oncall" onClick={focus} title={t} aria-label={`${t} — open softphone`}>
+          <Ico n="hdr-call-chip-phone" /><span className="qm-oncall-dot" />
+        </button>
+      );
+    }
     return (
-      <button className="qm-icon-btn" title="Phone" onClick={() => (open ? setOpen(false) : openPanel())}>
-        <Ico n="hdr-add" />
+      <button className="qm-icon-btn" title="Phone" aria-label={open ? 'Close softphone' : 'Open softphone'} onClick={() => (open ? closePanel() : openPanel())}>
+        <Ico n="hdr-phone" />
       </button>
     );
   };
@@ -2084,16 +2279,22 @@ function SoftphoneApp() {
       top: Math.round(b.bottom + 8),                       // just below the phone button
       left: clampLeft(b.left, SP_WIDTH),                        // panel: left edges aligned
       barLeft: clampLeft(b.left, 500),                     // compact bar: left edges aligned
-      wideTop: Math.max(0, Math.round(sr.top + sr.height / 2 - 34)),   // 68px bar centred on the search bar
-      wideLeft: clampLeft(sr.left + sr.width / 2 - 733 / 2, 733),
+      wideTop: 64 + 8,                                          // below the header bar, never over its controls
+      wideLeft: clampLeft((window.innerWidth - 733) / 2, 733),
     };
     setAnchor(a => (Object.keys(next).every(k => a[k] === next[k]) ? a : next));
+    setVw(w => (w === window.innerWidth ? w : window.innerWidth));
   }, []);
   React.useLayoutEffect(measureAnchor);
   useEffect(() => {
     window.addEventListener('resize', measureAnchor);
     return () => window.removeEventListener('resize', measureAnchor);
   }, [measureAnchor]);
+
+  React.useLayoutEffect(() => {
+    const el = barRef.current;
+    if (el && Math.round(el.offsetWidth) !== barW) setBarW(Math.round(el.offsetWidth));
+  });
 
   // Once dragged, keep the panel on screen when its height changes (e.g. expanding the incoming card)
   React.useLayoutEffect(() => {
@@ -2102,6 +2303,49 @@ function SoftphoneApp() {
     const r = el.getBoundingClientRect();
     if (r.top < 8) setPanelPos(p => ({ ...p, b: Math.max(8, p.b - (8 - r.top)) }));
   });
+
+  // ── Call panel docked beside the New Ticket form (Accept & Add Ticket) ──
+  const DOCK_TOP = 80, DOCK_MARGIN = 16, MODAL_W = 560, MODAL_MIN = 400;
+  const callPanelShown = open && !minimized && isCalling;
+  const dockSpace = vw - DOCK_MARGIN - SP_WIDTH - DOCK_MARGIN - DOCK_MARGIN;   // room left of the panel for the form
+  const dockedLayout = ticketModalOpen && dockRight && callPanelShown && panelPos.r == null;
+  const modalW = Math.min(MODAL_W, dockSpace);
+  // Not enough room for both: collapse the call to the minimized bar
+  useEffect(() => {
+    if (ticketModalOpen && dockRight && callPanelShown && panelPos.r == null && dockSpace < MODAL_MIN) { setMinimized(true); setOpen(false); }
+  }, [ticketModalOpen, dockRight, callPanelShown, dockSpace]);
+
+  // ── Ringing: move focus to Accept & Add Ticket (panel or bar) ──
+  useEffect(() => {
+    if (screen !== 'incoming') return;
+    const t = setTimeout(() => {
+      const btn = document.querySelector('.sp-panel [data-primary-accept], .sp-bar [data-primary-accept]');
+      if (btn) btn.focus();
+    }, 30);
+    return () => clearTimeout(t);
+  }, [screen, open, minimized, wideIncomingBar]);
+
+  // ── Keyboard shortcuts: ⌘/Ctrl+Shift+A accept & add ticket, ⌘/Ctrl+Shift+D decline, Esc minimize ──
+  const keysRef = useRef({});
+  keysRef.current = { screen, open, minimized, isCalling, ticketModalOpen, acceptCall, endCall, openPanel, minimize, closePanel };
+  useEffect(() => {
+    const onKey = (e) => {
+      const k = keysRef.current;
+      const mod = e.ctrlKey || e.metaKey;
+      if (mod && e.shiftKey && e.key.toLowerCase() === 'a' && k.screen === 'incoming') {
+        e.preventDefault(); k.acceptCall(true); k.openPanel();
+      } else if (mod && e.shiftKey && e.key.toLowerCase() === 'd' && k.screen === 'incoming') {
+        e.preventDefault(); k.endCall('Call declined');
+      } else if (e.key === 'Escape' && k.open) {
+        // With the ticket form open, Esc only minimizes when focus is in the call panel
+        if (k.ticketModalOpen && !(e.target.closest && e.target.closest('.sp-panel'))) return;
+        e.preventDefault();
+        k.isCalling ? k.minimize() : k.closePanel();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const head = headerInfo();
   const panelHeight = screen === 'incoming' ? 'auto' : 600;
@@ -2121,7 +2365,7 @@ function SoftphoneApp() {
           <div className="qm-buttons">
             <div ref={stateBtnRef} style={{ display: 'flex' }}>{renderStateButton()}</div>
             <button className="qm-remote t-body-md"><Ico n="hdr-agent" /><span>Remote Support</span></button>
-            <button className="qm-add-ticket t-body-md" onClick={() => { setTicketTitle(''); setTicketTitleError(false); setTicketModalOpen(true); }}><span>Add Ticket</span></button>
+            <button className="qm-add-ticket t-body-md" onClick={() => { setTicketTitle(''); setTicketDesc(''); setTicketTitleError(false); setTicketContacts([]); setCallLink(null); setTicketModalOpen(true); }}><span>Add Ticket</span></button>
             <div style={{ display: 'flex', gap: 12, alignItems: 'center' }}>
               <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
                 <Ico n="hdr-communication" />
@@ -2159,26 +2403,39 @@ function SoftphoneApp() {
       {minimized && isCalling && renderBar()}
 
       {open && !minimized && (
-        <div ref={panelRef} className="sp-panel" style={{ height: panelHeight, ...(panelPos.r == null
-          ? { top: anchor.top, left: anchor.left }
-          : { right: panelPos.r, bottom: panelPos.b }) }}>
+        <div ref={panelRef} className="sp-panel" role="dialog" aria-labelledby="sp-title" style={{ height: panelHeight, ...(panelPos.r != null
+          ? { right: panelPos.r, bottom: panelPos.b }                       // user-dragged position (kept for the session)
+          : dockRight && isCalling
+            ? { top: DOCK_TOP, right: DOCK_MARGIN }                         // docked right, beside the ticket form
+            : { top: anchor.top, left: anchor.left }) }}>
           {renderHeader(head)}
           {head.banner && renderBanner()}
           {renderBody()}
         </div>
       )}
 
-      {toast && <div className="sp-toast t-body-md">{toast}</div>}
+      <div className="sr-only" aria-live="assertive" aria-atomic="true">{announce}</div>
+      {toast && (
+        <div className="sp-toast t-body-md" role="status">
+          <span>{toast.msg}</span>
+          {toast.action && <button onClick={() => { toast.action.fn(); setToast(t => (t && t.id === toast.id ? null : t)); }}>{toast.action.label}</button>}
+        </div>
+      )}
 
       {ticketModalOpen && (
-        <div className="nt-overlay" onClick={e => { if (e.target === e.currentTarget) setTicketModalOpen(false); }}>
-          <div className="nt-modal">
+        <div className={`nt-overlay ${dockedLayout ? 'docked' : ''}`} onClick={e => { if (e.target === e.currentTarget) setTicketModalOpen(false); }}
+          style={dockedLayout ? { paddingTop: DOCK_TOP, paddingLeft: vw - DOCK_MARGIN - SP_WIDTH - DOCK_MARGIN - modalW } : null}>
+          <div className="nt-modal" role="dialog" aria-labelledby="nt-title"
+            style={dockedLayout ? { width: modalW, maxHeight: `calc(100vh - ${DOCK_TOP + DOCK_MARGIN}px)` } : null}>
             <div className="nt-header">
-              <span className="nt-title">New Ticket</span>
+              <span className="nt-title" id="nt-title">New Ticket</span>
               <button className="nt-hbtn" title="Help">?</button>
-              <button className="nt-hbtn" onClick={() => setTicketModalOpen(false)} title="Close">✕</button>
+              <button className="nt-hbtn" onClick={() => setTicketModalOpen(false)} title="Close" aria-label="Close New Ticket">✕</button>
             </div>
             <div className="nt-body">
+              {callLink && (callLink.logged
+                ? <span className="nt-callchip logged"><Ico n="hdr-call-chip-phone" />Call · {fmtShort(callLink.duration)} · Logged</span>
+                : <span className="nt-callchip live" aria-live="off"><Ico n="banner-phone" />Call in progress · {fmtShort(callTimer)}</span>)}
               <div>
                 <div className="nt-section-label">Details</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -2193,7 +2450,7 @@ function SoftphoneApp() {
                   </div>
                   <div className="nt-field">
                     <label className="nt-label">Title <span>*</span></label>
-                    <input className={`nt-input${ticketTitleError ? ' error' : ''}`} placeholder=""
+                    <input className={`nt-input${ticketTitleError ? ' error' : ''}`} placeholder="" autoFocus
                       value={ticketTitle} onChange={e => { setTicketTitle(e.target.value); setTicketTitleError(false); }}/>
                     {ticketTitleError && <span className="nt-error">Please provide a title</span>}
                   </div>
@@ -2201,6 +2458,19 @@ function SoftphoneApp() {
               </div>
               <div>
                 <div className="nt-section-label">Contacts</div>
+                {ticketContacts.length > 0 && (
+                  <div className="nt-chips">
+                    {ticketContacts.map(ch => (
+                      <span key={ch.id} className={`nt-chip ${ch.unverified ? 'unverified' : ''}`} title={ch.unverified ? 'Unverified caller — identify them from the call panel' : `${ch.name}${ch.sub ? ' · ' + ch.sub : ''}`}>
+                        {ch.unverified
+                          ? <span className="nt-chip-av" style={{ background: '#A9AFBC' }}>?</span>
+                          : <span className="nt-chip-av" style={{ background: ch.color }}>{ch.initials}</span>}
+                        {ch.unverified ? <span style={{ fontWeight: 500 }}>{ch.label}</span> : <span>{ch.name}{ch.sub && <small> · {ch.sub}</small>}</span>}
+                        <button className="nt-chip-x" aria-label={`Remove ${ch.name || ch.label}`} onClick={() => setTicketContacts(cs => cs.filter(x => x.id !== ch.id))}>×</button>
+                      </span>
+                    ))}
+                  </div>
+                )}
                 <button className="nt-add-contacts">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>
                   Add Contacts
@@ -2208,6 +2478,9 @@ function SoftphoneApp() {
               </div>
               <div>
                 <div className="nt-section-label">Description</div>
+                {callLink && callLink.logged && (
+                  <div className="nt-calllog"><Ico n="hdr-call-chip-phone" /><span><b>Call with {callLink.callerName}</b> · {fmtShort(callLink.duration)} · Logged {timeNow()}</span></div>
+                )}
                 <div className="nt-desc-toolbar">
                   {['B','I','U','≡','≡','≡','⋮≡','⋮≡'].map((t,i) => <button key={i} className="nt-tool">{t}</button>)}
                 </div>
@@ -2221,8 +2494,10 @@ function SoftphoneApp() {
                 if (!ticketTitle.trim()) { setTicketTitleError(true); return; }
                 setTicketModalOpen(false);
                 ticketSeq.current += 1;
-                setOpenTicket({ number: ticketSeq.current, title: ticketTitle.trim(), description: ticketDesc.trim(), type: ticketType });
-                setTicketTitle(''); setTicketDesc('');
+                setOpenTicket({ number: ticketSeq.current, title: ticketTitle.trim(), description: ticketDesc.trim(), type: ticketType,
+                  created: `${dateAgo(0)} ${timeNow()}`, contacts: ticketContacts, callId: callLink && callLink.id, call: callLink });
+                setTicketTitle(''); setTicketDesc(''); setTicketContacts([]);
+                if (!isCalling || (callLink && callLink.logged)) setCallLink(null);
               }}>Create</button>
             </div>
           </div>
