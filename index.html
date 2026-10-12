@@ -1146,10 +1146,8 @@ function SoftphoneApp() {
   const stateBtnRef = useRef(null);
   const searchRef = useRef(null);
   // Docked positions measured from the header: under the phone button (panel, compact bar) and over the search bar (simple bar)
-  const [anchor, setAnchor] = useState({ top: 72, left: 0, barLeft: 0, wideTop: 0, wideLeft: 0 });
+  const [anchor, setAnchor] = useState({ top: 72, left: 0, wideTop: 0, wideLeft: 0 });
   const [barPos, , barDragStart] = useDrag({ r: null, b: null });
-  const barRef = useRef(null);
-  const [barW, setBarW] = useState(500);   // measured, so a wider bar (3 incoming actions) still fits on screen
   const [wideBarPos, , wideBarDragStart] = useDrag({ r: null, b: null });
 
   const inCall = screen === 'active';
@@ -2216,8 +2214,8 @@ function SoftphoneApp() {
       buttons = <button className="sp-btn danger t-body-md" onClick={() => endCall()}>End</button>;
     }
     return (
-      <div ref={barRef} className="sp-bar" role="region" aria-label="Softphone call controls" style={{ width: screen === 'incoming' ? 'auto' : 500, minWidth: 500, gap: 16, ...(barPos.r == null
-        ? { top: anchor.top, left: Math.max(8, Math.min(anchor.barLeft, vw - barW - 8)) }   // under the phone button, kept on screen
+      <div className="sp-bar" role="region" aria-label="Softphone call controls" style={{ gap: 24, ...(barPos.r == null
+        ? { top: 64 + 8, right: 16 }   // hugs its content (Figma 2277:10515); docks top-right, below the header
         : { right: barPos.r, bottom: barPos.b }) }}>
         <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
           <div className="sp-bar-handle" onMouseDown={barDragStart} aria-hidden="true"><Ico n="drag" /></div>
@@ -2275,7 +2273,6 @@ function SoftphoneApp() {
     const next = {
       top: Math.round(b.bottom + 8),                       // just below the phone button
       left: clampLeft(b.left, SP_WIDTH),                        // panel: left edges aligned
-      barLeft: clampLeft(b.left, 500),                     // compact bar: left edges aligned
       wideTop: 64 + 8,                                          // below the header bar, never over its controls
       wideLeft: clampLeft((window.innerWidth - 733) / 2, 733),
     };
@@ -2287,11 +2284,6 @@ function SoftphoneApp() {
     window.addEventListener('resize', measureAnchor);
     return () => window.removeEventListener('resize', measureAnchor);
   }, [measureAnchor]);
-
-  React.useLayoutEffect(() => {
-    const el = barRef.current;
-    if (el && Math.round(el.offsetWidth) !== barW) setBarW(Math.round(el.offsetWidth));
-  });
 
   // Once dragged, keep the panel on screen when its height changes (e.g. expanding the incoming card)
   React.useLayoutEffect(() => {
