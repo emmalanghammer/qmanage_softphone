@@ -41,6 +41,10 @@
     flex: 0 1 500px; min-width: 250px; height: 40px; padding: 8px 12px;
     display: flex; gap: 8px; align-items: center; background: #F2F3F7; border-radius: 8px; color: #8D99AE;
   }
+  /* Not enough room: search collapses to an icon; opening it overlays a full-width field on the header */
+  .qm-search-open { position: absolute; inset: 12px 24px; z-index: 2; display: flex; gap: 8px; align-items: center; height: 40px; padding: 8px 12px; background: #F2F3F7; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.12); }
+  .qm-search-open input { flex: 1; min-width: 0; border: none; outline: none; background: none; font: 500 16px/20px 'Montserrat', sans-serif; letter-spacing: 0.5px; color: #363B4D; }
+  .qm-search-open input::placeholder { color: #8D99AE; }
   .qm-right { flex: 1 0 auto; display: flex; justify-content: flex-end; align-items: center; gap: 24px; }
   .qm-buttons { display: flex; gap: 16px; align-items: center; }
   .qm-buttons > * { flex-shrink: 0; white-space: nowrap; }
@@ -1145,6 +1149,9 @@ function SoftphoneApp() {
   const panelRef = useRef(null);
   const stateBtnRef = useRef(null);
   const searchRef = useRef(null);
+  const qmLeftRef = useRef(null), qmRightRef = useRef(null);
+  const [searchCompact, setSearchCompact] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   // Docked positions measured from the header: under the phone button (panel, compact bar) and over the search bar (simple bar)
   const [anchor, setAnchor] = useState({ top: 72, left: 0, wideTop: 0, wideLeft: 0 });
   const [barPos, , barDragStart] = useDrag({ r: null, b: null });
@@ -2265,6 +2272,15 @@ function SoftphoneApp() {
 
   // Docked positions, kept inside the window
   const measureAnchor = useCallback(() => {
+    // Collapse search to an icon when logo + 250px search + right-side buttons don't fit (24px padding ×2, 16px gaps ×2)
+    if (qmLeftRef.current && qmRightRef.current) {
+      // Content widths (the two sides flex-grow, so measure their children, not the boxes)
+      const contentW = (el, gap) => [...el.children].reduce((w, c) => w + c.offsetWidth, 0) + gap * Math.max(0, el.children.length - 1);
+      const need = 48 + 32 + contentW(qmLeftRef.current, 16) + 250 + contentW(qmRightRef.current, 24);
+      const compact = need > window.innerWidth;
+      setSearchCompact(c => (c === compact ? c : compact));
+      if (!compact) setSearchOpen(false);
+    }
     const btn = stateBtnRef.current, search = searchRef.current;
     if (!btn || !search) return;
     const clampLeft = (x, w) => Math.round(Math.max(8, Math.min(x, window.innerWidth - w - 8)));
@@ -2342,15 +2358,30 @@ function SoftphoneApp() {
   return (
     <>
       <div className="qm-header">
-        <div className="qm-left">
+        <div className="qm-left" ref={qmLeftRef}>
           <Ico n="hdr-menu" />
           <button className="sp-icon-btn" title="Go to workspace" onClick={() => setOpenTicket(null)}><Ico n="hdr-logo" /></button>
         </div>
-        <div className="qm-search" ref={searchRef}>
-          <span className="t-body-lg" style={{ flex: 1 }}>Search qManage</span>
-          <Ico n="hdr-search" />
-        </div>
-        <div className="qm-right">
+        {searchCompact ? (
+          <button ref={searchRef} className="qm-icon-btn" title="Search qManage" aria-label="Search qManage" aria-expanded={searchOpen}
+            onClick={() => setSearchOpen(true)} style={{ marginLeft: 'auto' }}>
+            <Ico n="hdr-search" />
+          </button>
+        ) : (
+          <div className="qm-search" ref={searchRef}>
+            <span className="t-body-lg" style={{ flex: 1 }}>Search qManage</span>
+            <Ico n="hdr-search" />
+          </div>
+        )}
+        {searchCompact && searchOpen && (
+          <div className="qm-search-open" role="search">
+            <input autoFocus placeholder="Search qManage" aria-label="Search qManage"
+              onKeyDown={e => { if (e.key === 'Escape') { e.stopPropagation(); setSearchOpen(false); } }}
+              onBlur={() => setSearchOpen(false)} />
+            <Ico n="hdr-search" />
+          </div>
+        )}
+        <div className="qm-right" ref={qmRightRef}>
           <div className="qm-buttons">
             <div ref={stateBtnRef} style={{ display: 'flex' }}>{renderStateButton()}</div>
             <button className="qm-remote t-body-md"><Ico n="hdr-agent" /><span>Remote Support</span></button>
