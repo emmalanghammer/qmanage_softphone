@@ -287,9 +287,6 @@
   @keyframes oncallPulse { 0% { box-shadow: 0 0 0 0 rgba(76,175,80,0.6); } 100% { box-shadow: 0 0 0 7px rgba(76,175,80,0); } }
 
   /* Call ↔ ticket link (New Ticket form) */
-  .nt-callchip { display: inline-flex; align-items: center; gap: 6px; align-self: flex-start; height: 26px; padding: 0 10px; border-radius: 13px; font-size: 12px; font-weight: 600; font-variant-numeric: tabular-nums; }
-  .nt-callchip.live { background: #E4F2E0; color: #2E5527; }
-  .nt-callchip.logged { background: #F2F3F7; color: #5F6475; }
   .nt-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
   .nt-chip { display: inline-flex; align-items: center; gap: 8px; height: 30px; padding: 0 6px 0 4px; border-radius: 15px; background: #EAF5FA; border: 1px solid #BFE0EE; color: #363B4D; font-size: 13px; font-weight: 600; }
   .nt-chip small { font-size: 12px; font-weight: 500; color: #5F6475; }
@@ -2433,9 +2430,6 @@ function SoftphoneApp() {
               <button className="nt-hbtn" onClick={() => setTicketModalOpen(false)} title="Close" aria-label="Close New Ticket">✕</button>
             </div>
             <div className="nt-body">
-              {callLink && (callLink.logged
-                ? <span className="nt-callchip logged"><Ico n="hdr-call-chip-phone" />Call · {fmtShort(callLink.duration)} · Logged</span>
-                : <span className="nt-callchip live" aria-live="off"><Ico n="banner-phone" />Call in progress · {fmtShort(callTimer)}</span>)}
               <div>
                 <div className="nt-section-label">Details</div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
