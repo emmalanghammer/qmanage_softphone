@@ -209,15 +209,15 @@
   .sp-btn.primary:hover { background: #006d95; }
   .sp-btn.secondary { background: #F2F3F7; color: #5F6475; }
   .sp-btn.secondary:hover { background: #e3e5ec; }
-  .sp-btn.danger { background: #C8323A; color: #fff; }   /* #C8323A: white text 5.29:1 (AA) */
-  .sp-btn.danger:hover { background: #b02a31; }
+  .sp-btn.danger { background: #ED4B52; color: #fff; }   /* Figma status/error */
+  .sp-btn.danger:hover { background: #d9434a; }
   /* Incoming-call actions — same weights everywhere; Decline always left, accept actions right */
-  .sp-btn.accept-ticket { background: #94CC86; color: #363B4D; font-weight: 600; }
+  .sp-btn.accept-ticket { background: #94CC86; color: #363B4D; }
   .sp-btn.accept-ticket:hover { background: #86bd78; }
   .sp-btn.accept-plain { background: transparent; border: 1px solid #8D99AE; color: #fff; }
   .sp-btn.accept-plain:hover { background: rgba(255,255,255,0.08); }
-  .sp-btn.decline-ghost { background: transparent; border: 1px solid rgba(255,138,143,0.5); color: #FF8A8F; }  /* 4.91:1 on #363B4D */
-  .sp-btn.decline-ghost:hover { background: rgba(255,138,143,0.12); }
+  .sp-btn.decline { background: #ED4B52; color: #fff; }
+  .sp-btn.decline:hover { background: #d9434a; }
   .sp-btn.icon-only { width: 36px; padding: 0; }
   .sp-btn.success { background: #94CC86; color: #363B4D; }
   .sp-btn.success.bordered { border: 1px solid #94CC86; }
@@ -258,6 +258,9 @@
   .sp-filter input::placeholder { color: #8D99AE; font-style: italic; }
   .sp-filter-menu { position: absolute; top: 40px; left: -1px; right: -1px; z-index: 5; background: #4A4F61; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); padding: 4px 0; }
   .sp-filter-menu button { display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: none; color: #fff; cursor: pointer; }
+  .sp-filter-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; padding: 0; border: 1px solid #5F6475; border-radius: 4px; background: none; cursor: pointer; }
+  .sp-filter-btn:hover, .sp-filter-btn.on { background: rgba(255,255,255,0.08); }
+  .sp-filter-btn.on { border-color: #87CFE7; }
   .sp-filter-menu button:hover { background: rgba(255,255,255,0.08); }
   .sp-square { width: 40px; height: 36px; padding: 0 7px; border: 1px solid #5F6475; border-radius: 4px; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
   .sp-square.on { border-color: #8D99AE; }
@@ -269,6 +272,15 @@
     box-shadow: 0 0 2px rgba(0,0,0,0.16), 0 1px 4px rgba(0,0,0,0.16), 0 12px 32px rgba(0,0,0,0.18);
   }
   .sp-bar-handle { cursor: grab; display: flex; }
+  /* Mini bar: one compact strip that's easy to ignore — 48px tall, 32px controls, status under the name */
+  .sp-bar.mini { height: 48px; padding: 8px 8px 8px 4px; gap: 12px; }
+  .sp-bar.mini .sp-btn { height: 32px; padding: 0 12px; }
+  .sp-bar.mini .sp-btn.icon-only { width: 32px; padding: 0; }
+  .sp-bar.mini .sp-bar-handle { opacity: 0.6; }
+  .sp-bar.mini .sp-bar-handle:hover { opacity: 1; }
+  .sp-bar-who { display: flex; flex-direction: column; gap: 2px; min-width: 0; max-width: 140px; }
+  .sp-bar-who .t-body-sm { color: #AEB7C6; font-variant-numeric: tabular-nums; }
+  .sp-av.ringing { animation: oncallPulse 1.2s ease-out infinite; }
   .sp-bar-handle:active { cursor: grabbing; }
 
   /* Generic toast */
@@ -395,7 +407,7 @@ const { useState, useEffect, useRef, useCallback } = React;
 // ─────────────────────────────────────────────────────────────
 // Icons are the Figma-exported SVGs in assets/icons; each is rendered at its root size.
 const ICON_SIZE = {
-  'drag': 24, 'expand': 24, 'clear': 24, 'search': 24, 'row-call': 24, 'filter': 24, 'queue': 24,
+  'call-end': 20, 'star': 24, 'call-group': 24, 'drag': 24, 'expand': 24, 'clear': 24, 'search': 24, 'row-call': 24, 'filter': 24, 'queue': 24,
   'history-incoming': 24, 'history-outgoing': 24, 'history-missed': 24,
   'chevron-down-blue': 24, 'chevron-up-blue': 24, 'person-placeholder': 32,
   'dot-available': 8, 'dot-busy': 8, 'dot-away': 8, 'mail': 18, 'phone-blue': 18, 'building': 16,
@@ -479,11 +491,17 @@ const UNKNOWN_CALLER = {
 };
 
 const USERS = [
-  { id: 'e1', kind: 'user', name: 'Charlie Stile',  initials: 'CA', title: 'Product Support Specialist I',  ext: '204', status: 'available' },
-  { id: 'e2', kind: 'user', name: 'Eleanor Foster', initials: 'EF', title: 'Product Support Specialist II', ext: '201', status: 'available' },
-  { id: 'e3', kind: 'user', name: 'Joe Smith',      initials: 'JS', title: 'Product Support Specialist I',  ext: '207', status: 'busy' },
-  { id: 'e4', kind: 'user', name: 'Pam Reynolds',   initials: 'PR', title: 'Product Support Manager',       ext: '210', status: 'away' },
-  { id: 'e5', kind: 'user', name: 'Marcus Lee',     initials: 'ML', title: 'Product Support Team Lead',     ext: '212', status: 'offline' },
+  { id: 'e1', kind: 'user', name: 'Charlie Stile',  initials: 'CS', email: 'thisisaverylongemailIdontknowwhy@email.com', title: 'Product Support Specialist I',  ext: '204', status: 'available' },
+  { id: 'e2', kind: 'user', name: 'Eleanor Foster', initials: 'EF', email: 'eleanor.foster@qmanage.com', title: 'Product Support Specialist II', ext: '201', status: 'available' },
+  { id: 'e3', kind: 'user', name: 'Joe Smith',      initials: 'JS', email: 'joe.smith@qmanage.com', title: 'Product Support Specialist I',  ext: '207', status: 'busy' },
+  { id: 'e4', kind: 'user', name: 'Pam Reynolds',   initials: 'PR', email: 'pam.reynolds@qmanage.com', title: 'Product Support Manager',       ext: '210', status: 'away' },
+  { id: 'e5', kind: 'user', name: 'Marcus Lee',     initials: 'ML', email: 'marcus.lee@qmanage.com', title: 'Product Support Team Lead',     ext: '212', status: 'offline' },
+];
+
+const CALL_GROUPS = [
+  { id: 'g1', kind: 'group', name: 'Support Tier 1',   ext: '300', members: 6 },
+  { id: 'g2', kind: 'group', name: 'Support Tier 2',   ext: '301', members: 4 },
+  { id: 'g3', kind: 'group', name: 'Account Managers', ext: '310', members: 3 },
 ];
 
 const QUEUES = [
@@ -506,6 +524,9 @@ const HISTORY_ICON = { Incoming: 'history-incoming', Outgoing: 'history-outgoing
 
 const ME = { id: 'me', kind: 'user', name: 'Emma Langhammer', initials: 'EL', color: '#007FAD' };
 const SP_WIDTH = 350; // keep in sync with --sp-width
+// One home for every softphone state: top-right, 8px below the 64px app header, 16px from the edge.
+// Panel, compact bar and wide bar all open here, so collapsing/expanding happens in place.
+const DOCK = { top: 64 + 8, right: 16 };
 const KEYS = ['1','2','3','4','5','6','7','8','9','*','0','#'];
 
 const contactFromHistory = (h) =>
@@ -515,29 +536,52 @@ const contactFromNumber = (num) =>
   ({ id: 'n' + digits(num), kind: 'contact', unknown: true, name: num, phone: num, color: '#8D99AE' });
 
 // ─────────────────────────────────────────────────────────────
-// Drag hook — position is {r: right, b: bottom} so panels stay docked bottom-right at any size
+// Drag hook — while dragging, position is {r: right, b: bottom}. On release it snaps to the
+// nearest corner ('tl' | 'bl' | 'br'); null means the default home (top-right, DOCK).
+// Double-clicking the handle resets to null.
 // ─────────────────────────────────────────────────────────────
-function useDrag(initial) {
-  const [pos, setPos] = useState(initial);
-  const posRef = useRef(pos);
-  posRef.current = pos;
+const SNAP_GAP = 16;
+const CORNER_STYLE = {
+  tl: { top: DOCK.top, left: SNAP_GAP },
+  bl: { bottom: SNAP_GAP, left: SNAP_GAP },
+  br: { bottom: SNAP_GAP, right: SNAP_GAP },
+};
+const dragStyle = (pos) => (pos == null ? DOCK : typeof pos === 'string' ? CORNER_STYLE[pos] : { right: pos.r, bottom: pos.b });
+
+function useDrag() {
+  const [pos, setPos] = useState(null);
   const start = useCallback((e) => {
+    if (e.button !== 0) return;
     e.preventDefault();
-    // A null position means "not placed yet" — start from wherever the element currently is
-    const rect = e.currentTarget.closest('.sp-panel, .sp-bar').getBoundingClientRect();
+    const el = e.currentTarget.closest('.sp-panel, .sp-bar');
+    const rect = el.getBoundingClientRect();
     const sx = e.clientX, sy = e.clientY;
-    const r = posRef.current.r ?? window.innerWidth - rect.right;
-    const b = posRef.current.b ?? window.innerHeight - rect.bottom;
+    const r = window.innerWidth - rect.right;
+    const b = window.innerHeight - rect.bottom;
+    let moved = false;
     // Keep the whole element on screen while dragging
-    const move = (ev) => setPos({
-      r: Math.max(0, Math.min(window.innerWidth - rect.width, r - (ev.clientX - sx))),
-      b: Math.max(0, Math.min(window.innerHeight - rect.height, b - (ev.clientY - sy))),
-    });
-    const up = () => { window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up); };
+    const move = (ev) => {
+      if (!moved && Math.abs(ev.clientX - sx) + Math.abs(ev.clientY - sy) < 4) return;   // ignore clicks / double-clicks
+      moved = true;
+      setPos({
+        r: Math.max(0, Math.min(window.innerWidth - rect.width, r - (ev.clientX - sx))),
+        b: Math.max(0, Math.min(window.innerHeight - rect.height, b - (ev.clientY - sy))),
+      });
+    };
+    const up = () => {
+      window.removeEventListener('mousemove', move); window.removeEventListener('mouseup', up);
+      if (!moved) return;
+      // Snap to whichever corner the element's centre is closest to
+      const f = el.getBoundingClientRect();
+      const left = f.left + f.width / 2 < window.innerWidth / 2;
+      const top = f.top + f.height / 2 < window.innerHeight / 2;
+      setPos(top ? (left ? 'tl' : null) : (left ? 'bl' : 'br'));
+    };
     window.addEventListener('mousemove', move);
     window.addEventListener('mouseup', up);
   }, []);
-  return [pos, setPos, start];
+  const reset = useCallback(() => setPos(null), []);
+  return [pos, start, reset];
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -596,6 +640,24 @@ const UserRow = ({ u, right, onClick }) => (
           <span className="t-title-xs">{u.name}</span>
           <span className="t-body-sm ellipsis" style={{ color: '#CED0D4' }}>{u.title}</span>
         </div>
+        <div className="sp-line" style={{ gap: 12, color: '#8D99AE' }}>
+          <span className="t-body-sm">Ext. {u.ext}</span>
+          <StatusDot status={u.status} />
+        </div>
+      </div>
+    </div>
+    {right}
+  </div>
+);
+
+// Name / title / ext+status on three lines (Extensions tab, Figma 2278:13664)
+const StackedUserRow = ({ u, right, onClick }) => (
+  <div className="sp-row" onClick={onClick} style={onClick ? { cursor: 'pointer' } : null}>
+    <div className="sp-row-left">
+      <Avatar p={u} size={24} color="#B23C69" />
+      <div className="sp-col4">
+        <span className="t-title-xs nowrap">{u.name}</span>
+        <span className="t-body-sm nowrap" style={{ color: '#CED0D4' }}>{u.title}</span>
         <div className="sp-line" style={{ gap: 12, color: '#8D99AE' }}>
           <span className="t-body-sm">Ext. {u.ext}</span>
           <StatusDot status={u.status} />
@@ -1098,6 +1160,10 @@ function SoftphoneApp() {
   const [dialInput, setDialInput] = useState('');
   const [contactSearch, setContactSearch] = useState('');
   const [extSearch, setExtSearch] = useState('');
+  const [extView, setExtView] = useState('all');             // all | favorites | users | queues | groups
+  const [extMenu, setExtMenu] = useState(false);
+  const [favorites, setFavorites] = useState(['e1']);
+  const [viewUser, setViewUser] = useState(null);           // idle extension details
   const [historyTab, setHistoryTab] = useState('all');
   const [viewContact, setViewContact] = useState(null);     // idle contact details
 
@@ -1145,7 +1211,8 @@ function SoftphoneApp() {
   const returnFocusRef = useRef(null);
 
   // Panel opens docked under the header phone button until the user drags it (r/b stay null until then)
-  const [panelPos, setPanelPos, panelDragStart] = useDrag({ r: null, b: null });
+  // Panel and both bars share one position, so minimizing/expanding happens in the same corner
+  const [dockPos, dragStart, resetDock] = useDrag();
   const panelRef = useRef(null);
   const stateBtnRef = useRef(null);
   const searchRef = useRef(null);
@@ -1153,9 +1220,6 @@ function SoftphoneApp() {
   const [searchCompact, setSearchCompact] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   // Docked positions measured from the header: under the phone button (panel, compact bar) and over the search bar (simple bar)
-  const [anchor, setAnchor] = useState({ top: 72, left: 0, wideTop: 0, wideLeft: 0 });
-  const [barPos, , barDragStart] = useDrag({ r: null, b: null });
-  const [wideBarPos, , wideBarDragStart] = useDrag({ r: null, b: null });
 
   const inCall = screen === 'active';
   const isCalling = screen === 'incoming' || screen === 'outgoing' || screen === 'active';
@@ -1357,7 +1421,7 @@ function SoftphoneApp() {
   const renderHeader = ({ title, chip }) => (
     <div className="sp-head">
       <div className="sp-head-left">
-        <div className="sp-hbtn drag" onMouseDown={panelDragStart} aria-hidden="true" title="Drag to move"><Ico n="drag" /></div>
+        <div className="sp-hbtn drag" onMouseDown={dragStart} onDoubleClick={resetDock} aria-hidden="true" title="Drag to move · double-click to reset"><Ico n="drag" /></div>
         <span id="sp-title" className="t-title-xs nowrap">{title}</span>
       </div>
       <div className="sp-head-right">
@@ -1483,23 +1547,123 @@ function SoftphoneApp() {
     );
   };
 
+  const toggleFavorite = (id) => {
+    const fav = favorites.includes(id);
+    setFavorites(f => (fav ? f.filter(x => x !== id) : [...f, id]));
+    showToast(fav ? 'Removed from favorites' : 'Added to favorites');
+  };
+
+  // Extension details (Figma 2349:4276)
+  const renderUserDetails = (u) => {
+    const fav = favorites.includes(u.id);
+    return (
+      <div className="sp-main" style={{ padding: 20, gap: 12 }}>
+        <BackLink label="Back to extensions" onClick={() => setViewUser(null)} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 16, width: '100%' }}>
+          <Avatar p={u} size={48} color="#B23C69" />
+          <div style={{ flex: '1 0 0', minWidth: 0, display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-start' }}>
+            <span className="t-title-md">{u.name}</span>
+            <span className="t-body-md" style={{ color: '#CED0D4' }}>{u.title}</span>
+            <div className="sp-line t-body-md" style={{ gap: 12, color: '#8D99AE' }}>
+              <span>Ext. {u.ext}</span>
+              <StatusDot status={u.status} />
+            </div>
+            {u.email && (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%' }}>
+                <Ico n="mail" />
+                {emailButton(u.email)}
+              </div>
+            )}
+          </div>
+          <button className="sp-row-call" title={`Call ${u.name}`} onClick={() => { setViewUser(null); startCall({ ...u, phone: `Ext. ${u.ext}` }); }}><Ico n="row-call" /></button>
+        </div>
+        <div className="sp-div" />
+        <button className="sp-btn primary full t-body-md" aria-pressed={fav} onClick={() => toggleFavorite(u.id)}>
+          {fav ? 'Remove from Favorites' : 'Add to Favorites'}
+        </button>
+      </div>
+    );
+  };
+
   const renderExtensionsTab = () => {
+    if (viewUser) return renderUserDetails(viewUser);
     const q = extSearch.trim().toLowerCase();
-    const list = USERS.filter(u => !q || u.name.toLowerCase().includes(q) || u.title.toLowerCase().includes(q) || u.ext.includes(q));
+    const match = (...fields) => !q || fields.some(f => f && f.toLowerCase().includes(q));
+    const users = USERS.filter(u => match(u.name, u.title, u.ext));
+    const favs = users.filter(u => favorites.includes(u.id));
+    const queues = QUEUES.filter(x => match(x.name));
+    const groups = CALL_GROUPS.filter(g => match(g.name, g.ext));
+    const callBtn = (name, c) => (
+      <button className="sp-row-call" title={`Call ${name}`} onClick={e => { e.stopPropagation(); startCall(c); }}><Ico n="row-call" /></button>
+    );
+    const userRow = u => <StackedUserRow u={u} onClick={() => setViewUser(u)} right={callBtn(u.name, { ...u, phone: `Ext. ${u.ext}` })} />;
+    const queueRow = x => <QueueRow q={x} right={callBtn(x.name, { ...x, phone: 'Queue' })} />;
+    const groupRow = g => (
+      <div className="sp-row">
+        <div className="sp-row-left">
+          <Ico n="call-group" />
+          <div className="sp-col4">
+            <span className="t-title-xs nowrap">{g.name}</span>
+            <div className="sp-line" style={{ gap: 12, color: '#8D99AE' }}>
+              <span className="t-body-sm">Ext. {g.ext}</span>
+              <span className="t-body-sm">{g.members} members</span>
+            </div>
+          </div>
+        </div>
+        {callBtn(g.name, { ...g, phone: `Ext. ${g.ext}` })}
+      </div>
+    );
+    const show = v => extView === 'all' || extView === v;
+    const sections = [
+      show('favorites') && { id: 'favorites', title: 'Favorites', icon: 'star', items: favs, row: userRow },
+      show('users') && { id: 'users', title: extView === 'all' ? 'All Extensions' : 'Users', items: extView === 'all' ? users.filter(u => !favorites.includes(u.id)) : users, row: userRow },
+      show('queues') && { id: 'queues', title: 'Queues', items: queues, row: queueRow },
+      show('groups') && { id: 'groups', title: 'Call Groups', items: groups, row: groupRow },
+    ].filter(sec => sec && sec.items.length);
+    const VIEWS = [['all', 'All'], ['favorites', 'Favorites'], ['users', 'Users'], ['queues', 'Queues'], ['groups', 'Call groups']];
+    const viewLabel = VIEWS.find(v => v[0] === extView)[1];
     return (
       <div className="sp-main" style={{ padding: 20, gap: 20, alignItems: 'center', overflow: 'hidden' }}>
-        <div className={`sp-search ${extSearch ? 'filled' : ''}`}>
-          <input value={extSearch} placeholder="Search extensions" onChange={e => setExtSearch(e.target.value)} />
-          {extSearch
-            ? <button className="sp-icon-btn" onClick={() => setExtSearch('')} title="Clear"><Ico n="clear" /></button>
-            : <Ico n="search" />}
+        <div style={{ display: 'flex', gap: 16, width: '100%', alignItems: 'center' }}>
+          <div className={`sp-search ${extSearch ? 'filled' : ''}`} style={{ flex: '1 0 0', minWidth: 0 }}>
+            <input value={extSearch} placeholder={extView === 'all' ? 'Search extensions' : `Search ${viewLabel.toLowerCase()}`} onChange={e => setExtSearch(e.target.value)} />
+            {extSearch
+              ? <button className="sp-icon-btn" onClick={() => setExtSearch('')} title="Clear"><Ico n="clear" /></button>
+              : <Ico n="search" />}
+          </div>
+          <div style={{ position: 'relative' }}>
+            <button className={`sp-filter-btn ${extView !== 'all' ? 'on' : ''}`} title={`Showing: ${viewLabel}`} aria-label={`Filter extensions, showing ${viewLabel}`}
+              aria-haspopup="menu" aria-expanded={extMenu} onClick={() => setExtMenu(m => !m)}>
+              <Ico n="filter" />
+            </button>
+            {extMenu && (
+              <div className="sp-filter-menu" role="menu" style={{ left: 'auto', right: 0, width: 160 }}>
+                {VIEWS.map(([id, label]) => (
+                  <button key={id} role="menuitemradio" aria-checked={extView === id} className="t-body-md"
+                    style={{ fontWeight: extView === id ? 600 : 500, background: extView === id ? 'rgba(255,255,255,0.08)' : undefined }}
+                    onClick={() => { setExtView(id); setExtMenu(false); }}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
-        <div className="sp-scroll" style={{ width: '100%', flex: 1 }}>
-          <ListWithDividers items={list} render={u => (
-            <UserRow u={u} right={
-              <button className="sp-row-call" title={`Call ${u.name}`} onClick={() => startCall({ ...u, phone: `Ext. ${u.ext}` })}><Ico n="row-call" /></button>
-            } />
-          )} />
+        <div className="sp-scroll" style={{ width: '100%', flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {sections.map(sec => (
+            <React.Fragment key={sec.id}>
+              <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+                {sec.icon && <Ico n={sec.icon} />}<span className="t-title-sm">{sec.title}</span>
+              </div>
+              <ListWithDividers items={sec.items} render={sec.row} />
+            </React.Fragment>
+          ))}
+          {!sections.length && (
+            <div style={{ flex: '1 0 0', display: 'flex', flexDirection: 'column', gap: 12, alignItems: 'center', justifyContent: 'center', textAlign: 'center' }}>
+              <span className="t-body-md">{extView === 'favorites' && !q ? 'No favorites yet' : 'No matches'}</span>
+              <span className="t-body-sm" style={{ color: '#8D99AE' }}>{extView === 'favorites' && !q ? 'Open an extension and choose Add to Favorites.' : 'Try another name or extension.'}</span>
+            </div>
+          )}
         </div>
       </div>
     );
@@ -1553,7 +1717,7 @@ function SoftphoneApp() {
       <div className="sp-nav">
         {items.map(it => (
           <button key={it.id} className={`sp-nav-item ${navTab === it.id ? 'on' : ''}`}
-            onClick={() => { setNavTab(it.id); setViewContact(null); }}>
+            onClick={() => { setNavTab(it.id); setViewContact(null); setViewUser(null); setExtMenu(false); }}>
             <Ico n={`nav-${it.id}-${navTab === it.id ? 'active' : 'inactive'}`} />
             <span className="t-body-sm nowrap">{it.label}</span>
           </button>
@@ -1658,8 +1822,8 @@ function SoftphoneApp() {
       <button data-primary-accept className="sp-btn accept-ticket full t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`}
         onClick={() => acceptCall(true)}>Accept &amp; Add Ticket</button>
       <div style={{ display: 'flex', gap: 8, width: '100%' }}>
-        <button className="sp-btn decline-ghost t-body-md" style={{ flex: 1 }} title={`Decline (${MOD_KEY}+Shift+D)`} onClick={() => endCall('Call declined')}>Decline</button>
-        <button className="sp-btn accept-plain t-body-md" style={{ flex: 1 }} title="Accept without ticket" onClick={() => acceptCall(false)}>Accept</button>
+        <button className="sp-btn decline t-body-md" style={{ flex: 1 }} title={`Decline (${MOD_KEY}+Shift+D)`} onClick={() => endCall('Call declined')}>Decline</button>
+        <button className="sp-btn accept-outline t-body-md" style={{ flex: 1 }} title="Accept without ticket" onClick={() => acceptCall(false)}>Accept</button>
       </div>
     </div>
   );
@@ -1673,7 +1837,8 @@ function SoftphoneApp() {
     </button>
   );
 
-  const renderIncoming = () => {
+  // Incoming and outgoing share one layout (Figma flows 3 & 4): name + number, optional details card, actions
+  const renderCallerPanel = (buttons) => {
     const c = caller;
     if (c.unknown) {
       return (
@@ -1681,29 +1846,32 @@ function SoftphoneApp() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%' }}>
             <div style={{ display: 'flex', gap: 8, alignItems: 'center' }} className="nowrap">
               <span className="t-title-md">{c.location || c.name}</span>
-              <span className="t-body-md">{c.phone}</span>
+              {c.location && <span className="t-body-md">{c.phone}</span>}
             </div>
-            <span className="t-body-md" style={{ color: '#8D99AE' }}>This caller is not in your contacts.</span>
+            <span className="t-body-md" style={{ color: '#8D99AE' }}>{screen === 'outgoing' ? 'This number is not in your contacts.' : 'This caller is not in your contacts.'}</span>
           </div>
-          {incomingButtons()}
+          {buttons}
         </div>
       );
     }
+    const hasDetails = !!(c.company || c.email);
     const contactRow = (
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }} className="nowrap">
           <span className="t-title-md">{c.name}</span>
           <span className="t-body-md">{c.phone}</span>
         </div>
-        <button className="sp-icon-btn" title={incomingExpanded ? 'Hide details' : 'Show details'} aria-label={incomingExpanded ? 'Hide caller details' : 'Show caller details'}
-          aria-expanded={incomingExpanded} onClick={() => setIncomingExpanded(x => !x)}>
-          <Ico n={incomingExpanded ? 'chevron-up-blue' : 'chevron-down-blue'} />
-        </button>
+        {hasDetails && (
+          <button className="sp-icon-btn" title={incomingExpanded ? 'Hide details' : 'Show details'} aria-label={incomingExpanded ? 'Hide caller details' : 'Show caller details'}
+            aria-expanded={incomingExpanded} onClick={() => setIncomingExpanded(x => !x)}>
+            <Ico n={incomingExpanded ? 'chevron-up-blue' : 'chevron-down-blue'} />
+          </button>
+        )}
       </div>
     );
     return (
       <div style={{ padding: '32px 16px', display: 'flex', flexDirection: 'column', gap: 32, alignItems: 'center' }}>
-        {!incomingExpanded ? contactRow : (
+        {!(incomingExpanded && hasDetails) ? contactRow : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16, width: '100%' }}>
             {contactRow}
             <div style={{ border: '1px solid #5F6475', borderRadius: 8, padding: 12, display: 'flex', flexDirection: 'column', gap: 12, overflow: 'hidden', width: '100%' }}>
@@ -1769,10 +1937,11 @@ function SoftphoneApp() {
             </div>
           </div>
         )}
-        {incomingButtons()}
+        {buttons}
       </div>
     );
   };
+  const renderIncoming = () => renderCallerPanel(incomingButtons());
 
   // ─────────────────────────────────────────────────────────────
   // Active call views
@@ -1787,18 +1956,9 @@ function SoftphoneApp() {
     </div>
   );
 
-  const renderOutgoing = () => (
-    <div className="sp-main" style={{ padding: '32px 20px', gap: 20, alignItems: 'center', justifyContent: 'center' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
-        <Avatar p={caller} size={48} color={caller.unknown ? '#8D99AE' : '#B23C69'} />
-        <span className="t-title-md">{caller.name}</span>
-        <div className="t-body-md" style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center', textAlign: 'center' }}>
-          {!caller.unknown && caller.phone && <span>{caller.phone}</span>}
-          <span style={{ color: '#8D99AE' }}>Calling...</span>
-        </div>
-      </div>
-      <button className="sp-btn danger full t-body-md" onClick={() => endCall('Call cancelled')}>Cancel</button>
-    </div>
+  // Outgoing (Figma flow 3): same card as incoming, single End action
+  const renderOutgoing = () => renderCallerPanel(
+    <button className="sp-btn danger full t-body-md" onClick={() => endCall('Call cancelled')}>End</button>
   );
 
   const renderCallMain = () => {
@@ -2172,69 +2332,69 @@ function SoftphoneApp() {
   // Minimized bars
   // ─────────────────────────────────────────────────────────────
   const renderBar = () => {
-    if (screen === 'incoming' && wideIncomingBar) {
+    if ((screen === 'incoming' || screen === 'outgoing') && wideIncomingBar) {
+      const outgoing = screen === 'outgoing';
       return (
-        <div className="sp-bar" role="region" aria-label="Incoming call" style={{ width: 733, padding: '12px 16px', ...(wideBarPos.r == null
-          ? { top: anchor.wideTop, left: anchor.wideLeft }   // just below the header, centred — clear of logo/search
-          : { right: wideBarPos.r, bottom: wideBarPos.b }) }}>
+        <div className="sp-bar" role="region" aria-label={outgoing ? 'Outgoing call' : 'Incoming call'} style={{ padding: '12px 16px', gap: 40, ...dragStyle(dockPos) }}>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <div className="sp-bar-handle" onMouseDown={wideBarDragStart}><Ico n="drag" /></div>
+            <div className="sp-bar-handle" onMouseDown={dragStart} onDoubleClick={resetDock} aria-hidden="true" title="Drag to move · double-click to reset"><Ico n="drag" /></div>
             <div className="t-title-sm nowrap" style={{ display: 'flex', flexDirection: 'column', gap: 8, justifyContent: 'center' }}>
               <span>{caller.unknown ? caller.location : caller.name}</span>
               <span>{caller.phone}</span>
             </div>
           </div>
-          <span className="t-body-sm nowrap">Incoming call</span>
+          <span className="t-body-sm nowrap">{outgoing ? 'Calling...' : 'Incoming call'}</span>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
-            <button className="sp-btn decline-ghost t-body-md" title={`Decline (${MOD_KEY}+Shift+D)`} onClick={() => endCall('Call declined')}>Decline</button>
-            <button className="sp-btn accept-plain t-body-md" title="Accept without ticket" onClick={() => { acceptCall(false); openPanel(); }}>Accept</button>
-            <button data-primary-accept className="sp-btn accept-ticket t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`} onClick={() => acceptCall(true)}>Accept &amp; Add Ticket</button>
+            {outgoing ? (
+              <button className="sp-btn danger t-body-md" onClick={() => endCall('Call cancelled')}>End</button>
+            ) : <>
+              <button className="sp-btn decline t-body-md" title={`Decline (${MOD_KEY}+Shift+D)`} onClick={() => endCall('Call declined')}>Decline</button>
+              <button data-primary-accept className="sp-btn accept-ticket t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`} onClick={() => acceptCall(true)}>Accept &amp; Add Ticket</button>
+              <button className="sp-btn accept-outline t-body-md" title="Accept without ticket" onClick={() => { acceptCall(false); openPanel(); }}>Accept</button>
+            </>}
             <button className="sp-icon-btn" style={{ width: 32, height: 32 }} title="Expand" aria-label="Expand softphone" onClick={openPanel}><Ico n="expand" /></button>
           </div>
         </div>
       );
     }
     let label, status, buttons;
-    const twoLine = (name) => {
-      if (caller.unknown) return <span className="nowrap">{name}</span>;
-      const parts = name.split(' ');
-      return parts.length > 1 ? <>{parts[0]}<br />{parts.slice(1).join(' ')}</> : name;
-    };
+    const name = caller.name;
     if (screen === 'incoming') {
-      label = twoLine(caller.name); status = 'Incoming call';
+      label = name; status = caller.unknown && caller.location ? `Incoming · ${caller.location}` : 'Incoming call';
+      // Decline left, accept actions right; Accept & Add Ticket keeps its label (primary, one click)
       buttons = <>
-        <button className="sp-btn decline-ghost t-body-md" title={`Decline (${MOD_KEY}+Shift+D)`} onClick={() => endCall('Call declined')}>Decline</button>
-        <button className="sp-btn accept-plain icon-only" title="Accept without ticket" aria-label="Accept without ticket" onClick={() => { acceptCall(false); openPanel(); }}><Ico n="row-call" /></button>
+        <button className="sp-btn decline icon-only" title={`Decline (${MOD_KEY}+Shift+D)`} aria-label="Decline" onClick={() => endCall('Call declined')}><Ico n="call-end" /></button>
+        <button className="sp-btn accept-outline icon-only" title="Accept without ticket" aria-label="Accept without ticket" onClick={() => { acceptCall(false); openPanel(); }}><Ico n="row-call" /></button>
         <button data-primary-accept className="sp-btn accept-ticket t-body-md" title={`Accept & Add Ticket (${MOD_KEY}+Shift+A)`} onClick={() => acceptCall(true)}>Accept &amp; Add Ticket</button>
       </>;
     } else if (screen === 'outgoing') {
-      label = twoLine(caller.name); status = 'Calling...';
-      buttons = <button className="sp-btn danger t-body-md" onClick={() => endCall('Call cancelled')}>Cancel</button>;
+      label = name; status = 'Calling...';
+      buttons = <button className="sp-btn danger t-body-md" onClick={() => endCall('Call cancelled')}>End</button>;
     } else if (isConference) {
       label = `${2 + connectedParty.length} people`; status = `Conference ${fmt(callTimer)}`;
       buttons = <button className="sp-btn danger t-body-md" onClick={() => endCall('Call ended for everyone')}>End</button>;
     } else if (onHold) {
-      label = twoLine(caller.name); status = `On hold ${fmt(callTimer)}`;
+      label = name; status = `On hold ${fmt(callTimer)}`;
       buttons = <button className="sp-btn success bordered t-body-md" onClick={() => setOnHold(false)}>Resume</button>;
     } else {
-      label = twoLine(caller.name); status = fmt(callTimer);
+      label = name; status = fmt(callTimer);
       buttons = <button className="sp-btn danger t-body-md" onClick={() => endCall()}>End</button>;
     }
     return (
-      <div className="sp-bar" role="region" aria-label="Softphone call controls" style={{ gap: 24, ...(barPos.r == null
-        ? { top: 8, right: 16 }   // hugs its content (Figma 2277:10515); docks in the top-right corner, over the header
-        : { right: barPos.r, bottom: barPos.b }) }}>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <div className="sp-bar-handle" onMouseDown={barDragStart} aria-hidden="true"><Ico n="drag" /></div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+      <div className="sp-bar mini" role="region" aria-label="Softphone call controls" style={dragStyle(dockPos)}>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center', minWidth: 0 }}>
+          <div className="sp-bar-handle" onMouseDown={dragStart} onDoubleClick={resetDock} aria-hidden="true" title="Drag to move · double-click to reset"><Ico n="drag" /></div>
+          <div className={screen === 'incoming' ? 'sp-av ringing' : undefined} style={{ display: 'flex', borderRadius: 100 }}>
             <Avatar p={caller} size={24} color={caller.unknown ? '#8D99AE' : '#B23C69'} />
-            <span className="t-title-sm" style={{ maxWidth: isConference ? 'none' : 120, whiteSpace: isConference ? 'nowrap' : 'normal' }}>{label}</span>
+          </div>
+          <div className="sp-bar-who">
+            <span className="t-title-xs ellipsis" title={label}>{label}</span>
+            <span className="t-body-sm nowrap">{status}</span>
           </div>
         </div>
-        <div style={{ display: 'flex', gap: 16, alignItems: 'center' }}>
-          <span className="t-body-sm nowrap" style={{ fontVariantNumeric: 'tabular-nums' }}>{status}</span>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>{buttons}</div>
-          <button className="sp-icon-btn" style={{ width: 32, height: 32 }} title="Expand" aria-label="Expand softphone" onClick={openPanel}><Ico n="expand" /></button>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {buttons}
+          <button className="sp-icon-btn" style={{ width: 28, height: 28 }} title="Expand" aria-label="Expand softphone" onClick={openPanel}><Ico n="expand" /></button>
         </div>
       </div>
     );
@@ -2270,7 +2430,6 @@ function SoftphoneApp() {
     );
   };
 
-  // Docked positions, kept inside the window
   const measureAnchor = useCallback(() => {
     // Collapse search to an icon when logo + 250px search + right-side buttons don't fit (24px padding ×2, 16px gaps ×2)
     if (qmLeftRef.current && qmRightRef.current) {
@@ -2281,32 +2440,12 @@ function SoftphoneApp() {
       setSearchCompact(c => (c === compact ? c : compact));
       if (!compact) setSearchOpen(false);
     }
-    const btn = stateBtnRef.current, search = searchRef.current;
-    if (!btn || !search) return;
-    const clampLeft = (x, w) => Math.round(Math.max(8, Math.min(x, window.innerWidth - w - 8)));
-    const b = btn.getBoundingClientRect();
-    const sr = search.getBoundingClientRect();
-    const next = {
-      top: Math.round(b.bottom + 8),                       // just below the phone button
-      left: clampLeft(b.left, SP_WIDTH),                        // panel: left edges aligned
-      wideTop: 64 + 8,                                          // below the header bar, never over its controls
-      wideLeft: clampLeft((window.innerWidth - 733) / 2, 733),
-    };
-    setAnchor(a => (Object.keys(next).every(k => a[k] === next[k]) ? a : next));
   }, []);
   React.useLayoutEffect(measureAnchor);
   useEffect(() => {
     window.addEventListener('resize', measureAnchor);
     return () => window.removeEventListener('resize', measureAnchor);
   }, [measureAnchor]);
-
-  // Once dragged, keep the panel on screen when its height changes (e.g. expanding the incoming card)
-  React.useLayoutEffect(() => {
-    const el = panelRef.current;
-    if (!el || panelPos.r == null) return;
-    const r = el.getBoundingClientRect();
-    if (r.top < 8) setPanelPos(p => ({ ...p, b: Math.max(8, p.b - (8 - r.top)) }));
-  });
 
   // ── Ringing: move focus to Accept & Add Ticket (panel or bar) ──
   useEffect(() => {
@@ -2341,7 +2480,7 @@ function SoftphoneApp() {
   }, []);
 
   const head = headerInfo();
-  const panelHeight = screen === 'incoming' ? 'auto' : 600;
+  const panelHeight = screen === 'incoming' || screen === 'outgoing' ? 'auto' : 600;
 
   return (
     <>
@@ -2411,9 +2550,7 @@ function SoftphoneApp() {
       {minimized && isCalling && renderBar()}
 
       {open && !minimized && (
-        <div ref={panelRef} className="sp-panel" role="dialog" aria-labelledby="sp-title" style={{ height: panelHeight, ...(panelPos.r != null
-          ? { right: panelPos.r, bottom: panelPos.b }                       // user-dragged position (kept for the session)
-          : { top: anchor.top, left: anchor.left }) }}>
+        <div ref={panelRef} className="sp-panel" role="dialog" aria-labelledby="sp-title" style={{ height: panelHeight, maxHeight: `calc(100vh - ${DOCK.top + SNAP_GAP}px)`, ...dragStyle(dockPos) }}>
           {renderHeader(head)}
           {head.banner && renderBanner()}
           {renderBody()}
