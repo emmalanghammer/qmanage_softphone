@@ -149,13 +149,16 @@
     background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), #363B4D;
     border-bottom: 1px solid rgba(255,255,255,0.1);
   }
-  .sp-head-left { display: flex; gap: 8px; align-items: center; }
-  .sp-head-right { display: flex; align-items: center; }
-  .sp-hbtn { width: 40px; height: 40px; padding: 8px; border-radius: 200px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+  .sp-head-left { display: flex; gap: 8px; align-items: center; flex: 1 1 auto; min-width: 0; }
+  #sp-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .sp-head-right { display: flex; align-items: center; flex-shrink: 0; }
+  .sp-hbtn { width: 36px; height: 40px; padding: 8px; border-radius: 200px; border: none; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
   .sp-hbtn:hover { background: rgba(255,255,255,0.08); }
   .sp-hbtn.drag { cursor: grab; }
   .sp-hbtn.drag:active { cursor: grabbing; }
-  .sp-chip { display: flex; align-items: center; gap: 8px; height: 24px; padding: 4px 8px; border-radius: 200px; background: #CED0D4; color: #363B4D; font-variant-numeric: tabular-nums; }
+  .sp-ticket-row { width: 100%; min-height: 46px; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    padding: 4px 4px 4px 8px; border: 1px solid #CED0D4; border-radius: 4px; }
+  .sp-chip { margin-right: 4px; display: flex; align-items: center; gap: 8px; height: 24px; padding: 4px 8px; border-radius: 200px; background: #CED0D4; color: #363B4D; font-variant-numeric: tabular-nums; }
 
   .sp-banner {
     flex-shrink: 0; display: flex; align-items: center; justify-content: space-between; padding: 8px 16px;
@@ -253,17 +256,13 @@
   .sp-lozenge { height: 24px; padding: 4px 8px; border-radius: 4px; display: inline-flex; align-items: center; color: #363B4D; white-space: nowrap; }
 
   /* Filter dropdown (transfer) */
-  .sp-filter { position: relative; flex: 1 0 0; min-width: 0; height: 36px; display: flex; align-items: center; gap: 8px; padding: 8px; border: 1px solid #5F6475; border-radius: 4px; cursor: pointer; }
-  .sp-filter input { flex: 1; min-width: 0; height: 18px; border: none; outline: none; background: none; color: #fff; font: 500 14px/18px 'Montserrat', sans-serif; letter-spacing: 0.25px; }
-  .sp-filter input::placeholder { color: #8D99AE; font-style: italic; }
   .sp-filter-menu { position: absolute; top: 40px; left: -1px; right: -1px; z-index: 5; background: #4A4F61; border-radius: 4px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); padding: 4px 0; }
   .sp-filter-menu button { display: block; width: 100%; text-align: left; padding: 8px 12px; border: none; background: none; color: #fff; cursor: pointer; }
   .sp-filter-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; padding: 0; border: 1px solid #5F6475; border-radius: 4px; background: none; cursor: pointer; }
   .sp-filter-btn:hover, .sp-filter-btn.on { background: rgba(255,255,255,0.08); }
-  .sp-filter-btn.on { border-color: #87CFE7; }
+  .sp-filter-btn { position: relative; }
+  .sp-filter-count { position: absolute; top: -8px; right: -8px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: #007FAD; color: #fff; font: 600 11px/18px 'Montserrat', sans-serif; text-align: center; }
   .sp-filter-menu button:hover { background: rgba(255,255,255,0.08); }
-  .sp-square { width: 40px; height: 36px; padding: 0 7px; border: 1px solid #5F6475; border-radius: 4px; background: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-  .sp-square.on { border-color: #8D99AE; }
 
   /* Minimized bars */
   .sp-bar {
@@ -498,6 +497,8 @@ const USERS = [
   { id: 'e5', kind: 'user', name: 'Marcus Lee',     initials: 'ML', email: 'marcus.lee@qmanage.com', title: 'Product Support Team Lead',     ext: '212', status: 'offline' },
 ];
 
+const ADD_VIEWS = [['users', 'Users'], ['favorites', 'Favorites'], ['queues', 'Queues'], ['groups', 'Call groups']];
+
 const CALL_GROUPS = [
   { id: 'g1', kind: 'group', name: 'Support Tier 1',   ext: '300', members: 6 },
   { id: 'g2', kind: 'group', name: 'Support Tier 2',   ext: '301', members: 4 },
@@ -529,11 +530,32 @@ const SP_WIDTH = 350; // keep in sync with --sp-width
 const DOCK = { top: 64 + 8, right: 16 };
 const KEYS = ['1','2','3','4','5','6','7','8','9','*','0','#'];
 
+// Dialed numbers: (555) 987-6543 as typed; +1 for 11 digits; anything with *, # or letters is left alone
+const NOT_A_NUMBER = /[^\d\s()+\-.]/;
+const formatPhone = (num) => {
+  if (NOT_A_NUMBER.test(num)) return num;
+  let d = digits(num), prefix = '';
+  if (d.length === 11 && d[0] === '1') { prefix = '+1 '; d = d.slice(1); }
+  if (d.length > 10) return d;
+  if (d.length <= 3) return prefix + d;
+  if (d.length <= 6) return `${prefix}(${d.slice(0, 3)}) ${d.slice(3)}`;
+  return `${prefix}(${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6)}`;
+};
+// Mock area-code lookup for unknown numbers
+const AREA_CODES = { '555': 'Rochester, NY', '585': 'Rochester, NY', '212': 'New York, NY', '589': 'Buffalo, NY', '360': 'Vancouver, WA', '415': 'San Francisco, CA' };
+const locationFor = (num) => {
+  let d = digits(num);
+  if (d.length === 11 && d[0] === '1') d = d.slice(1);
+  return d.length === 10 ? AREA_CODES[d.slice(0, 3)] : undefined;
+};
+
 const contactFromHistory = (h) =>
   CONTACTS.find(c => c.name === h.name) ||
-  { id: 'n' + digits(h.name), kind: 'contact', unknown: true, name: h.name, phone: h.name.replace(') ', ')-'), color: '#8D99AE' };
-const contactFromNumber = (num) =>
-  ({ id: 'n' + digits(num), kind: 'contact', unknown: true, name: num, phone: num, color: '#8D99AE' });
+  { id: 'n' + digits(h.name), kind: 'contact', unknown: true, name: h.name, phone: h.name, location: locationFor(h.name), color: '#8D99AE' };
+const contactFromNumber = (num) => {
+  const f = formatPhone(num);
+  return { id: 'n' + digits(num), kind: 'contact', unknown: true, name: f, phone: f, location: locationFor(num), color: '#8D99AE' };
+};
 
 // ─────────────────────────────────────────────────────────────
 // Drag hook — while dragging, position is {r: right, b: bottom}. On release it snaps to the
@@ -686,6 +708,22 @@ const TransferUserRow = ({ u, onTransfer }) => (
   </div>
 );
 
+const CallGroupRow = ({ g, right }) => (
+  <div className="sp-row">
+    <div className="sp-row-left">
+      <Ico n="call-group" />
+      <div className="sp-col4">
+        <span className="t-title-xs nowrap">{g.name}</span>
+        <div className="sp-line" style={{ gap: 12, color: '#8D99AE' }}>
+          <span className="t-body-sm">Ext. {g.ext}</span>
+          <span className="t-body-sm">{g.members} members</span>
+        </div>
+      </div>
+    </div>
+    {right}
+  </div>
+);
+
 const QueueRow = ({ q, right }) => (
   <div className="sp-row">
     <div className="sp-row-left">
@@ -702,37 +740,6 @@ const QueueRow = ({ q, right }) => (
   </div>
 );
 
-// "Filter By" dropdown (Users / Queues) + square search button — Transfer and Add someone
-const FilterRow = ({ filter, onFilter, search, onSearch }) => {
-  const [menu, setMenu] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
-  return (
-    <div style={{ display: 'flex', gap: 16, alignItems: 'center', width: '100%', flexShrink: 0 }}>
-      <div className="sp-filter" onClick={() => !searchOpen && setMenu(m => !m)}>
-        {searchOpen ? (
-          <input value={search} placeholder={filter === 'queues' ? 'Search queues' : 'Search users'} autoFocus
-            onChange={e => onSearch(e.target.value)} />
-        ) : (
-          <span className="t-body-md ellipsis" style={{ flex: 1, color: filter === 'queues' ? '#fff' : '#8D99AE', fontStyle: filter === 'queues' ? 'normal' : 'italic' }}>
-            {filter === 'queues' ? 'Queues' : 'Filter By'}
-          </span>
-        )}
-        <Ico n="filter" />
-        {menu && (
-          <div className="sp-filter-menu" onClick={e => e.stopPropagation()}>
-            {[{ id: 'users', label: 'Users' }, { id: 'queues', label: 'Queues' }].map(o => (
-              <button key={o.id} className="t-body-md" onClick={() => { onFilter(o.id); setMenu(false); }}>{o.label}</button>
-            ))}
-          </div>
-        )}
-      </div>
-      <button className={`sp-square ${searchOpen ? 'on' : ''}`} title="Search"
-        onClick={() => { setSearchOpen(o => !o); onSearch(''); setMenu(false); }}>
-        <Ico n="search" />
-      </button>
-    </div>
-  );
-};
 
 // "On this call" style row (32 avatar, title/small name, two-part meta)
 const PartyRow = ({ p, meta, right, padding = 4, color }) => (
@@ -1158,6 +1165,10 @@ function SoftphoneApp() {
   // Idle browsing
   const [navTab, setNavTab] = useState('keypad');          // keypad | contacts | extensions | history
   const [dialInput, setDialInput] = useState('');
+  const [history, setHistory] = useState(HISTORY);
+  const callDirRef = useRef('Incoming');
+  const logCall = (dur) => setHistory(h => [{ id: Date.now(), dir: callDirRef.current, name: caller.name,
+    date: dateAgo(0), time: timeNow(), duration: dur ? fmt(dur) : '' }, ...h]);
   const [contactSearch, setContactSearch] = useState('');
   const [extSearch, setExtSearch] = useState('');
   const [extView, setExtView] = useState('all');             // all | favorites | users | queues | groups
@@ -1180,7 +1191,8 @@ function SoftphoneApp() {
 
   // Transfer
   const [transferTab, setTransferTab] = useState('extensions'); // extensions | keypad
-  const [transferFilter, setTransferFilter] = useState('users'); // users | queues
+  const [transferFilter, setTransferFilter] = useState('users'); // users | favorites | queues | groups
+  const [transferMenu, setTransferMenu] = useState(false);
   const [transferSearch, setTransferSearch] = useState('');
   const [transferNumber, setTransferNumber] = useState('');
   const [transferTarget, setTransferTarget] = useState(null);
@@ -1191,7 +1203,8 @@ function SoftphoneApp() {
 
   // Add someone
   const [addTab, setAddTab] = useState('extensions');      // extensions | keypad
-  const [addFilter, setAddFilter] = useState('users');     // users | queues
+  const [addFilter, setAddFilter] = useState('users');     // users | favorites | queues | groups
+  const [addMenu, setAddMenu] = useState(false);
   const [addSearch, setAddSearch] = useState('');
   const [addNumber, setAddNumber] = useState('');
 
@@ -1200,7 +1213,7 @@ function SoftphoneApp() {
   const [ticketTitle, setTicketTitle] = useState('');
   const [ticketDesc, setTicketDesc] = useState('');
   const [openTicket, setOpenTicket] = useState(null);    // ticket shown in place of the workspace after Create
-  const ticketSeq = useRef(0);
+  const ticketSeq = useRef(8696);
   const [ticketType, setTicketType] = useState('Default');
   const [ticketTitleError, setTicketTitleError] = useState(false);
   const [ticketContacts, setTicketContacts] = useState([]);  // chips in the form's Contacts field
@@ -1280,6 +1293,8 @@ function SoftphoneApp() {
     const active = document.activeElement;
     if (active && active !== document.body && !active.closest('.sp-panel, .sp-bar')) returnFocusRef.current = active;
     setCaller(c);
+    callDirRef.current = 'Incoming';
+    setCallLink(l => (l && l.logged ? null : l));   // a finished call's link shouldn't read as "Linked" on this one
     setIncomingExpanded(false);
     setWhoMode(null); setNewContactName('');
     setScreen('incoming');
@@ -1297,6 +1312,8 @@ function SoftphoneApp() {
   const startCall = (c) => {
     resetCallState();
     setCaller(c);
+    callDirRef.current = 'Outgoing';
+    setCallLink(l => (l && l.logged ? null : l));
     setCallTimer(0);
     setScreen('outgoing');
     setOpen(true); setMinimized(false);
@@ -1324,6 +1341,8 @@ function SoftphoneApp() {
   const endCall = (msg) => {
     const wasActive = screen === 'active';
     const dur = callTimerRef.current;
+    if (wasActive) logCall(dur);
+    else if (screen === 'outgoing') logCall(0);   // cancelled before it connected
     if (wasActive && callLink && !callLink.logged) {
       const logged = { ...callLink, callerName: caller.name, logged: true, duration: dur };
       setCallLink(logged);
@@ -1362,6 +1381,7 @@ function SoftphoneApp() {
   };
 
   const doTransfer = () => {
+    logCall(callTimer);
     setTransferredAfter(callTimer);
     resetCallState();
     setScreen('transferred');
@@ -1406,10 +1426,10 @@ function SoftphoneApp() {
     if (consult) return { title: 'Consulting', chip: fmt(consultTimer) };
     const n = 2 + connectedParty.length;
     switch (callView) {
-      case 'keypad':   return { title: 'On a call', banner: true };
-      case 'details':  return { title: 'Phone', banner: true };
-      case 'transfer': return { title: 'Transfer call', banner: true };
-      case 'add':      return { title: 'Add to call', banner: true };
+      case 'keypad':   return { title: 'On a call', banner: true, chip: fmt(callTimer) };
+      case 'details':  return { title: 'Phone', banner: true, chip: fmt(callTimer) };
+      case 'transfer': return { title: 'Transfer call', banner: true, chip: fmt(callTimer) };
+      case 'add':      return { title: 'Add to call', banner: true, chip: fmt(callTimer) };
       case 'people':   return { title: `Conference call (${n})`, chip: fmt(callTimer) };
       default:
         if (ringingParty.length) return { title: 'On a call', chip: fmt(callTimer) };
@@ -1468,7 +1488,17 @@ function SoftphoneApp() {
         <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16 }}>
           <div className="sp-field">
             <input value={dialInput} placeholder="Enter a name or number" autoFocus
-              onChange={e => setDialInput(e.target.value)}
+              onChange={e => {
+                const v = e.target.value;
+                if (NOT_A_NUMBER.test(v)) { setDialInput(v); return; }   // names stay as typed
+                let d = digits(v);
+                // Backspace over "(", ")", " " or "-" also removes the digit before it
+                if (v.length < dialInput.length && d === digits(dialInput)) {
+                  const before = digits(v.slice(0, e.target.selectionStart ?? v.length)).length;
+                  if (before > 0) d = d.slice(0, before - 1) + d.slice(before);
+                }
+                setDialInput(formatPhone(d));
+              }}
               onKeyDown={e => {
                 if (e.key === 'Enter') dial();
               }} />
@@ -1495,7 +1525,7 @@ function SoftphoneApp() {
             </div>
           )}
         </div>
-        <Keypad onKey={k => setDialInput(v => v + k)}>
+        <Keypad onKey={k => setDialInput(v => formatPhone(NOT_A_NUMBER.test(v + k) ? v + k : digits(v + k)))}>
           <button className="sp-key call" style={{ gridColumn: 2 }} disabled={!q} onClick={dial} title="Call">
             <Ico n={q ? 'call-enabled' : 'call-disabled'} />
           </button>
@@ -1543,6 +1573,39 @@ function SoftphoneApp() {
             <button className="sp-btn primary t-body-md" onClick={() => showToast(`New contact: ${contactSearch}`)}>Add Contact</button>
           </div>
         )}
+      </div>
+    );
+  };
+
+  // Search field + filter icon button with a view menu (Figma 2278:13664 / 2283:18924)
+  const searchFilterRow = ({ search, setSearch, placeholder = 'Search extensions', view, setView, views, menuOpen, setMenuOpen, defaultView = views[0][0] }) => {
+    const label = views.find(v => v[0] === view)[1];
+    return (
+      <div style={{ display: 'flex', gap: 16, width: '100%', alignItems: 'center', flexShrink: 0 }}>
+        <div className={`sp-search ${search ? 'filled' : ''}`} style={{ flex: '1 0 0', minWidth: 0 }}>
+          <input value={search} placeholder={placeholder} onChange={e => setSearch(e.target.value)} />
+          {search
+            ? <button className="sp-icon-btn" onClick={() => setSearch('')} title="Clear"><Ico n="clear" /></button>
+            : <Ico n="search" />}
+        </div>
+        <div style={{ position: 'relative' }}>
+          <button className={`sp-filter-btn ${view !== defaultView ? 'on' : ''}`} title={`Showing: ${label}`} aria-label={`Filter, showing ${label}`}
+            aria-haspopup="menu" aria-expanded={menuOpen} onClick={() => setMenuOpen(m => !m)}>
+            <Ico n="filter" />
+            {view !== defaultView && <span className="sp-filter-count" aria-hidden="true">1</span>}
+          </button>
+          {menuOpen && (
+            <div className="sp-filter-menu" role="menu" style={{ left: 'auto', right: 0, width: 160 }}>
+              {views.map(([id, l]) => (
+                <button key={id} role="menuitemradio" aria-checked={view === id} className="t-body-md"
+                  style={{ fontWeight: view === id ? 600 : 500, background: view === id ? 'rgba(255,255,255,0.08)' : undefined }}
+                  onClick={() => { setView(id); setMenuOpen(false); }}>
+                  {l}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     );
   };
@@ -1598,21 +1661,7 @@ function SoftphoneApp() {
     );
     const userRow = u => <StackedUserRow u={u} onClick={() => setViewUser(u)} right={callBtn(u.name, { ...u, phone: `Ext. ${u.ext}` })} />;
     const queueRow = x => <QueueRow q={x} right={callBtn(x.name, { ...x, phone: 'Queue' })} />;
-    const groupRow = g => (
-      <div className="sp-row">
-        <div className="sp-row-left">
-          <Ico n="call-group" />
-          <div className="sp-col4">
-            <span className="t-title-xs nowrap">{g.name}</span>
-            <div className="sp-line" style={{ gap: 12, color: '#8D99AE' }}>
-              <span className="t-body-sm">Ext. {g.ext}</span>
-              <span className="t-body-sm">{g.members} members</span>
-            </div>
-          </div>
-        </div>
-        {callBtn(g.name, { ...g, phone: `Ext. ${g.ext}` })}
-      </div>
-    );
+    const groupRow = g => <CallGroupRow g={g} right={callBtn(g.name, { ...g, phone: `Ext. ${g.ext}` })} />;
     const show = v => extView === 'all' || extView === v;
     const sections = [
       show('favorites') && { id: 'favorites', title: 'Favorites', icon: 'star', items: favs, row: userRow },
@@ -1621,34 +1670,10 @@ function SoftphoneApp() {
       show('groups') && { id: 'groups', title: 'Call Groups', items: groups, row: groupRow },
     ].filter(sec => sec && sec.items.length);
     const VIEWS = [['all', 'All'], ['favorites', 'Favorites'], ['users', 'Users'], ['queues', 'Queues'], ['groups', 'Call groups']];
-    const viewLabel = VIEWS.find(v => v[0] === extView)[1];
     return (
       <div className="sp-main" style={{ padding: 20, gap: 20, alignItems: 'center', overflow: 'hidden' }}>
-        <div style={{ display: 'flex', gap: 16, width: '100%', alignItems: 'center' }}>
-          <div className={`sp-search ${extSearch ? 'filled' : ''}`} style={{ flex: '1 0 0', minWidth: 0 }}>
-            <input value={extSearch} placeholder={extView === 'all' ? 'Search extensions' : `Search ${viewLabel.toLowerCase()}`} onChange={e => setExtSearch(e.target.value)} />
-            {extSearch
-              ? <button className="sp-icon-btn" onClick={() => setExtSearch('')} title="Clear"><Ico n="clear" /></button>
-              : <Ico n="search" />}
-          </div>
-          <div style={{ position: 'relative' }}>
-            <button className={`sp-filter-btn ${extView !== 'all' ? 'on' : ''}`} title={`Showing: ${viewLabel}`} aria-label={`Filter extensions, showing ${viewLabel}`}
-              aria-haspopup="menu" aria-expanded={extMenu} onClick={() => setExtMenu(m => !m)}>
-              <Ico n="filter" />
-            </button>
-            {extMenu && (
-              <div className="sp-filter-menu" role="menu" style={{ left: 'auto', right: 0, width: 160 }}>
-                {VIEWS.map(([id, label]) => (
-                  <button key={id} role="menuitemradio" aria-checked={extView === id} className="t-body-md"
-                    style={{ fontWeight: extView === id ? 600 : 500, background: extView === id ? 'rgba(255,255,255,0.08)' : undefined }}
-                    onClick={() => { setExtView(id); setExtMenu(false); }}>
-                    {label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
+        {searchFilterRow({ search: extSearch, setSearch: setExtSearch, view: extView, setView: setExtView, views: VIEWS, menuOpen: extMenu, setMenuOpen: setExtMenu,
+          placeholder: 'Search extensions' })}
         <div className="sp-scroll" style={{ width: '100%', flex: 1, display: 'flex', flexDirection: 'column', gap: 12 }}>
           {sections.map(sec => (
             <React.Fragment key={sec.id}>
@@ -1670,8 +1695,8 @@ function SoftphoneApp() {
   };
 
   const renderHistoryTab = () => {
-    const missed = HISTORY.filter(h => h.dir === 'Missed');
-    const items = historyTab === 'missed' ? missed : HISTORY;
+    const missed = history.filter(h => h.dir === 'Missed');
+    const items = historyTab === 'missed' ? missed : history;
     return (
       <div className="sp-main" style={{ padding: items.length ? '16px 20px' : 20, gap: 20, alignItems: 'center', overflow: 'hidden' }}>
         <Seg value={historyTab} onChange={setHistoryTab}
@@ -1902,10 +1927,9 @@ function SoftphoneApp() {
               <div className="t-body-md" style={{ display: 'grid', gridTemplateColumns: 'auto minmax(0, 1fr)', columnGap: 12, rowGap: 8, alignItems: 'center' }}>
                 <span style={{ color: '#8D99AE' }}>Company</span>
                 <span className="ellipsis" style={{ color: '#87CFE7' }}>{c.company}</span>
-                {c.billing && <>
-                  <span style={{ color: '#8D99AE' }}>Billing</span>
-                  <span style={{ display: 'flex', gap: 8, alignItems: 'center' }}><Ico n="building" />{c.billing}</span>
-                </>}
+                {c.billing && (
+                  <span style={{ gridColumn: '1 / -1', display: 'flex', gap: 8, alignItems: 'center' }}><Ico n="building" />{c.billing}</span>
+                )}
                 {c.companyCode && <>
                   <span style={{ color: '#8D99AE' }}>Company Code</span>
                   <span>{c.companyCode}</span>
@@ -1942,6 +1966,37 @@ function SoftphoneApp() {
     );
   };
   const renderIncoming = () => renderCallerPanel(incomingButtons());
+
+  // Ticket link row on the active call (Figma "Ticket 8697 · Add Link")
+  const renderTicketRow = () => {
+    const linked = openTicket && callLink && openTicket.callId === callLink.id;
+    const draft = !linked && ticketModalOpen && callLink;
+    let label, button = null;
+    if (linked) {
+      label = <>Ticket <span style={{ color: '#87CFE7' }}>{openTicket.number}</span></>;
+      button = <span className="t-body-md" style={{ color: '#AEB7C6', paddingRight: 8 }}>Linked</span>;
+    } else if (draft) {
+      label = 'New ticket · draft';
+      button = <button className="sp-btn secondary t-body-md" onClick={() => { setMinimized(true); setOpen(false); setTicketModalOpen(true); }}>Open</button>;
+    } else if (openTicket) {
+      label = <>Ticket <span style={{ color: '#87CFE7' }}>{openTicket.number}</span></>;
+      button = <button className="sp-btn secondary t-body-md" onClick={() => {
+        const link = { id: Date.now(), callerName: caller.name, logged: false, duration: 0 };
+        setCallLink(link);
+        setOpenTicket(t => ({ ...t, callId: link.id, call: link }));
+        showToast(`Call linked to ticket ${openTicket.number}`);
+      }}>Add Link</button>;
+    } else {
+      label = 'No ticket linked';
+      button = <button className="sp-btn secondary t-body-md" onClick={() => openLinkedTicket(caller)}>Add Ticket</button>;
+    }
+    return (
+      <div className="sp-ticket-row">
+        <span className="t-body-md ellipsis">{label}</span>
+        {button}
+      </div>
+    );
+  };
 
   // ─────────────────────────────────────────────────────────────
   // Active call views
@@ -1995,7 +2050,14 @@ function SoftphoneApp() {
     if (isConference) {
       const people = [caller, ...connectedParty, ME];
       const first = (n) => n.split(' ')[0];
-      const names = [caller, ...connectedParty].map(p => p.unknown ? p.name : first(p.name)).join(', ') + ', & you';
+      // Shared first names get a last initial: "Charlie A., Charlie S., & you"
+      const others = [caller, ...connectedParty];
+      const firstNames = others.map(p => (p.unknown ? p.name : first(p.name)));
+      const names = others.map((p, i) => {
+        if (p.unknown || firstNames.filter(f => f === firstNames[i]).length < 2) return firstNames[i];
+        const last = p.name.split(' ').slice(1).join(' ');
+        return last ? `${firstNames[i]} ${last[0]}.` : firstNames[i];
+      }).join(', ') + ', & you';
       return (
         <div className="sp-main" style={{ padding: 20, gap: 20, alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ flex: '1 0 0', width: '100%', display: 'flex', flexDirection: 'column', gap: 20, alignItems: 'center' }}>
@@ -2037,6 +2099,7 @@ function SoftphoneApp() {
             </button>
           )}
         </div>
+        {renderTicketRow()}
         {callControls()}
         {caller.unknown && (
           <div style={{ width: '100%', display: 'flex', flexDirection: 'column', gap: 16, padding: 16, borderRadius: 4, border: '1px solid #5F6475', background: 'rgba(255,255,255,0.1)' }}>
@@ -2137,6 +2200,8 @@ function SoftphoneApp() {
     const onCall = new Set(party.map(p => p.id));
     const users = USERS.filter(u => !onCall.has(u.id) && (!q || u.name.toLowerCase().includes(q) || u.title.toLowerCase().includes(q) || u.ext.includes(q)));
     const queues = QUEUES.filter(x => !q || x.name.toLowerCase().includes(q));
+    const groups = CALL_GROUPS.filter(g => !q || g.name.toLowerCase().includes(q) || g.ext.includes(q));
+    const addBtn = (name, p) => <button className="sp-row-call" title={`Add ${name}`} onClick={() => addParticipant(p)}><Ico n="row-call" /></button>;
     return (
       <div className="sp-main" style={{ padding: 16, gap: 16, overflow: 'hidden' }}>
         <BackLink onClick={() => setCallView('main')} />
@@ -2157,18 +2222,19 @@ function SoftphoneApp() {
             </Keypad>
           </div>
         ) : <>
-          <FilterRow filter={addFilter} onFilter={setAddFilter} search={addSearch} onSearch={setAddSearch} />
+          {searchFilterRow({ search: addSearch, setSearch: setAddSearch, view: addFilter, setView: setAddFilter, menuOpen: addMenu, setMenuOpen: setAddMenu,
+            views: ADD_VIEWS })}
           <div className="sp-scroll" style={{ flex: 1, width: '100%' }}>
-            {addFilter === 'users'
-              ? <ListWithDividers items={users} render={u => (
-                  <UserRow u={u} right={
-                    <button className="sp-row-call" title={`Add ${u.name}`} onClick={() => addParticipant(u)}><Ico n="row-call" /></button>
-                  } />
+            {addFilter === 'queues'
+              ? <ListWithDividers items={queues} render={x => (
+                  <QueueRow q={x} right={addBtn(x.name, { ...x, initials: x.name.split(' ').map(w => w[0]).join('').slice(0, 2) })} />
                 )} />
-              : <ListWithDividers items={queues} render={x => (
-                  <QueueRow q={x} right={
-                    <button className="sp-row-call" title={`Add ${x.name}`} onClick={() => addParticipant({ ...x, initials: x.name.split(' ').map(w => w[0]).join('').slice(0, 2) })}><Ico n="row-call" /></button>
-                  } />
+              : addFilter === 'groups'
+              ? <ListWithDividers items={groups} render={g => (
+                  <CallGroupRow g={g} right={addBtn(g.name, { ...g, initials: initialsOf(g.name) })} />
+                )} />
+              : <ListWithDividers items={addFilter === 'favorites' ? users.filter(u => favorites.includes(u.id)) : users} render={u => (
+                  <StackedUserRow u={u} right={addBtn(u.name, u)} />
                 )} />}
           </div>
         </>}
@@ -2225,13 +2291,18 @@ function SoftphoneApp() {
               </div>
             </div>
           ) : <>
-            <FilterRow filter={transferFilter} onFilter={setTransferFilter} search={transferSearch} onSearch={setTransferSearch} />
+            {searchFilterRow({ search: transferSearch, setSearch: setTransferSearch, view: transferFilter, setView: setTransferFilter,
+              menuOpen: transferMenu, setMenuOpen: setTransferMenu, views: ADD_VIEWS })}
             <div className="sp-scroll" style={{ flex: 1, width: '100%' }}>
               {transferFilter === 'queues'
                 ? <ListWithDividers items={queues} render={x => (
                     <QueueRow q={x} right={<button className="sp-btn secondary t-body-md" onClick={doTransfer}>Transfer</button>} />
                   )} />
-                : <ListWithDividers items={users} render={u => (
+                : transferFilter === 'groups'
+                ? <ListWithDividers items={CALL_GROUPS.filter(g => !q || g.name.toLowerCase().includes(q) || g.ext.includes(q))} render={g => (
+                    <CallGroupRow g={g} right={<button className="sp-btn secondary t-body-md" onClick={doTransfer}>Transfer</button>} />
+                  )} />
+                : <ListWithDividers items={transferFilter === 'favorites' ? users.filter(u => favorites.includes(u.id)) : users} render={u => (
                     <TransferUserRow u={u} onTransfer={() => setTransferTarget(u)} />
                   )} />}
             </div>
